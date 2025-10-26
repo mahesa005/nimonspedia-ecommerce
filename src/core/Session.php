@@ -3,7 +3,7 @@ namespace App\Core;
 
 class Session {
     public static function start() {
-        if (session_status() == PHP_SESSION_NONE) {
+        if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
     }
@@ -14,5 +14,14 @@ class Session {
 
     public static function get($key, $default = null) {
         return $_SESSION[$key] ?? $default;
+    }
+
+    public static function delete($key) {
+        unset($_SESSION[$key]);
+    }
+
+    public static function destroy() {
+        session_unset();
+        session_destroy();
     }
 }

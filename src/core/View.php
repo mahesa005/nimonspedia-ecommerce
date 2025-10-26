@@ -7,7 +7,7 @@ class View {
     protected array $data = [];
 
     public function __construct() {
-        $this->base_path = __DIR__ . '/../Views/';
+        $this->base_path = __DIR__ . '/../views/';
     }
 
     public function setData(string $key, $value): void {
@@ -37,7 +37,7 @@ class View {
     public static function renderComponent(string $componentFile, array $data = []): string {
         extract($data);
 
-        $base_path = __DIR__ . '/../Views/components/';
+        $base_path = __DIR__ . '/../views/components/';
 
         $component_path = $base_path . $componentFile;
 
