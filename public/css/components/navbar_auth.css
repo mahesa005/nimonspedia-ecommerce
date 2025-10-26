@@ -1,0 +1,23 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 64px;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.navbar-brand {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #42b549;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.navbar-brand:hover {
+    color: #329439;
+}
