@@ -165,3 +165,126 @@ input:focus {
         font-size: 1rem;
     }
 }
+
+/* REGISTER SPECIFIC CSS */
+.step-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border, #eee);
+}
+
+.role-selector {
+    display: flex;
+    gap: 16px;
+    margin-bottom:  16px;
+}
+
+.role-selector input[type="radio"] {
+    opacity: 0;
+    position: fixed;
+    width: 0;
+}
+
+.role-selector label {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius, 8px);
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.role-selector input[type="radio"]:checked + label {
+    background-color: #e8f5e9;
+    border-color: #42b549;
+    color: #42b549;
+    font-weight: 700;
+}
+
+.role-selector label:hover {
+    border-color: #369043;
+}
+
+textarea {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    display: block;
+    box-sizing: border-box;
+    min-height: 80px;
+    resize: vertical;
+}
+
+textarea:focus {
+    border: 1px solid #42b549;
+    outline: none;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    color: var(--color-text-light, #777);
+}
+
+#editor-container {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    background: #fff;
+}
+
+.ql-toolbar.ql-snow {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom: 1px solid #ccc;
+}
+
+.ql-container.ql-snow {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.ql-editor {
+    min-height: 150px;
+    padding: 10px;
+}
+
+.ql-editor.ql-blank::before {
+    color: #aaa;
+    font-style: normal;
+}
+
+@media screen and (max-width: 480px) {
+    .role-selector {
+        gap: 8px;
+    }
+
+    .role-selector label {
+        padding: 4px 8px;
+        font-size: 0.9rem;
+    }
+
+    textarea {
+        font-size: 1rem;
+        border-radius: 6px;
+    }
+
+    #editor-container,
+    .ql-toolbar.ql-snow,
+    .ql-container.ql-snow {
+        border-radius: 6px;
+    }
+
+    .step-title {
+        font-size: 0.9rem;
+    }
+}

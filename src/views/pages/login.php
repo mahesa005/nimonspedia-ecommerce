@@ -1,7 +1,7 @@
 <div class="auth-content">
   <div class="label-container">
     <div class="auth-label">Masuk ke Nimonspedia</div>
-    <a class="register-label" href="">Daftar</a>
+    <a class="register-label" href="/register">Daftar</a>
   </div>
   <form class="forms-container" action="/login" method="POST">
     <div class="forms">

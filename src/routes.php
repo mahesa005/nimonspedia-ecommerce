@@ -19,6 +19,17 @@ $router->add('GET', '/logout',
     [AuthMiddleware::class]
 );
 
+
+$router->add('GET', '/register',
+    [AuthController::class, 'showRegisterPage'],
+    [GuestMiddleware::class]
+);
+
+$router->add('POST', '/register',
+    [AuthController::class, 'handleRegister'],
+    [GuestMiddleware::class]
+);
+
 // --- TEST ROUTE ---
 $router->add('GET', '/',
     [TestController::class, 'showTestPage'],
