@@ -61,7 +61,8 @@
           <option value="stock-DESC"        <?= ($currentSort == 'stock'        && $currentOrder == 'DESC') ? 'selected' : '' ?>>Stok Banyak→Sedikit</option>
         </select>
 
-        <button id="clear-filters" class="btn btn-ghost">Reset</button>
+        <a id="clear-filters" class="btn btn-ghost" href="/seller/products">Reset</a>
+
       </div>
     </div>
   </div>

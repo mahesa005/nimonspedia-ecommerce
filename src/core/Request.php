@@ -62,6 +62,6 @@ class Request {
     
     public function getQuery(?string $key = null, $default = null) {
         if ($key === null) return $_GET;
-        return array_key_exists($key, $_GET) ? $this->sanitize($_GET[$key]) : $default;
+        return $_GET[$key] ?? $default;
     }
 }
