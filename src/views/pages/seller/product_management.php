@@ -133,4 +133,4 @@
   </div>
 </div>
 
-<script src="/js/product_management.js"></script>
+<script src="/js/pages/product_management.js"></script>

@@ -33,8 +33,7 @@ class ProductRepository {
                 p.main_image_path,
                 p.created_at,
                 p.updated_at,
-                c.name as category_name,
-                ci.category_id
+                STRING_AGG(c.name, ', ' ORDER BY c.name) as category_names
             FROM product p
             LEFT JOIN category_item ci ON p.product_id = ci.product_id
             LEFT JOIN category c ON ci.category_id = c.category_id
@@ -60,6 +59,7 @@ class ProductRepository {
         }
 
         $sortOrder = strtoupper($sortOrder) === 'DESC' ? 'DESC' : 'ASC';
+        $sql .= " GROUP BY p.product_id ";
         $sql .= " ORDER BY p.$sortBy $sortOrder LIMIT :limit";
 
         $stmt = $this->db->prepare($sql);

@@ -74,12 +74,12 @@ class ProductService {
         try {
             // Normalize data
             $normalizedData = [
-                'product_name' => $this->normalizeValue($data['product_name'] ?? ''),
-                'description' => $this->normalizeValue($data['description'] ?? ''),
-                'price' => $this->normalizeValue($data['price'] ?? 0),
-                'stock' => $this->normalizeValue($data['stock'] ?? 0),
-                'category_id' => $this->normalizeValue($data['category_id'] ?? null),
-            ];
+            'product_name' => $this->normalizeString($data['product_name'] ?? ''),
+            'description' => $this->normalizeString($data['description'] ?? ''),
+            'price' => $this->normalizeNumber($data['price'] ?? 0),
+            'stock' => $this->normalizeNumber($data['stock'] ?? 0),
+            'category_id' => $this->normalizeNumber($data['category_id'] ?? null),
+        ];
 
             // Validate data
             $this->validateProductData($normalizedData);
@@ -158,12 +158,12 @@ class ProductService {
         try {
             // Normalize data
             $normalizedData = [
-                'product_name' => $this->normalizeValue($data['product_name'] ?? ''),
-                'description' => $this->normalizeValue($data['description'] ?? ''),
-                'price' => $this->normalizeValue($data['price'] ?? 0),
-                'stock' => $this->normalizeValue($data['stock'] ?? 0),
-                'category_id' => $this->normalizeValue($data['category_id'] ?? null),
-            ];
+            'product_name' => $this->normalizeString($data['product_name'] ?? ''),
+            'description' => $this->normalizeString($data['description'] ?? ''),
+            'price' => $this->normalizeNumber($data['price'] ?? 0),
+            'stock' => $this->normalizeNumber($data['stock'] ?? 0),
+            'category_id' => $this->normalizeNumber($data['category_id'] ?? null),
+        ];
 
             $this->validateProductData($normalizedData);
 
@@ -328,10 +328,6 @@ class ProductService {
             $errors[] = 'Description must not exceed 1000 characters';
         }
 
-        if (!isset($data['price']) || $data['price'] < 1000) {
-            $errors[] = 'Price must be at least Rp 1,000';
-        }
-
         if (!isset($data['stock']) || $data['stock'] < 0) {
             $errors[] = 'Stock cannot be negative';
         }
@@ -345,20 +341,64 @@ class ProductService {
         }
     }
 
-    private function normalizeValue($value) {
+    // private function normalizeValue($value) {
+    //         // Handle array (extract first element)
+    //     if (is_array($value)) {
+    //         if (count($value) === 0) {
+    //             return null; // Changed from '' to null
+    //         }
+            
+    //         $firstValue = reset($value);
+    //         return $firstValue !== false ? $firstValue : null;
+    //     }
+        
+    //     // Handle null
+    //     if ($value === null) {
+    //         return null;
+    //     }
+        
+    //     // Handle empty string
+    //     if ($value === '') {
+    //         return null;
+    //     }
+        
+    //     // Return value as-is (preserves int, float, string)
+    //     return $value;
+    // }
+    /**
+     * Normalize string values
+     */
+    private function normalizeString($value): string {
+        // Handle array (take first element)
         if (is_array($value)) {
-            if (count($value) === 0) {
+            if (empty($value)) {
                 return '';
             }
-            
-            $firstValue = reset($value);
-            return $firstValue !== false ? $firstValue : '';
+            $value = reset($value);
         }
         
-        if ($value === null) {
-            return '';
+        // Convert to string
+        return (string) ($value ?? '');
+    }
+
+    /**
+     * Normalize numeric values
+     */
+    private function normalizeNumber($value) {
+        // Handle array (take first element)
+        if (is_array($value)) {
+            if (empty($value)) {
+                return 0;
+            }
+            $value = reset($value);
         }
         
-        return $value;
+        // Handle null or empty string
+        if ($value === null || $value === '') {
+            return 0;
+        }
+        
+        // Return numeric value
+        return is_numeric($value) ? $value : 0;
     }
 }

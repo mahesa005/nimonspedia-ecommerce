@@ -171,7 +171,7 @@ class ProductManagementController {
             'category_id' => $request->getBody('category_id')
         ];
 
-        // ✅ FIX: Get uploaded file (optional for update)
+        // Get uploaded file (optional for update)
         $file = $request->getFile('image');
 
         // Update product via service

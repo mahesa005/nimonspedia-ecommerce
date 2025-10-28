@@ -1,17 +1,33 @@
 <?php
-
+/**
+ * Safely get session value
+ */
 function getSessionValue($key, $default = '') {
+    // Check if form_data exists in session
+    if (!isset($_SESSION['form_data'])) {
+        return $default;
+    }
+    
+    // Check if key exists
     if (!isset($_SESSION['form_data'][$key])) {
         return $default;
     }
     
     $value = $_SESSION['form_data'][$key];
     
-    // If it's an array, take first element
+    // Handle array (take first element)
     if (is_array($value)) {
-        return !empty($value) ? $value[0] : $default;
+        // Use array_values to avoid undefined key 0
+        $arrayValues = array_values($value);
+        return !empty($arrayValues) ? $arrayValues[0] : $default;
     }
     
+    // Handle null
+    if ($value === null) {
+        return $default;
+    }
+    
+    // Return value
     return $value;
 }
 ?>
@@ -167,7 +183,7 @@ function getSessionValue($key, $default = '') {
             <div class="loading-overlay" id="loadingOverlay" style="display: none;">
                 <div class="spinner"></div>
                 <p>Uploading product...</p>
-            </div>
+            </div>  
         </form>
     </div>
 </div>
