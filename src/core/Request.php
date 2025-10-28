@@ -45,4 +45,9 @@ class Request {
     public function getFile(string $key): ?array {
         return $this->files_data[$key] ?? null;
     }
+    
+    public function getQuery(?string $key = null, $default = null) {
+        if ($key === null) return $_GET;
+        return array_key_exists($key, $_GET) ? $this->sanitize($_GET[$key]) : $default;
+    }
 }
