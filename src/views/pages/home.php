@@ -50,7 +50,7 @@ use App\Core\View;
                 </div>
             </div>
         </div>
-        <button id="apply-filters-sidebar-btn" class="btn btn--primary" style="width: 100%; margin-top: 1rem;">Apply Filters</button>
+        <button id="apply-filters-sidebar-btn" class="btn btn--primary" style="width: 100%; margin-top: 1rem;">Terapkan Filter</button>
     </aside>
 
     <div class="main-content">
