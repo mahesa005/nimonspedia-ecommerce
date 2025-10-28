@@ -1,6 +1,7 @@
 <?php
 use App\Controllers\AuthController;
 use App\Controllers\ProductController;
+use App\Controllers\BuyerProfileController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 
@@ -33,3 +34,8 @@ $router->add('POST', '/register',
 $router->add('GET', '/', [ProductController::class, 'showHomePage']);
 
 $router->add('GET', '/api/get-products', [ProductController::class, 'apiGetProducts']);
+
+$router->add('POST', '/api/buyer/balance/topup', 
+    [BuyerProfileController::class, 'handleTopUp'],
+    [AuthMiddleware::class]
+);
