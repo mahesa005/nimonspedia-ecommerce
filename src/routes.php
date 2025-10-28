@@ -42,5 +42,33 @@ $router->add('GET', '/',
 $router->add('GET', '/seller/products', [ProductManagementController::class, 'index'], 
     [AuthMiddleware::class, RoleMiddleware::class]);
 
-$router->add('POST', '/seller/products/delete', [ProductManagementController::class, 'delete'], 
-    [AuthMiddleware::class, RoleMiddleware::class]);
+$router->add('GET', '/seller/products/create', 
+    [ProductManagementController::class, 'create'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('POST', '/seller/products/store', 
+    [ProductManagementController::class, 'store'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('GET', '/seller/products/{id}/edit', 
+    [ProductManagementController::class, 'edit'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('POST', '/seller/products/{id}/update', 
+    [ProductManagementController::class, 'update'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+// Delete product (AJAX)
+$router->add('POST', '/seller/products/delete', 
+    [ProductManagementController::class, 'delete'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('GET', '/seller/products/add', 
+    [ProductManagementController::class, 'create'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
