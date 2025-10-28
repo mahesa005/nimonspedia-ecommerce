@@ -1,6 +1,6 @@
 <?php
 use App\Controllers\AuthController;
-use App\Controllers\TestController;
+use App\Controllers\ProductController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 
@@ -30,8 +30,6 @@ $router->add('POST', '/register',
     [GuestMiddleware::class]
 );
 
-// --- TEST ROUTE ---
-$router->add('GET', '/',
-    [TestController::class, 'showTestPage'],
-    [AuthMiddleware::class]
-);
+$router->add('GET', '/', [ProductController::class, 'showHomePage']);
+
+$router->add('GET', '/api/get-products', [ProductController::class, 'apiGetProducts']);
