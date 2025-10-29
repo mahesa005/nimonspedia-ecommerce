@@ -8,9 +8,11 @@ use App\Services\ProductService;
 
 class ProductManagementController {
     private ProductService $productService;
+    private View $view;
 
     public function __construct() {
         $this->productService = new ProductService();
+        $this->view = new View();
     }
 
     /**
@@ -19,6 +21,7 @@ class ProductManagementController {
      */
     public function index(Request $request) {
         $userId = Auth::id();
+        
 
         try {
             // Get filter parameters
@@ -127,30 +130,28 @@ class ProductManagementController {
      * GET /seller/products/{id}/edit
      * Show edit product form
      */
-    public function edit(Request $request, int $productId) {
+    public function edit(Request $request, int $id) {
         $userId = Auth::id();
 
         try {
-            // Get product
-            $product = $this->productService->getProductForEdit($userId, $productId);
+            $product = $this->productService->getProductForEdit($userId, $id);
             
             if (!$product) {
-                header('Location: /seller/products?error=product_not_found');
+                $_SESSION['error_message'] = 'Product not found';
+                header('Location: /seller/products');
                 exit;
             }
 
-            // Get categories
             $categories = $this->productService->getAllCategories();
 
-            // Render view
-            $view = new View();
-            $view->setData('pageTitle', 'Edit Product');
-            $view->setData('product', $product);
-            $view->setData('categories', $categories);
-            $view->renderPage('pages/seller/product_edit.php');
+
+            $this->view->setData('product', $product);
+            $this->view->setData('categories', $categories);
+            $this->view->renderPage('pages/seller/product_edit.php');
 
         } catch (\Exception $e) {
-            header('Location: /seller/products?error=' . urlencode($e->getMessage()));
+            error_log('Error in edit: ' . $e->getMessage());
+            header('Location: /seller/products');
             exit;
         }
     }
