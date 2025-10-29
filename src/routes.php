@@ -39,3 +39,9 @@ $router->add('POST', '/api/buyer/balance/topup',
     [BuyerProfileController::class, 'handleTopUp'],
     [AuthMiddleware::class]
 );
+
+$router->add('GET', '/store/{id}', 
+    [App\Controllers\StoreController::class, 'showStorePage']);
+
+$router->add('GET', '/api/stores/{id}/products', 
+    [App\Controllers\StoreController::class, 'apiGetStoreProducts']);
