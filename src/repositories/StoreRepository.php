@@ -30,4 +30,12 @@ class StoreRepository {
             throw "Terjadi kesalahan pada sistem. Silakan coba lagi nanti.";
         }
     }
+
+    public function findById(int $store_id): ?Store {
+        $sql = 'SELECT * FROM "store" WHERE store_id = ?';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$store_id]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $data ? new Store($data) : null;
+    }
 }

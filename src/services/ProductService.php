@@ -2,12 +2,18 @@
 namespace App\Services;
 
 use App\Repositories\ProductRepository;
+use App\Repositories\StoreRepository;
+use App\Repositories\CategoryRepository;
 
 class ProductService {
     private ProductRepository $product_repo;
+    private StoreRepository $store_repo;
+    private CategoryRepository $category_repo;
 
     public function __construct() {
         $this->product_repo = new ProductRepository();
+        $this->store_repo = new StoreRepository();
+        $this->category_repo = new CategoryRepository();
     }
 
     public function getAllVisibleProducts(): array {
@@ -49,6 +55,23 @@ class ProductService {
             'total_pages' => $total_pages,
             'limit' => $limit,
             'total_items' => $total_count
+        ];
+    }
+
+    public function getProductDetailsById(int $product_id): ?array {
+        $product = $this->product_repo->findById($product_id);
+        if (!$product) {
+            return null;
+        }
+
+        $store = $this->store_repo->findById($product->store_id);
+
+        $categories = $this->category_repo->findByProductId($product_id);
+
+        return [
+            'product' => $product,
+            'store' => $store,
+            'categories' => $categories
         ];
     }
 }

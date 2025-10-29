@@ -2,6 +2,7 @@
 use App\Controllers\AuthController;
 use App\Controllers\ProductController;
 use App\Controllers\BuyerProfileController;
+use App\Controllers\CartController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 
@@ -39,3 +40,7 @@ $router->add('POST', '/api/buyer/balance/topup',
     [BuyerProfileController::class, 'handleTopUp'],
     [AuthMiddleware::class]
 );
+
+$router->add('GET', '/products/{id}', [ProductController::class, 'showProductDetailPage']);
+
+$router->add('POST', '/api/cart/add', [CartController::class, 'handleAdd'], [AuthMiddleware::class]);

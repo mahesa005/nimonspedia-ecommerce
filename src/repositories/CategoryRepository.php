@@ -22,4 +22,18 @@ class CategoryRepository {
         }
         return $categories;
     }
+
+    public function findByProductId(int $product_id): array {
+        $sql = 'SELECT c.* FROM "category" c
+                JOIN "category_item" ci ON c.category_id = ci.category_id
+                WHERE ci.product_id = ? 
+                ORDER BY c.name';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$product_id]);
+        $categories = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $categories[] = new Category($row);
+        }
+        return $categories;
+    }
 }
