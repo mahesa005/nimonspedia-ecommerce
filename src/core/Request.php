@@ -28,8 +28,15 @@ class Request {
     
     public function getBody(): array {
         if ($this->method === 'POST') {
+            $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+            if (stripos($contentType, 'application/json') !== false) {
+                $rawInput = file_get_contents('php://input');
+                $jsonData = json_decode($rawInput, true);
+                return is_array($jsonData) ? $jsonData : [];
+            }
             return $this->post_data;
         }
+
         return $this->get_data;
     }
 
