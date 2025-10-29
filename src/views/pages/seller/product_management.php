@@ -14,23 +14,7 @@
       </a>
     </div>
   </div>
-  
-  <!-- Delete Confirmation Modal -->
-<div class="modal" id="deleteModal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Confirm Delete</h3>
-        </div>
-        <div class="modal-body">
-            <p>Are you sure you want to delete <strong id="modalProductName"></strong>?</p>
-            <p class="text-danger">This action cannot be undone.</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-ghost" id="cancelDelete">Cancel</button>
-            <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
-        </div>
-    </div>
-</div>
+
 
   <!-- Metrics cards -->
   <div class="metric-grid">
@@ -148,6 +132,22 @@
         </table>
       </div>
     <?php endif; ?>
+  </div>
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" id="deleteModal">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h3>Confirm Delete</h3>
+          </div>
+          <div class="modal-body">
+              <p>Are you sure you want to delete <strong id="delete-product-name"></strong>?</p>
+              <p class="text-danger">This action cannot be undone.</p>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-ghost" id="cancel-delete">Cancel</button>
+              <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
+          </div>
+      </div>
   </div>
 </div>
 

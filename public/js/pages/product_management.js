@@ -39,7 +39,7 @@ function applyFilters() {
 
 // Delete product
 const deleteButtons = document.querySelectorAll('.btn-delete');
-const deleteModal = document.getElementById('delete-modal');
+const deleteModal = document.getElementById('deleteModal');
 const deleteProductName = document.getElementById('delete-product-name');
 const confirmDeleteBtn = document.getElementById('confirm-delete');
 const cancelDeleteBtn = document.getElementById('cancel-delete');
@@ -50,10 +50,20 @@ deleteButtons.forEach(btn => {
     btn.addEventListener('click', function() {
         productToDelete = this.dataset.productId;
         const productName = this.dataset.productName;
-        
+
+        console.log(productToDelete)
+        console.log(deleteModal.classList)
         deleteProductName.textContent = productName;
         deleteModal.classList.add('show');
     });
+});
+
+// Close modal on outside click
+deleteModal.addEventListener('click', function(e) {
+    if (e.target === deleteModal) {
+        deleteModal.classList.remove('show');
+        productToDelete = null;
+    }
 });
 
 cancelDeleteBtn.addEventListener('click', function() {
@@ -113,10 +123,5 @@ confirmDeleteBtn.addEventListener('click', function() {
     });
 });
 
-// Close modal on outside click
-deleteModal.addEventListener('click', function(e) {
-    if (e.target === deleteModal) {
-        deleteModal.classList.remove('show');
-        productToDelete = null;
-    }
-});
+
+
