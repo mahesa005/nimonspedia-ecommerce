@@ -419,4 +419,33 @@ class ProductRepository {
         $stmt->execute($params);
         return (int) $stmt->fetchColumn();
     }
+
+    public function getStock(int $product_id): int {
+        $sql = 'SELECT stock FROM "product" WHERE product_id = ? FOR UPDATE';
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$product_id]);
+            $stock = $stmt->fetchColumn();
+            
+            if ($stock === false) {
+                throw new PDOException("Produk dengan ID $product_id tidak ditemukan saat mengambil stok.");
+            }
+            return (int) $stock;
+
+        } catch (PDOException $e) {
+            error_log("ProductRepository::getStock Gagal: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function reduceStock(int $product_id, int $quantity): bool {
+        $sql = 'UPDATE "product" SET stock = stock - ? WHERE product_id = ?';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$quantity, $product_id]) && $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("ProductRepository::reduceStock Gagal: " . $e->getMessage());
+            throw $e;
+        }
+    }
 }

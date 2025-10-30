@@ -5,6 +5,7 @@ use App\Controllers\ProductManagementController;
 use App\Controllers\ProductController;
 use App\Controllers\BuyerProfileController;
 use App\Controllers\CartController;
+use App\Controllers\CheckoutController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 use App\Core\Middleware\RoleMiddleware;
@@ -80,4 +81,17 @@ $router->add('POST', '/seller/products/delete',
 $router->add('GET', '/seller/products/add', 
     [ProductManagementController::class, 'create'], 
     [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('GET', '/checkout', [CheckoutController::class, 'showCheckoutPage'], [AuthMiddleware::class]);
+
+$router->add('POST', '/checkout', 
+    [CheckoutController::class, 'handleCheckout'], 
+    [AuthMiddleware::class]
+);
+
+
+$router->add('POST', '/api/profile/address', 
+    [BuyerProfileController::class, 'handleAddressUpdate'],
+    [AuthMiddleware::class]
 );

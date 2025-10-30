@@ -43,4 +43,41 @@ class BuyerProfileController {
             exit;
         }
     }
+
+    public function handleAddressUpdate(Request $request): void {
+        header('Content-Type: application/json');
+        
+        $user_id = Auth::id();
+        if (!$user_id) {
+            http_response_code(401); // Harusnya ga mungkin, tp jaga-jaga
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak.']);
+            exit;
+        }
+
+        $new_address = $request->getDataBody('address');
+
+        try {
+            $success = $this->user_service->updateAddress($user_id, $new_address);
+
+            if ($success) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Alamat berhasil diperbarui!',
+                    'newAddress' => htmlspecialchars($new_address) 
+                ]);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Gagal memperbarui alamat.']);
+            }
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+            exit;
+        }
+    }
 }

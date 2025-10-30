@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Repositories\CartRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\StoreRepository;
 use Exception;
 use PDOException;
 
@@ -84,5 +85,35 @@ class CartService {
 
     public function clearCart(int $buyer_id): bool {
         // TODO
+    }
+
+    public function getCartForCheckout(int $buyer_id): array {
+        $cart_items = $this->cart_repo->findByBuyerIdWithDetails($buyer_id);
+
+        $stores = [];
+        $products_by_store = [];
+        $total_price = 0;
+        $num_of_items = 0;
+
+        foreach ($cart_items as $item) {
+            $store_id = $item->product->store_id;
+
+            if (!isset($stores[$store_id])) {
+                $store = (new StoreRepository())->findById($store_id);
+                $stores[$store_id] = $store; 
+            }
+            
+            $products_by_store[$store_id][] = $item;
+
+            $total_price += $item->getSubtotal();
+            $num_of_items += $item->quantity;
+        }
+
+        return [
+            'stores' => array_values($stores),
+            'products_by_store' => $products_by_store,
+            'total_price' => $total_price,
+            'num_of_items' => $num_of_items
+        ];
     }
 }
