@@ -1,0 +1,155 @@
+.product-card {
+    width: 188px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    justify-self: center;
+}
+
+.product-link,
+.store-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.product-image {
+    width: 100%;
+    height: 188px;
+    object-fit: cover;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #888;
+}
+
+.product-details {
+    display: flex;
+    flex-direction: column;
+}
+.product-name,
+.product-price,
+.product-store {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.product-name {
+    font-size: 18px;
+    margin: 10px 0 5px;
+}
+
+.product-price {
+    font-weight: 800;
+    margin: 5px 0;
+}
+
+.product-store {
+    color: #55565b;
+    cursor: pointer;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.product-store:hover {
+    color: #666666;
+    text-decoration: underline;
+}
+
+.product-card.out-of-stock {
+    opacity: 0.5;
+    pointer-events: none;
+    position: relative;
+}
+
+.product-card.out-of-stock::after {
+    content: "Stok Habis";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: red;
+    color: white;
+    padding: 5px 10px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.product-card.skeleton {
+    width: 188px;
+    height: 290px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    text-align: center;
+    position: relative;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton-image,
+.skeleton-text {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.4s ease-in-out infinite;
+    border-radius: 5px;
+}
+
+.skeleton-image {
+    width: 100%;
+    height: 188px;
+    border-bottom: 1px solid #ddd;
+}
+
+.skeleton-details {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.skeleton-name {
+    width: 80%;
+    height: 20px;
+    margin-bottom: 8px;
+}
+
+.skeleton-price {
+    width: 50%;
+    height: 18px;
+    margin-bottom: 10px;
+}
+
+.skeleton-store {
+    width: 70%;
+    height: 16px;
+    margin: 0 auto 10px auto;
+}

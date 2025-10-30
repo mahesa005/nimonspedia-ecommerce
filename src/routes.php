@@ -1,6 +1,7 @@
 <?php
 use App\Controllers\AuthController;
-use App\Controllers\TestController;
+use App\Controllers\ProductController;
+use App\Controllers\BuyerProfileController;
 use App\Controllers\StoreController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
@@ -36,8 +37,22 @@ $router->add('GET', '/store/{id}',
     []
 );
 
-// --- TEST ROUTE ---
-$router->add('GET', '/',
-    [TestController::class, 'showTestPage'],
+$router->add('GET', '/store/{id}',
+    [StoreController::class, 'showDetail'],
+    []
+);
+
+$router->add('GET', '/', [ProductController::class, 'showHomePage']);
+
+$router->add('GET', '/api/get-products', [ProductController::class, 'apiGetProducts']);
+
+$router->add('POST', '/api/buyer/balance/topup', 
+    [BuyerProfileController::class, 'handleTopUp'],
     [AuthMiddleware::class]
 );
+
+$router->add('GET', '/store/{id}', 
+    [App\Controllers\StoreController::class, 'showStorePage']);
+
+$router->add('GET', '/api/stores/{id}/products', 
+    [App\Controllers\StoreController::class, 'apiGetStoreProducts']);
