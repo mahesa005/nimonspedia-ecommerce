@@ -48,6 +48,14 @@ CREATE TABLE "product" (
     FOREIGN KEY (store_id) REFERENCES "store"(store_id)
 );
 
+-- Soft delete
+ALTER TABLE product ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL;
+
+-- Index for performance
+CREATE INDEX IF NOT EXISTS idx_product_name ON product(product_name);
+CREATE INDEX IF NOT EXISTS idx_product_store ON product(store_id);
+CREATE INDEX IF NOT EXISTS idx_product_deleted ON product(deleted_at);
+
 CREATE TABLE "category" (
     category_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE

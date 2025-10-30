@@ -1,10 +1,13 @@
 <?php
 use App\Controllers\AuthController;
+use App\Controllers\TestController;
+use App\Controllers\ProductManagementController;
 use App\Controllers\ProductController;
 use App\Controllers\BuyerProfileController;
 use App\Controllers\CartController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
+use App\Core\Middleware\RoleMiddleware;
 
 $router->add('GET', '/login',
     [AuthController::class, 'showLoginPage'],
@@ -44,3 +47,37 @@ $router->add('POST', '/api/buyer/balance/topup',
 $router->add('GET', '/products/{id}', [ProductController::class, 'showProductDetailPage']);
 
 $router->add('POST', '/api/cart/add', [CartController::class, 'handleAdd'], [AuthMiddleware::class]);
+// Product Management Routes (Seller only)
+$router->add('GET', '/seller/products', [ProductManagementController::class, 'index'], 
+    [AuthMiddleware::class, RoleMiddleware::class]);
+
+$router->add('GET', '/seller/products/create', 
+    [ProductManagementController::class, 'create'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('POST', '/seller/products/store', 
+    [ProductManagementController::class, 'store'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('GET', '/seller/products/{id}/edit', 
+    [ProductManagementController::class, 'edit'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('POST', '/seller/products/{id}/update', 
+    [ProductManagementController::class, 'update'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+// Delete product (AJAX)
+$router->add('POST', '/seller/products/delete', 
+    [ProductManagementController::class, 'delete'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('GET', '/seller/products/add', 
+    [ProductManagementController::class, 'create'], 
+    [AuthMiddleware::class, RoleMiddleware::class]
+);

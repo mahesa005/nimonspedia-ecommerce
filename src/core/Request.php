@@ -26,18 +26,25 @@ class Request {
     }
 
     
-    public function getBody(): array {
-        if ($this->method === 'POST') {
-            $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-            if (stripos($contentType, 'application/json') !== false) {
-                $rawInput = file_get_contents('php://input');
-                $jsonData = json_decode($rawInput, true);
-                return is_array($jsonData) ? $jsonData : [];
-            }
-            return $this->post_data;
+    public function getBody(?string $key = null, $default = null) {
+        if ($this->method === 'GET') {
+            $arr = $_GET;
+        } else {
+            $ct = $_SERVER['CONTENT_TYPE'] ?? '';
+            if (stripos($ct, 'application/json') === 0) {
+                static $jsonCache = null;
+                if ($jsonCache === null) {
+                    $raw = file_get_contents('php://input') ?: '';
+                    $jsonCache = json_decode($raw, true) ?: [];
+                }
+                $arr = $jsonCache;
+            } else {
+                // form-urlencoded & multipart/form-data
+                $arr = $_POST;
+            }   
         }
-
-        return $this->get_data;
+        if ($key === null) return $arr;
+        return array_key_exists($key, $arr) ? $arr[$key] : $default;
     }
 
     public function getDataBody(string $key, $default = null) {
@@ -51,5 +58,10 @@ class Request {
 
     public function getFile(string $key): ?array {
         return $this->files_data[$key] ?? null;
+    }
+    
+    public function getQuery(?string $key = null, $default = null) {
+        if ($key === null) return $_GET;
+        return $_GET[$key] ?? $default;
     }
 }
