@@ -12,6 +12,18 @@ class StoreRepository {
         $this->db = Database::getInstance();
     }
 
+    public function getByUserId(int $userId): ?array { // get user id dari stores
+        $stmt = $this->db->prepare("SELECT * FROM store WHERE user_id = :user_id");
+        $stmt->execute(['user_id' => $userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    public function getStoreIdByUserId(int $userId): ?int { // get store id from user id
+        $store = $this->getByUserId($userId);
+        return $store ? (int)$store['store_id'] : null;
+    }
+
     public function create(int $user_id, string $store_name, string $clean_description, ?string $logo_path): int {
         $sql = 'INSERT INTO store (user_id, store_name, store_description, store_logo_path) 
                 VALUES (?, ?, ?, ?) RETURNING store_id';
