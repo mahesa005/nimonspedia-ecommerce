@@ -8,7 +8,7 @@ use App\Repositories\ProductRepository;
 use App\Repositories\CategoryRepository;
 
 class StoreController {
-    public function showDetail($id) {
+    public function showDetail(Request $request, string $id) {
         $storeRepo = new StoreRepository();
         $productRepo = new ProductRepository();
         $categoryRepo = new CategoryRepository();
