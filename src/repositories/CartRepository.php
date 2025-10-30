@@ -15,7 +15,7 @@ class CartRepository {
     }
 
     public function countUniqueItems(int $buyer_id): int {
-        $sql = 'SELECT COUNT(DISTINCT product_id) FROM cart_item WHERE buyer_id = ?';
+        $sql = 'SELECT COUNT(DISTINCT ci.product_id) FROM cart_item ci JOIN product p ON ci.product_id = p.product_id WHERE buyer_id = ? AND p.deleted_at IS NULL';
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$buyer_id]);
