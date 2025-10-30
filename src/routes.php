@@ -4,6 +4,7 @@ use App\Controllers\TestController;
 use App\Controllers\ProductManagementController;
 use App\Controllers\ProductController;
 use App\Controllers\BuyerProfileController;
+use App\Controllers\SellerDashboardController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 use App\Core\Middleware\RoleMiddleware;
@@ -76,4 +77,10 @@ $router->add('POST', '/seller/products/delete',
 $router->add('GET', '/seller/products/add', 
     [ProductManagementController::class, 'create'], 
     [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+// Seller Dashboard
+$router->add('GET', '/seller/dashboard',
+    [SellerDashboardController::class, 'index'],
+    [AuthMiddleware::class, RoleMiddleware::class]  
 );
