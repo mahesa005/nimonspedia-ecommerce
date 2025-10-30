@@ -12,6 +12,28 @@ class ProductRepository {
         $this->db = Database::getInstance();
     }
 
+    public function findById(int $product_id): ?Product {
+        $sql = 'SELECT p.*, s.store_name
+                FROM "product" p 
+                LEFT JOIN "store" s ON p.store_id = s.store_id 
+                WHERE p.product_id = ? AND p.deleted_at IS NULL';
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$product_id]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($data) {
+                $product = new Product($data);
+                if (property_exists($product, 'store_name')) {
+                    $product->store_name = $data['store_name'];
+                }
+                return $product;
+            }
+            return null;
+        } catch (PDOException $e) {
+            error_log("Error finding product by ID $product_id: " . $e->getMessage());
+        }
+    }
     /**
      * Get products by store ID with filters
      */

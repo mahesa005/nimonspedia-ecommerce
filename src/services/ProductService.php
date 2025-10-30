@@ -443,4 +443,21 @@ class ProductService {
             'total_items' => $total_count
         ];
     }
+
+    public function getProductDetailsById(int $product_id): ?array {
+        $product = $this->product_repo->findById($product_id);
+        if (!$product) {
+            return null;
+        }
+
+        $store = $this->store_repo->findById($product->store_id);
+
+        $categories = $this->category_repo->findByProductId($product_id);
+
+        return [
+            'product' => $product,
+            'store' => $store,
+            'categories' => $categories
+        ];
+    }
 }

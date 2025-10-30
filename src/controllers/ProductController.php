@@ -43,9 +43,9 @@ class ProductController {
             $navbar_file = 'components/navbar_buyer.php';
             $styles[] = '/css/components/navbar_buyer.css';
             $scripts[] = '/js/modules/topup_modal.js';
-             $styles[] = '/css/components/topup_modal.css';
+            $styles[] = '/css/components/topup_modal.css';
         } else {
-             $styles[] = '/css/components/navbar_guest.css';
+            $styles[] = '/css/components/navbar_guest.css';
         }
 
         $this->view->setData('pageTitle', 'Home - Nimonspedia');
@@ -111,5 +111,52 @@ class ProductController {
             header('Content-Type: application/json');
             echo json_encode($response);
             exit;
+    }
+
+    public function showProductDetailPage(Request $request, string $id): void {
+        $product_id = (int) $id;
+        try {
+            $product_data = $this->product_service->getProductDetailsById($product_id);
+
+            if (!$product_data || $product_data['product']->isDeleted()) {
+                http_response_code(404);
+                // $this->view->renderPage('pages/404.php', ['pageTitle' => 'Not Found']);
+                return;
+            }
+
+            $user = null;
+            $cart_item_count = 0;
+            $navbar_file = 'components/navbar_guest.php';
+            $styles = ['/css/pages/product_detail.css'];
+            $scripts = ['/js/pages/product_detail.js'];
+
+            if (Auth::check()) {
+                $user_id = Auth::id();
+                $user = $this->user_service->getUserById($user_id);
+                $cart_item_count = $this->cart_service->countUniqueItems($user_id);
+                $navbar_file = 'components/navbar_buyer.php';
+                $styles[] = '/css/components/navbar_buyer.css';
+                $scripts[] = '/js/modules/topup_modal.js';
+            } else {
+                 $styles[] = '/css/components/navbar_guest.css';
+            }
+
+            $this->view->setData('pageTitle', $product_data['product']->product_name . ' - Nimonspedia');
+            $this->view->setData('navbarFile', $navbar_file);
+            $this->view->setData('pageStyles', $styles);
+            $this->view->setData('pageScripts', $scripts);
+            $this->view->setData('user', $user);
+            $this->view->setData('cart_item_count', $cart_item_count);
+            $this->view->setData('product', $product_data['product']);
+            $this->view->setData('store', $product_data['store']);
+            $this->view->setData('categories', $product_data['categories']);
+
+            $this->view->renderPage('pages/product_detail.php');
+
+        } catch (Exception $e) {
+            error_log("Error showing product detail for ID $product_id: " . $e->getMessage());
+            http_response_code(500);
+            // $this->view->renderPage('errors/500.php', ['pageTitle' => 'Server Error']);
+        }
     }
 }

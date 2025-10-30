@@ -4,6 +4,7 @@ use App\Controllers\TestController;
 use App\Controllers\ProductManagementController;
 use App\Controllers\ProductController;
 use App\Controllers\BuyerProfileController;
+use App\Controllers\CartController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 use App\Core\Middleware\RoleMiddleware;
@@ -43,6 +44,9 @@ $router->add('POST', '/api/buyer/balance/topup',
     [AuthMiddleware::class]
 );
 
+$router->add('GET', '/products/{id}', [ProductController::class, 'showProductDetailPage']);
+
+$router->add('POST', '/api/cart/add', [CartController::class, 'handleAdd'], [AuthMiddleware::class]);
 // Product Management Routes (Seller only)
 $router->add('GET', '/seller/products', [ProductManagementController::class, 'index'], 
     [AuthMiddleware::class, RoleMiddleware::class]);
