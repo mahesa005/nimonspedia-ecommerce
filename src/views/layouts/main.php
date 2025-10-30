@@ -15,6 +15,7 @@ use App\Core\Session;
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/components/toast.css">
+    <link rel="stylesheet" href="/css/pages/404.css">
     <?php
         if (isset($pageStyles) && is_array($pageStyles)):
             foreach ($pageStyles as $style_path):

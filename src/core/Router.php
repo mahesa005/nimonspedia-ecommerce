@@ -65,6 +65,7 @@ class Router {
         }
         
         http_response_code(404);
-        echo "404 Not Found: Page '$uri'"; 
+        $view = new View();
+        $view->renderPage('pages/404.php');
     }
 }
