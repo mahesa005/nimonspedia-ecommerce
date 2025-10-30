@@ -2,6 +2,8 @@
 use App\Controllers\AuthController;
 use App\Controllers\TestController;
 use App\Controllers\ProductManagementController;
+use App\Controllers\ProductController;
+use App\Controllers\BuyerProfileController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 use App\Core\Middleware\RoleMiddleware;
@@ -32,9 +34,12 @@ $router->add('POST', '/register',
     [GuestMiddleware::class]
 );
 
-// --- TEST ROUTE ---
-$router->add('GET', '/',
-    [TestController::class, 'showTestPage'],
+$router->add('GET', '/', [ProductController::class, 'showHomePage']);
+
+$router->add('GET', '/api/get-products', [ProductController::class, 'apiGetProducts']);
+
+$router->add('POST', '/api/buyer/balance/topup', 
+    [BuyerProfileController::class, 'handleTopUp'],
     [AuthMiddleware::class]
 );
 

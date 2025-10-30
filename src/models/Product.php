@@ -12,6 +12,7 @@ class Product {
     public string $created_at;
     public string $updated_at;
     public ?string $deleted_at;
+    public ?string $store_name = null;
 
     public function __construct(array $data) {
         $this->product_id = (int) ($data['product_id'] ?? 0);

@@ -44,4 +44,22 @@ class UserRepository {
 
         return null;
     }
+
+    public function findById(int $id): ?User {
+        $stmt = $this->db->prepare('SELECT * FROM "user" WHERE user_id = ?');
+        $stmt->execute([$id]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $data ? new User($data) : null;
+    }
+
+    public function updateBalance(int $user_id, int $new_balance): bool {
+         $sql = 'UPDATE "user" SET balance = ?, updated_at = NOW() WHERE user_id = ?';
+         try {
+             $stmt = $this->db->prepare($sql);
+             return $stmt->execute([$new_balance, $user_id]) && $stmt->rowCount() > 0; 
+         } catch (\PDOException $e) {
+             error_log("Error updating balance for user $user_id: " . $e->getMessage());
+             return false;
+         }
+    }
 }
