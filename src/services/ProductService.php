@@ -445,14 +445,14 @@ class ProductService {
     }
 
     public function getProductDetailsById(int $product_id): ?array {
-        $product = $this->product_repo->findById($product_id);
+        $product = $this->productRepo->findById($product_id);
         if (!$product) {
             return null;
         }
 
-        $store = $this->store_repo->findById($product->store_id);
+        $store = $this->storeRepo->findById($product->store_id);
 
-        $categories = $this->category_repo->findByProductId($product_id);
+        $categories = $this->categoryRepo->findByProductId($product_id);
 
         return [
             'product' => $product,
