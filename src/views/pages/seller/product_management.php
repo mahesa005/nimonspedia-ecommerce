@@ -1,16 +1,23 @@
 <link rel="stylesheet" href="/css/pages/product_management.css">
 
 <div class="tp-page">
-  <!-- Top Bar: Title + CTA -->
-  <div class="tp-heading card">
+  <div class="tp-heading">
     <div class="left">
       <h1>Kelola Produk</h1>
-      <p class="sub">Pantau performa produk dan kelola stok secara cepat</p>
+      <p class="sub">Kelola semua produk di toko Anda</p>
     </div>
     <div class="right">
+      <a href="/seller/dashboard" class="back-btn back-btn--small" title="Kembali ke Dashboard">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
       <a href="/seller/products/add" class="btn btn-primary">
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-        Buat Produk Baru
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        Tambah Produk
       </a>
     </div>
   </div>
