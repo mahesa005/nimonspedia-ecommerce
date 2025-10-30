@@ -5,10 +5,12 @@ use App\Models\Store;
 $current_store = $store ?? null;
 $store_balance_formatted = '0';
 if ($current_store) {
-    $store_balance_formatted = number_format($current_store->balance, 0, ',', '.');
+    $store_balance_formatted = number_format($current_store["balance"], 0, ',', '.');
 }
 ?>
+
 <header>
+    <link rel="stylesheet" href="/css/components/navbar_seller.css">
     <nav class="navbar">
         <a href="/seller/dashboard" class="navbar-brand">Nimonspedia Seller</a>
 

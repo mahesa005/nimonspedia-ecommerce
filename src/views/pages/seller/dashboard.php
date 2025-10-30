@@ -15,6 +15,8 @@ function rph($n) {
 
 <link rel="stylesheet" href="/css/pages/seller_dashboard.css">
 
+<?php include __DIR__ . '/../../components/navbar_seller.php'; ?>
+
 <div class="tp-page">
   <div class="tp-heading">
     <div class="left">
