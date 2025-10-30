@@ -400,6 +400,7 @@ class ProductService {
         
         // Return numeric value
         return is_numeric($value) ? $value : 0;
+    }
 
     public function getAllVisibleProducts(): array {
         return $this->productRepo->findAllVisible();

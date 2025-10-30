@@ -286,6 +286,8 @@ class ProductRepository {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
         return (int) $result['total'];
+    }
+
     public function findAllVisible(): array {
         $sql = 'SELECT * FROM product WHERE deleted_at IS NULL ORDER BY created_at DESC';
         $stmt = $this->db->query($sql);
