@@ -1,6 +1,7 @@
 <?php
 use App\Controllers\AuthController;
 use App\Controllers\TestController;
+use App\Controllers\StoreController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 
@@ -28,6 +29,11 @@ $router->add('GET', '/register',
 $router->add('POST', '/register',
     [AuthController::class, 'handleRegister'],
     [GuestMiddleware::class]
+);
+
+$router->add('GET', '/store/{id}',
+    [StoreController::class, 'showDetail'],
+    []
 );
 
 // --- TEST ROUTE ---
