@@ -1,29 +1,3 @@
-<?php
-$componentDir = __DIR__ . '/../../components';
-$navbarFile = $componentDir . '/navbar_guest.php';
-
-if (session_status() === PHP_SESSION_NONE) {
-    @session_start();
-}
-
-$user = $currentUser ?? null;
-if (!$user && isset($_SESSION['user'])) {
-    $user = $_SESSION['user'];
-}
-
-if ($user) {
-    $role = is_object($user) ? ($user->role ?? ($user->user_role ?? null)) : ($user['role'] ?? ($user['user_role'] ?? null));
-    if ($role === 'seller' || $role === 'store') {
-        $navbarFile = $componentDir . '/navbar_seller.php';
-    } else {
-        $navbarFile = $componentDir . '/navbar_buyer.php';
-    }
-}
-
-if (file_exists($navbarFile)) {
-    include_once $navbarFile;
-}
-?>
 <div class="cart-page">
     <h1>Keranjang Belanja Anda</h1>
     

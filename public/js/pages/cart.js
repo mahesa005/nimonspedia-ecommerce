@@ -25,12 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+
 function handleDelete(button) {
     const itemId = button.dataset.itemId;
 
-    if (!confirm('Anda yakin ingin menghapus item ini dari keranjang?')) {
-        return;
-    }
+    if (!confirm('Anda yakin ingin menghapus item ini dari keranjang?')) return;
 
     fetch('/cart/delete', {
         method: 'POST',
@@ -44,9 +43,8 @@ function handleDelete(button) {
     .then(data => {
         if (data.success) {
             document.querySelector(`.cart-item[data-item-id="${itemId}"]`).remove();
-            
-            updateTotals(data.newGrandTotal); 
-            
+
+            updateTotals(data.grandTotal);
             updateNavbarBadge(data.newCount);
 
             showToast('Item berhasil dihapus', 'success');
@@ -54,7 +52,10 @@ function handleDelete(button) {
             showToast(data.message || 'Gagal menghapus item', 'error');
         }
     })
-    .catch(() => showToast('Terjadi kesalahan jaringan', 'error'));
+    .catch(err => {
+        console.error('Network or JSON error:', err);
+        showToast('Terjadi kesalahan jaringan', 'error');
+    });
 }
 
 function handleQuantityChange(button) {
@@ -72,7 +73,7 @@ function handleQuantityChange(button) {
     
     input.value = quantity;
     
-    updateItemOnServer(itemId, quantity);
+    updateItemOnServer(itemId, quantity, input);
 }
 
 function handleQuantityInputChange(input) {
@@ -84,12 +85,11 @@ function handleQuantityInputChange(input) {
         input.value = 1;
     }
     
-    updateItemOnServer(itemId, quantity);
+    updateItemOnServer(itemId, quantity, input);
 }
 
 
-function updateItemOnServer(itemId, quantity) {
-    
+function updateItemOnServer(itemId, quantity, input) {
     fetch('/cart/update', {
         method: 'POST',
         headers: {
@@ -101,17 +101,34 @@ function updateItemOnServer(itemId, quantity) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById(`subtotal-${itemId}`).textContent = `Rp ${data.newSubtotal.toLocaleString('id-ID')}`;
-            document.getElementById('grand-total').textContent = `Rp ${data.newGrandTotal.toLocaleString('id-ID')}`;
-            
+            const subtotalElem = document.getElementById(`subtotal-${itemId}`);
+            if (subtotalElem && data.stores) {
+                const store = Object.values(data.stores)[0];
+                const item = store.items.find(i => i.cart_item_id === itemId);
+                if (item) {
+                    subtotalElem.textContent =
+                        `Rp ${(item.product.price * item.quantity).toLocaleString('id-ID')}`;
+                }
+            }
+
+            const grandTotalElem = document.getElementById('grand-total');
+            if (grandTotalElem) {
+                grandTotalElem.textContent =
+                    `Rp ${data.grandTotal.toLocaleString('id-ID')}`;
+            }
+
             showToast('Kuantitas diperbarui', 'success');
         } else {
             showToast(data.message || 'Gagal update kuantitas', 'error');
-            input.value = data.oldQuantity; 
+            if (input) input.value = data.oldQuantity; 
         }
     })
-    .catch(() => showToast('Terjadi kesalahan jaringan', 'error'));
+    .catch(err => {
+        console.error('Network or JSON error:', err);
+        showToast('Terjadi kesalahan jaringan', 'error');
+    });
 }
+
 
 function updateTotals(newGrandTotal) {
     document.getElementById('grand-total').textContent = `Rp ${newGrandTotal.toLocaleString('id-ID')}`;
