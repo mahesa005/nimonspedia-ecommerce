@@ -2,6 +2,7 @@
 use App\Controllers\AuthController;
 use App\Controllers\CartController;
 use App\Controllers\ProductController;
+use App\Controllers\ProfileController;
 use App\Controllers\BuyerProfileController;
 use App\Controllers\StoreController;
 use App\Core\Middleware\AuthMiddleware;
@@ -72,3 +73,18 @@ $router->add('GET', '/store/{id}',
 
 $router->add('GET', '/api/stores/{id}/products', 
     [App\Controllers\StoreController::class, 'apiGetStoreProducts']);
+
+    $router->add('GET', '/profile',
+    [ProfileController::class, 'showPage'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/profile/update',
+    [ProfileController::class, 'update'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/profile/password',
+    [ProfileController::class, 'changePassword'],
+    [AuthMiddleware::class]
+);

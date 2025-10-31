@@ -24,6 +24,6 @@ class TestController {
         $this->view->setData('pageScripts', $scripts);
         $this->view->setData('navbarFile', 'components/navbar_auth.php');
 
-        $this->view->renderPage('pages/auth/test.php');
+        $this->view->renderPage('pages/test.php');
     }
 }

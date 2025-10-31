@@ -31,7 +31,7 @@ class CartController {
         $view->setData('grandTotal', $cartData['grandTotal']);
         $view->setData('totalItems', $totalItems);
         
-        $view->renderPage('pages/cart/cart.php');
+        $view->renderPage('pages/cart.php');
     }
 
     public function add() {
