@@ -73,4 +73,19 @@ class UserRepository {
             throw $e;
         }
     }
+
+    public function refundBalance(int $user_id, int $amount) {
+        $sql = 'UPDATE "user" SET balance = balance + :amount
+                WHERE user_id = :user_id AND role =\'BUYER\'';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                'amount' => $amount,
+                'user_id' => $user_id
+            ]);
+        } catch (PDOException $e) {
+            error_log("UserRepository::refundBalance Gagal: " . $e->getMessage());
+            throw $e;
+        }
+    }
 }
