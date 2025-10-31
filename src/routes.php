@@ -1,5 +1,6 @@
 <?php
 use App\Controllers\AuthController;
+use App\Controllers\CartController;
 use App\Controllers\ProductController;
 use App\Controllers\BuyerProfileController;
 use App\Controllers\StoreController;
@@ -37,9 +38,24 @@ $router->add('GET', '/store/{id}',
     []
 );
 
-$router->add('GET', '/store/{id}',
-    [StoreController::class, 'showDetail'],
-    []
+$router->add('GET', '/cart',
+    [CartController::class, 'showPage'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/cart/add',
+    [CartController::class, 'add'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/cart/update',
+    [CartController::class, 'update'],
+    [AuthMiddleware::class] 
+);
+
+$router->add('POST', '/cart/delete',
+    [CartController::class, 'delete'],
+    [AuthMiddleware::class]
 );
 
 $router->add('GET', '/', [ProductController::class, 'showHomePage']);
