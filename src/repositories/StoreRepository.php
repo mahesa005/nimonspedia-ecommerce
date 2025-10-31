@@ -43,6 +43,20 @@ class StoreRepository {
         }
     }
 
+    // Get Store Balance
+    public function getStoreBalance(int $store_id): ?int {
+        $sql = 'SELECT balance FROM store WHERE store_id = :store_id';
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['store_id' => $store_id]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? (int) $result['balance'] : null;
+        } catch (\PDOException $e) {
+            error_log('Error fetching store balance: ' . $e->getMessage());
+            return null;
+        }
     public function findById(int $store_id): ?Store {
         $sql = 'SELECT * FROM "store" WHERE store_id = ?';
         $stmt = $this->db->prepare($sql);

@@ -4,6 +4,7 @@ use App\Controllers\TestController;
 use App\Controllers\ProductManagementController;
 use App\Controllers\ProductController;
 use App\Controllers\BuyerProfileController;
+use App\Controllers\SellerDashboardController;
 use App\Controllers\CartController;
 use App\Controllers\CheckoutController;
 use App\Controllers\StoreController;
@@ -109,6 +110,11 @@ $router->add('GET', '/seller/products/add',
     [AuthMiddleware::class, RoleMiddleware::class]
 );
 
+// Seller Dashboard
+$router->add('GET', '/seller/dashboard',
+    [SellerDashboardController::class, 'index'],
+    [AuthMiddleware::class, RoleMiddleware::class]  
+);
 $router->add('GET', '/checkout', [CheckoutController::class, 'showCheckoutPage'], [AuthMiddleware::class]);
 
 $router->add('POST', '/checkout', 

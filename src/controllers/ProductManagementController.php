@@ -5,13 +5,16 @@ use App\Core\Request;
 use App\Core\View;
 use App\Core\Auth;
 use App\Services\ProductService;
+use App\Repositories\StoreRepository;
 
 class ProductManagementController {
     private ProductService $productService;
+    private StoreRepository $storeRepo;
     private View $view;
 
     public function __construct() {
         $this->productService = new ProductService();
+        $this->storeRepo = new StoreRepository();
         $this->view = new View();
     }
 
@@ -29,6 +32,7 @@ class ProductManagementController {
             $categoryId = $request->getQuery('category');
             $sortBy = $request->getQuery('sort_by', 'product_name');
             $sortOrder = $request->getQuery('sort_order', 'ASC');
+            $storeId = $this->storeRepo->getByUserId($userId);
 
             // Get products from service
             $products = $this->productService->getProductsByUser(
@@ -51,6 +55,7 @@ class ProductManagementController {
             $view->setData('currentCategory', $categoryId);
             $view->setData('currentSort', $sortBy);
             $view->setData('currentOrder', $sortOrder);
+            $view->setData('store', $storeId);
             $view->renderPage('pages/seller/product_management.php');
 
         } catch (\Exception $e) {

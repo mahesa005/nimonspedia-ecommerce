@@ -112,50 +112,6 @@ body {
   height: 16px;
 }
 
-/* Metrics Grid */
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.metric {
-  padding: 16px 20px;
-}
-
-.metric .label {
-  font-size: 12px;
-  color: var(--tp-gray-500);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-}
-
-.metric .value {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--tp-gray-900);
-  line-height: 1.2;
-}
-
-.metric .value.warn {
-  color: var(--warn);
-}
-
-.metric .delta {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--tp-gray-500);
-  font-weight: 500;
-}
-
-.metric .delta.up {
-  color: var(--tp-green);
-  font-weight: 600;
-}
-
 /* Toolbar */
 .toolbar {
   padding: 16px 20px;
@@ -514,12 +470,12 @@ body {
 
 /* Overlay full-screen (default hidden) */
 .modal {
-  display: none;              /* hidden by default */
-  position: fixed;            /* kunci: fixed biar nempel layar */
-  inset: 0;                   /* top:0; right:0; bottom:0; left:0 */
-  z-index: 9999;              /* di atas semua */
-  background: rgba(0,0,0,.45);/* overlay gelap */
-  justify-content: center;    /* center konten */
+  display: none;           
+  position: fixed;           
+  inset: 0;                   
+  z-index: 9999;              
+  background: rgba(0,0,0,.45);
+  justify-content: center;    
   align-items: center;
 }
 
@@ -539,7 +495,75 @@ body {
   position: relative;
 }
 
-/* (opsional) lock scroll saat modal terbuka */
 body.modal-open {
   overflow: hidden;
 }
+.tp-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 0;
+}
+
+/* new: compact back button on the right */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #424242;
+  font-size: 14px;
+  font-weight: 600;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  transition: all 0.18s ease;
+}
+
+.back-btn:hover {
+  background: #f5f5f5;
+  border-color: var(--tp-green);
+  color: var(--tp-green);
+  transform: translateX(-4px);
+}
+
+.back-btn svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+/* small variant: icon-only */
+.back-btn--small {
+  padding: 8px;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+/* ensure heading left keeps spacing when back-btn moved */
+.tp-heading .left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* responsive: move back button next line on small screens */
+@media (max-width: 768px) {
+  .tp-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .tp-heading .right {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+
+

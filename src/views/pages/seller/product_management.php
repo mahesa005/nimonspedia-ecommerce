@@ -1,37 +1,26 @@
 <link rel="stylesheet" href="/css/pages/product_management.css">
 
+<?php include __DIR__ . '/../../components/navbar_seller.php'; ?>
+
 <div class="tp-page">
-  <!-- Top Bar: Title + CTA -->
-  <div class="tp-heading card">
+  <div class="tp-heading">
     <div class="left">
       <h1>Kelola Produk</h1>
-      <p class="sub">Pantau performa produk dan kelola stok secara cepat</p>
+      <p class="sub">Kelola semua produk di toko Anda</p>
     </div>
     <div class="right">
-      <a href="/seller/products/add" class="btn btn-primary">
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-        Buat Produk Baru
+      <a href="/seller/dashboard" class="back-btn back-btn--small" title="Kembali ke Dashboard">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </a>
-    </div>
-  </div>
 
-
-  <!-- Metrics cards -->
-  <div class="metric-grid">
-    <div class="metric card">
-      <div class="label">Produk Aktif</div>
-      <div class="value"><?= number_format($stats['active_products'] ?? count($products ?? [])) ?></div>
-      <div class="delta up">+<?= (int)($stats['active_delta'] ?? 0) ?></div>
-    </div>
-    <div class="metric card">
-      <div class="label">Stok Menipis</div>
-      <div class="value warn"><?= number_format($stats['low_stock'] ?? 0) ?></div>
-      <div class="delta">perlu tindakan</div>
-    </div>
-    <div class="metric card">
-      <div class="label">Pendapatan Bulan Ini</div>
-      <div class="value">Rp <?= number_format($stats['revenue_month'] ?? 0, 0, ',', '.') ?></div>
-      <div class="delta up">+<?= (int)($stats['revenue_delta'] ?? 0) ?>%</div>
+      <a href="/seller/products/add" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        Tambah Produk
+      </a>
     </div>
   </div>
 

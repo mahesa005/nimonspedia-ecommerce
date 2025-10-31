@@ -420,6 +420,46 @@ class ProductRepository {
         return (int) $stmt->fetchColumn();
     }
 
+    public function countUniqueProducts(int $store_id): ?int {
+        $sql = 'SELECT COUNT(product_id) 
+                FROM Product 
+                WHERE store_id = :store_id 
+                AND deleted_at IS NULL';
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['store_id' => $store_id]);
+            $count = $stmt->fetchColumn();
+
+            return $count !== false ? (int)$count : null;
+        } catch (PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function countLowStockProducts(int $store_id, int $threshold): ?int {
+        $sql = 'SELECT COUNT(product_id) 
+                FROM Product 
+                WHERE store_id = :store_id 
+                AND stock < :threshold 
+                AND deleted_at IS NULL';
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                'store_id' => $store_id,
+                'threshold' => $threshold
+            ]);
+
+            $count = $stmt->fetchColumn();
+            return $count !== false ? (int)$count : null;
+        } catch (PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            return null;
+        }
+    }
+
     public function getStock(int $product_id): int {
         $sql = 'SELECT stock FROM "product" WHERE product_id = ? FOR UPDATE';
         try {
