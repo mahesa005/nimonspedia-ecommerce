@@ -11,6 +11,7 @@ use App\Controllers\StoreController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 use App\Core\Middleware\RoleMiddleware;
+use App\Controllers\OrderManagementController;
 
 $router->add('GET', '/login',
     [AuthController::class, 'showLoginPage'],
@@ -122,7 +123,6 @@ $router->add('POST', '/checkout',
     [AuthMiddleware::class]
 );
 
-
 $router->add('POST', '/api/profile/address', 
     [BuyerProfileController::class, 'handleAddressUpdate'],
     [AuthMiddleware::class]
@@ -132,3 +132,13 @@ $router->add('GET', '/store/{id}',
 
 $router->add('GET', '/api/stores/{id}/products', 
     [App\Controllers\StoreController::class, 'apiGetStoreProducts']);
+
+$router->add('GET', '/seller/orders',
+    [OrderManagementController::class, 'index'],
+    [AuthMiddleware::class, RoleMiddleware::class]  
+);
+
+$router->add('POST', '/seller/orders/action',
+    [OrderManagementController::class, 'handleAction'],
+    [AuthMiddleware::class, RoleMiddleware::class]  
+);
