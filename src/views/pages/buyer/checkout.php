@@ -26,8 +26,8 @@
                             <textarea id="addressInput" name="address" required><?php echo htmlspecialchars($user->address ?? ''); ?></textarea>
                         </div>
                         <div class="address-action">
-                            <button type="button" class="cancel-btn" id="cancelEditAddressBtn">Batal</button>
-                            <button type="button" class="submit-address-btn" id="saveAddressBtn">Simpan Alamat</button>
+                            <button type="button" class="address-btn" id="cancelEditAddressBtn">Batal</button>
+                            <button type="button" class="submit-btn" id="saveAddressBtn">Simpan Alamat</button>
                         </div>
                     </div>
                 </div>

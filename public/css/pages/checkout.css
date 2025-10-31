@@ -73,6 +73,36 @@
     color: #42b549;
 }
 
+textarea {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    display: block;
+    box-sizing: border-box;
+    min-height: 80px;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+
+.submit-btn {
+    padding: 10px 16px;
+    background-color: #42b549;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #17a04f;
+}
+
 .store-section {
     background-color: #fff;
     padding: 24px;
