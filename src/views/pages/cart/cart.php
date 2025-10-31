@@ -30,7 +30,7 @@ if (file_exists($navbarFile)) {
     <?php if (empty($stores)): ?>
         
         <div class="cart-empty">
-            <img src="/images/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
+            <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
             <p>Keranjang Anda masih kosong.</p>
             <a href="/" class="btn btn-primary">Mulai Belanja</a>
         </div>
