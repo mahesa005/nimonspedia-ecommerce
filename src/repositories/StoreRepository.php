@@ -12,6 +12,18 @@ class StoreRepository {
         $this->db = Database::getInstance();
     }
 
+    public function getByUserId(int $userId): ?array { // get user id dari stores
+        $stmt = $this->db->prepare("SELECT * FROM store WHERE user_id = :user_id");
+        $stmt->execute(['user_id' => $userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    public function getStoreIdByUserId(int $userId): ?int { // get store id from user id
+        $store = $this->getByUserId($userId);
+        return $store ? (int)$store['store_id'] : null;
+    }
+
     public function create(int $user_id, string $store_name, string $clean_description, ?string $logo_path): int {
         $sql = 'INSERT INTO store (user_id, store_name, store_description, store_logo_path) 
                 VALUES (?, ?, ?, ?) RETURNING store_id';
@@ -31,14 +43,27 @@ class StoreRepository {
         }
     }
 
-    public function findById(int $storeId): ?array {
-         $stmt = $this->db->prepare(
-             'SELECT store_id, user_id, store_name, store_description, store_logo_path 
-              FROM store 
-              WHERE store_id = :store_id'
-         );
-         $stmt->execute(['store_id' => $storeId]);
-         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-         return $data ?: null;
+    // Get Store Balance
+    public function getStoreBalance(int $store_id): ?int {
+        $sql = 'SELECT balance FROM store WHERE store_id = :store_id';
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['store_id' => $store_id]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? (int) $result['balance'] : null;
+        } catch (\PDOException $e) {
+            error_log('Error fetching store balance: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function findById(int $store_id): ?Store {
+        $sql = 'SELECT * FROM "store" WHERE store_id = ?';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$store_id]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $data ? new Store($data) : null;
     }
 }

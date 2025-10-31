@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\View;
 use App\Core\Session;
+use App\Core\Auth;
 use App\Services\AuthService;
 use Exception;
 
@@ -45,6 +46,10 @@ class AuthController {
                 'type' => 'success'
             ]);
 
+            if (Auth::role() === 'SELLER') {
+                header('Location: /seller/dashboard');
+                return;
+            }
             header('Location: /');
 
         } catch (Exception $e) {

@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Repositories\CartRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\StoreRepository;
 use App\Models\CartItem;
 use App\Models\Product;
 use Exception;
@@ -64,6 +65,47 @@ class CartService {
 
     public function addItem(int $buyer_id, int $product_id, int $quantity): bool {
         if ($quantity <= 0) {
+            throw new Exception("Kuantitas harus positif.");
+        }
+
+        try {
+            $product = $this->product_repo->findById($product_id);
+            if (!$product || $product->isDeleted()) {
+                throw new Exception("Produk tidak ditemukan atau tidak tersedia.");
+            }
+            if ($product->isOutOfStock()) {
+                 throw new Exception("Stok produk ini sedang habis.");
+            }
+
+            $existing_item = $this->cart_repo->findItem($buyer_id, $product_id);
+
+            if ($existing_item) {
+                $new_quantity = $existing_item->quantity + $quantity;
+
+                if ($new_quantity > $product->stock) {
+                    $available_add = $product->stock - $existing_item->quantity;
+                    $message = "Stok tidak mencukupi. Anda sudah memiliki {$existing_item->quantity} di keranjang.";
+                    if ($available_add > 0) {
+                        $message .= " Anda hanya bisa menambah {$available_add} lagi.";
+                    } else {
+                         $message .= " Stok saat ini: {$product->stock}.";
+                    }
+                    throw new Exception($message);
+                }
+                
+                return $this->cart_repo->updateQuantity($existing_item->cart_item_id, $new_quantity, $buyer_id);
+
+            } else {
+                if ($quantity > $product->stock) {
+                    throw new Exception("Stok tidak mencukupi (tersisa {$product->stock}). Anda mencoba menambahkan {$quantity}.");
+                }
+
+                return $this->cart_repo->addItem($buyer_id, $product_id, $quantity);
+            }
+
+        } catch (PDOException $e) {
+            error_log("Database error adding item to cart for buyer $buyer_id, product $product_id: " . $e->getMessage());
+            throw new Exception("Gagal menambahkan item ke keranjang karena masalah database.");
             throw new Exception("Kuantitas harus lebih dari 0");
         }
         
@@ -112,5 +154,35 @@ class CartService {
     }
     public function clearCart(int $buyer_id): bool {
         return $this->cart_repo->clear($buyer_id);
+    }
+
+    public function getCartForCheckout(int $buyer_id): array {
+        $cart_items = $this->cart_repo->findByBuyerIdWithDetails($buyer_id);
+
+        $stores = [];
+        $products_by_store = [];
+        $total_price = 0;
+        $num_of_items = 0;
+
+        foreach ($cart_items as $item) {
+            $store_id = $item->product->store_id;
+
+            if (!isset($stores[$store_id])) {
+                $store = (new StoreRepository())->findById($store_id);
+                $stores[$store_id] = $store; 
+            }
+            
+            $products_by_store[$store_id][] = $item;
+
+            $total_price += $item->getSubtotal();
+            $num_of_items += $item->quantity;
+        }
+
+        return [
+            'stores' => array_values($stores),
+            'products_by_store' => $products_by_store,
+            'total_price' => $total_price,
+            'num_of_items' => $num_of_items
+        ];
     }
 }
