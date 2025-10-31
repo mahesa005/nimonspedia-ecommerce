@@ -13,4 +13,8 @@ class CategoryService {
     public function getAllCategories(): array {
         return $this->category_repo->findAll();
     }
+
+    public function getCategoriesByStoreId(int $store_id): array {
+        return $this->category_repo->findAllByStoreId($store_id);
+    }
 }

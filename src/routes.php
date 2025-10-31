@@ -38,11 +38,6 @@ $router->add('POST', '/register',
     [GuestMiddleware::class]
 );
 
-$router->add('GET', '/store/{id}',
-    [StoreController::class, 'showDetail'],
-    []
-);
-
 $router->add('GET', '/cart',
     [CartController::class, 'showPage'],
     [AuthMiddleware::class]
@@ -127,8 +122,5 @@ $router->add('POST', '/api/profile/address',
     [BuyerProfileController::class, 'handleAddressUpdate'],
     [AuthMiddleware::class]
 );
-$router->add('GET', '/store/{id}', 
-    [App\Controllers\StoreController::class, 'showStorePage']);
 
-$router->add('GET', '/api/stores/{id}/products', 
-    [App\Controllers\StoreController::class, 'apiGetStoreProducts']);
+$router->add('GET', '/store/{id}', [StoreController::class, 'showStoreDetailPage']);
