@@ -41,4 +41,17 @@ class UserService {
 
         return $new_balance;
     }
+
+    public function updateAddress(int $user_id, ?string $new_address): bool {
+        if (empty(trim($new_address ?? ''))) {
+            throw new Exception("Alamat tidak boleh kosong.");
+        }
+        
+        try {
+            return $this->user_repo->updateAddress($user_id, trim($new_address));
+        } catch (PDOException $e) {
+            error_log("Gagal update alamat untuk user $user_id: " . $e->getMessage());
+            throw new Exception("Gagal memperbarui alamat karena masalah database."); 
+        }
+    }
 }

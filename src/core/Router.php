@@ -17,10 +17,11 @@ class Router {
             'middleware' => $middleware
         ];
     }
-    
-    public function dispatch(string $uri, string $method, Request $request) {
+
+    public function dispatch(string $uri, string $method, Request $request): void {
+        $uri = rtrim($uri, '/') ?: '/';
+        
         foreach ($this->routes as $route) {
-            // Check method
             if ($route['method'] !== $method) {
                 continue;
             }
@@ -44,6 +45,8 @@ class Router {
                 if (is_callable($route['action'])) {
                     call_user_func($route['action'], ...$params);
                     return;
+                } else {
+                    error_log("Router Error: Invalid action format for URI '{$route['uri']}'. Expected [Class::class, 'method'] or callable.");
                 }
                 
                 [$class, $function] = $route['action'];
@@ -60,6 +63,7 @@ class Router {
         }
         
         http_response_code(404);
-        echo "404 Not Found: Page '$uri'";
+        $view = new View();
+        $view->renderPage('pages/404.php');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\View;
 use App\Core\Session;
+use App\Core\Auth;
 use App\Services\AuthService;
 use Exception;
 
@@ -31,7 +32,7 @@ class AuthController {
         $this->view->setData('pageScripts', $scripts);
         $this->view->setData('navbarFile', 'components/navbar_auth.php');
 
-        $this->view->renderPage('pages/login.php');
+        $this->view->renderPage('pages/auth/login.php');
     }
 
     public function handleLogin(Request $request): void {
@@ -45,6 +46,10 @@ class AuthController {
                 'type' => 'success'
             ]);
 
+            if (Auth::role() === 'SELLER') {
+                header('Location: /seller/dashboard');
+                return;
+            }
             header('Location: /');
 
         } catch (Exception $e) {
@@ -82,7 +87,7 @@ class AuthController {
         $this->view->setData('navbarFile', 'components/navbar_auth.php');
         $this->view->setData('old', $old_data);
 
-        $this->view->renderPage('pages/register.php');
+        $this->view->renderPage('pages/auth/register.php');
     }
 
     public function handleRegister(Request $request): void {

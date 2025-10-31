@@ -5,6 +5,9 @@ use App\Controllers\ProductManagementController;
 use App\Controllers\ProductController;
 use App\Controllers\BuyerProfileController;
 use App\Controllers\SellerDashboardController;
+use App\Controllers\CartController;
+use App\Controllers\CheckoutController;
+use App\Controllers\StoreController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 use App\Core\Middleware\RoleMiddleware;
@@ -35,6 +38,31 @@ $router->add('POST', '/register',
     [GuestMiddleware::class]
 );
 
+$router->add('GET', '/store/{id}',
+    [StoreController::class, 'showDetail'],
+    []
+);
+
+$router->add('GET', '/cart',
+    [CartController::class, 'showPage'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/cart/add',
+    [CartController::class, 'add'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/cart/update',
+    [CartController::class, 'update'],
+    [AuthMiddleware::class] 
+);
+
+$router->add('POST', '/cart/delete',
+    [CartController::class, 'delete'],
+    [AuthMiddleware::class]
+);
+
 $router->add('GET', '/', [ProductController::class, 'showHomePage']);
 
 $router->add('GET', '/api/get-products', [ProductController::class, 'apiGetProducts']);
@@ -44,6 +72,9 @@ $router->add('POST', '/api/buyer/balance/topup',
     [AuthMiddleware::class]
 );
 
+$router->add('GET', '/products/{id}', [ProductController::class, 'showProductDetailPage']);
+
+$router->add('POST', '/api/cart/add', [CartController::class, 'handleAdd'], [AuthMiddleware::class]);
 // Product Management Routes (Seller only)
 $router->add('GET', '/seller/products', [ProductManagementController::class, 'index'], 
     [AuthMiddleware::class, RoleMiddleware::class]);
@@ -84,3 +115,20 @@ $router->add('GET', '/seller/dashboard',
     [SellerDashboardController::class, 'index'],
     [AuthMiddleware::class, RoleMiddleware::class]  
 );
+$router->add('GET', '/checkout', [CheckoutController::class, 'showCheckoutPage'], [AuthMiddleware::class]);
+
+$router->add('POST', '/checkout', 
+    [CheckoutController::class, 'handleCheckout'], 
+    [AuthMiddleware::class]
+);
+
+
+$router->add('POST', '/api/profile/address', 
+    [BuyerProfileController::class, 'handleAddressUpdate'],
+    [AuthMiddleware::class]
+);
+$router->add('GET', '/store/{id}', 
+    [App\Controllers\StoreController::class, 'showStorePage']);
+
+$router->add('GET', '/api/stores/{id}/products', 
+    [App\Controllers\StoreController::class, 'apiGetStoreProducts']);

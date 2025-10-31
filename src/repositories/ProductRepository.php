@@ -12,6 +12,28 @@ class ProductRepository {
         $this->db = Database::getInstance();
     }
 
+    public function findById(int $product_id): ?Product {
+        $sql = 'SELECT p.*, s.store_name
+                FROM "product" p 
+                LEFT JOIN "store" s ON p.store_id = s.store_id 
+                WHERE p.product_id = ? AND p.deleted_at IS NULL';
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$product_id]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($data) {
+                $product = new Product($data);
+                if (property_exists($product, 'store_name')) {
+                    $product->store_name = $data['store_name'];
+                }
+                return $product;
+            }
+            return null;
+        } catch (PDOException $e) {
+            error_log("Error finding product by ID $product_id: " . $e->getMessage());
+        }
+    }
     /**
      * Get products by store ID with filters
      */
@@ -438,4 +460,132 @@ class ProductRepository {
         }
     }
 
+    public function getStock(int $product_id): int {
+        $sql = 'SELECT stock FROM "product" WHERE product_id = ? FOR UPDATE';
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$product_id]);
+            $stock = $stmt->fetchColumn();
+            
+            if ($stock === false) {
+                throw new PDOException("Produk dengan ID $product_id tidak ditemukan saat mengambil stok.");
+            }
+            return (int) $stock;
+
+        } catch (PDOException $e) {
+            error_log("ProductRepository::getStock Gagal: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function reduceStock(int $product_id, int $quantity): bool {
+        $sql = 'UPDATE "product" SET stock = stock - ? WHERE product_id = ?';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$quantity, $product_id]) && $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("ProductRepository::reduceStock Gagal: " . $e->getMessage());
+            throw $e;
+        }
+    }
+    
+    public function findPaginatedByStore(
+        int $store_id,
+        int $limit, 
+        int $offset, 
+        string $search = '', 
+        array $category_ids = [], 
+        ?int $min_price = null, 
+        ?int $max_price = null,
+        string $sort_by = 'created_at',
+        string $sort_order = 'DESC'
+    ): array {
+        $params = [];
+
+        $params[] = $store_id; 
+        
+        $sql = 'SELECT p.* FROM product p';
+        
+        if (!empty($category_ids)) {
+             $sql .= ' JOIN category_item ci ON p.product_id = ci.product_id';
+        }
+        
+        $sql .= ' WHERE p.deleted_at IS NULL AND p.store_id = ?';
+
+        if (!empty($search)) {
+            $sql .= ' AND p.product_name ILIKE ?'; 
+            $params[] = '%' . $search . '%';
+        }
+        if (!empty($category_ids)) {
+            $placeholders = implode(',', array_fill(0, count($category_ids), '?'));
+            $sql .= " AND ci.category_id IN ($placeholders)";
+            $params = array_merge($params, $category_ids);
+        }
+        if (!is_null($min_price)) {
+            $sql .= ' AND p.price >= ?';
+            $params[] = $min_price;
+        }
+        if (!is_null($max_price)) {
+            $sql .= ' AND p.price <= ?';
+            $params[] = $max_price;
+        }
+
+        $allowed_sort_columns = ['created_at', 'price', 'product_name'];
+        if (!in_array($sort_by, $allowed_sort_columns)) {
+            $sort_by = 'created_at';
+        }
+
+        $sort_order = strtoupper($sort_order) === 'ASC' ? 'ASC' : 'DESC';
+
+        $sql .= " GROUP BY p.product_id";
+        $sql .= " ORDER BY p.\"$sort_by\" $sort_order LIMIT ? OFFSET ?";
+        $params[] = $limit;
+        $params[] = $offset;
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countByStore(
+        int $store_id,
+        string $search = '', 
+        array $category_ids = [], 
+        ?int $min_price = null, 
+        ?int $max_price = null
+    ): int {
+        $params = [];
+        $params[] = $store_id;
+
+        $sql = 'SELECT COUNT(DISTINCT p.product_id)
+                FROM product p';
+        if (!empty($category_ids)) {
+             $sql .= ' JOIN category_item ci ON p.product_id = ci.product_id';
+        }
+        
+        $sql .= ' WHERE p.deleted_at IS NULL AND p.store_id = ?';
+
+        if (!empty($search)) {
+            $sql .= ' AND p.product_name ILIKE ?';
+            $params[] = '%' . $search . '%';
+        }
+        if (!empty($category_ids)) {
+            $placeholders = implode(',', array_fill(0, count($category_ids), '?'));
+            $sql .= " AND ci.category_id IN ($placeholders)";
+            $params = array_merge($params, $category_ids);
+        }
+        if (!is_null($min_price)) {
+            $sql .= ' AND p.price >= ?';
+            $params[] = $min_price;
+        }
+        if (!is_null($max_price)) {
+            $sql .= ' AND p.price <= ?';
+            $params[] = $max_price;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
+    }
 }

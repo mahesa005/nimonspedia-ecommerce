@@ -62,4 +62,15 @@ class UserRepository {
              return false;
          }
     }
+
+    public function updateAddress(int $user_id, string $new_address): bool {
+        $sql = 'UPDATE "user" SET address = ?, updated_at = NOW() WHERE user_id = ?';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$new_address, $user_id]) && $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("UserRepository::updateAddress Gagal: " . $e->getMessage());
+            throw $e;
+        }
+    }
 }
