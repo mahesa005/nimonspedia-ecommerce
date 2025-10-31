@@ -30,7 +30,6 @@ class OrderRepository {
             return null;
         }
     }
-}
     public function create(int $buyer_id, int $store_id, int $total_price, string $shipping_address): int {
         $sql = 'INSERT INTO "order" (buyer_id, store_id, total_price, shipping_address, created_at)
                 VALUES (?, ?, ?, ?, NOW())

@@ -57,6 +57,8 @@ class StoreRepository {
             error_log('Error fetching store balance: ' . $e->getMessage());
             return null;
         }
+    }
+
     public function findById(int $store_id): ?Store {
         $sql = 'SELECT * FROM "store" WHERE store_id = ?';
         $stmt = $this->db->prepare($sql);
