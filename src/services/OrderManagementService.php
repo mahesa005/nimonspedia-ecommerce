@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Repositories\OrderRepository;
 use App\Repositories\StoreRepository;
 use App\Repositories\UserRepository;
+use App\Models\Order;
 use Exception;
 
 class OrderManagementService {
@@ -94,52 +95,51 @@ class OrderManagementService {
     }
 
     // Business specific logic
-
-    private function handleApprove(array $order) {
-        if ($order['status'] !== 'waiting_approval') {
+    private function handleApprove(Order $order) {
+        if ($order->status !== 'waiting_approval') {
             throw new Exception("Hanya pesanan 'waiting_approval' yang bisa disetujui.");
         }
 
-        $success = $this->orderRepo->updateStatus($order['order_id'], 'approved');
+        $success = $this->orderRepo->updateStatus($order->order_id, 'approved');
         if (!$success) {
             throw new Exception("Database error: Gagal menyetujui pesanan.");
         }
-        return ['message' => "Pesanan #{$order['order_id']} berhasil disetujui."];
+        return ['message' => "Pesanan #{$order->order_id} berhasil disetujui."];
     }
 
-    private function handleReject(array $order, string $reason) {
-        if ($order['status'] !== 'waiting_approval') {
+    private function handleReject(Order $order, string $reason) {
+        if ($order->status !== 'waiting_approval') {
             throw new Exception("Hanya pesanan 'waiting_approval' yang bisa ditolak.");
         }
         if (empty($reason)) {
             throw new Exception("Alasan penolakan wajib diisi.");
         }
 
-        $refundSuccess = $this->userRepo->refundBalance($order['buyer_id'], $order['total_price']);
+        $refundSuccess = $this->userRepo->refundBalance($order->buyer_id, $order->total_price);
         if (!$refundSuccess) {
             throw new Exception("Database error: Gagal melakukan refund saldo buyer.");
         }
 
-        $updateSuccess = $this->orderRepo->updateStatus($order['order_id'], 'rejected', $reason);
+        $updateSuccess = $this->orderRepo->updateStatus($order->order_id, 'rejected', $reason);
         if (!$updateSuccess) {
             throw new Exception("Database error: Gagal memperbarui status pesanan.");
         }
 
-        return ['message' => "Pesanan #{$order['order_id']} berhasil ditolak. Saldo buyer telah dikembalikan."];
+        return ['message' => "Pesanan #{$order->order_id} berhasil ditolak. Saldo buyer telah dikembalikan."];
     }
 
-    private function handleSetDelivery(array $order, string $delivery_time) {
-        if ($order['status'] !== 'approved') {
+    private function handleSetDelivery(Order $order, string $delivery_time) {
+        if ($order->status !== 'approved') {
             throw new Exception("Hanya pesanan 'approved' yang bisa diatur pengirimannya.");
         }
         if (empty($delivery_time)) {
             throw new Exception("Waktu pengiriman (delivery_time) wajib diisi.");
         }
 
-        $success = $this->orderRepo->updateStatus($order['order_id'], 'on_delivery', null, $delivery_time);
+        $success = $this->orderRepo->updateStatus($order->order_id, 'on_delivery', null, $delivery_time);
         if (!$success) {
             throw new Exception("Database error: Gagal mengatur pengiriman.");
         }
-        return ['message' => "Pesanan #{$order['order_id']} telah diatur untuk pengiriman."];
+        return ['message' => "Pesanan #{$order->order_id} telah diatur untuk pengiriman."];
     }
 }

@@ -16,11 +16,6 @@ class OrderManagementController {
     public function __construct() {
         $this->orderService = new OrderManagementService();
         $this->view = new View();
-        
-        if (Auth::user()['role'] !== 'SELLER') {
-            header('Location: /login');
-            exit;
-        }
     }
 
     /**
@@ -29,7 +24,7 @@ class OrderManagementController {
      */
     public function index(Request $request) {
         $user_id = Auth::id();
-        $queryParams = $request->getQueryParams(); // Ambil $_GET
+        $queryParams = $_GET;
 
         try {
             // fetch data needed by the view
