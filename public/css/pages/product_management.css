@@ -112,50 +112,6 @@ body {
   height: 16px;
 }
 
-/* Metrics Grid */
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.metric {
-  padding: 16px 20px;
-}
-
-.metric .label {
-  font-size: 12px;
-  color: var(--tp-gray-500);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-}
-
-.metric .value {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--tp-gray-900);
-  line-height: 1.2;
-}
-
-.metric .value.warn {
-  color: var(--warn);
-}
-
-.metric .delta {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--tp-gray-500);
-  font-weight: 500;
-}
-
-.metric .delta.up {
-  color: var(--tp-green);
-  font-weight: 600;
-}
-
 /* Toolbar */
 .toolbar {
   padding: 16px 20px;

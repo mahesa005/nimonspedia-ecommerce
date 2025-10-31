@@ -24,26 +24,6 @@
     </div>
   </div>
 
-
-  <!-- Metrics cards -->
-  <div class="metric-grid">
-    <div class="metric card">
-      <div class="label">Produk Aktif</div>
-      <div class="value"><?= number_format($stats['active_products'] ?? count($products ?? [])) ?></div>
-      <div class="delta up">+<?= (int)($stats['active_delta'] ?? 0) ?></div>
-    </div>
-    <div class="metric card">
-      <div class="label">Stok Menipis</div>
-      <div class="value warn"><?= number_format($stats['low_stock'] ?? 0) ?></div>
-      <div class="delta">perlu tindakan</div>
-    </div>
-    <div class="metric card">
-      <div class="label">Pendapatan Bulan Ini</div>
-      <div class="value">Rp <?= number_format($stats['revenue_month'] ?? 0, 0, ',', '.') ?></div>
-      <div class="delta up">+<?= (int)($stats['revenue_delta'] ?? 0) ?>%</div>
-    </div>
-  </div>
-
   <!-- Filter toolbar -->
   <div class="toolbar card">
     <div class="toolbar-row">
