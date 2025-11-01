@@ -1,34 +1,34 @@
 <div class="order-history-page">
-    <h1>Riwayat Pesanan</h1>
+    <h1>Order History</h1>
 
     <nav class="order-filters">
         <a href="/orders" 
            class="filter-btn <?= empty($status_filter) ? 'active' : '' ?>">
-           Semua
+           All Orders
         </a>
         <a href="/orders?status=waiting_approval" 
            class="filter-btn <?= ($status_filter ?? '') === 'waiting_approval' ? 'active' : '' ?>">
-           Menunggu Persetujuan
+           Waiting Approval
         </a>
         <a href="/orders?status=on_delivery" 
            class="filter-btn <?= ($status_filter ?? '') === 'on_delivery' ? 'active' : '' ?>">
-           Dalam Pengiriman
+           On Delivery
         </a>
         <a href="/orders?status=received" 
            class="filter-btn <?= ($status_filter ?? '') === 'received' ? 'active' : '' ?>">
-           Diterima
+           Received
         </a>
         <a href="/orders?status=rejected" 
            class="filter-btn <?= ($status_filter ?? '') === 'rejected' ? 'active' : '' ?>">
-           Dibatalkan
+           Cancelled
         </a>
     </nav>
 
     <?php if (empty($orders)): ?>
         <div class="empty-orders">
             <div class="empty-icon"></div>
-            <p>Belum ada pesanan dengan status ini.</p>
-            <a href="/" class="btn btn-primary">Mulai Belanja</a>
+            <p>There are no orders with this status yet</p>
+            <a href="/" class="btn btn-primary">Start Shopping</a>
         </div>
     <?php else: ?>
         <div class="order-list">
@@ -89,32 +89,32 @@
 
                     <div class="order-footer">
                         <div class="shipping-address">
-                            <div class="address-label">Alamat Pengiriman</div>
+                            <div class="address-label">Shipping address</div>
                             <div class="address-text"><?= htmlspecialchars($order->shipping_address) ?></div>
                         </div>
 
                         <div class="order-total-section">
-                            <div class="total-label">Total Pembayaran</div>
+                            <div class="total-label">Total payment</div>
                             <div class="total-price">Rp <?= number_format($order->total_price, 0, ',', '.') ?></div>
 
                             <div class="order-actions">
                                 <?php if ($order->status === 'on_delivery'): ?>
                                     <button class="btn btn-success btn-confirm-receipt" 
                                             data-order-id="<?= $order->order_id ?>">
-                                        ✓ Terima Pesanan
+                                        ✓ Receive Orders
                                     </button>
                                 <?php endif; ?>
 
                                 <?php if ($order->status === 'waiting_approval'): ?>
                                     <button class="btn btn-danger btn-cancel-order" 
                                             data-order-id="<?= $order->order_id ?>">
-                                        ✕ Batalkan Pesanan
+                                        ✕ Cancel Order
                                     </button>
                                 <?php endif; ?>
 
                                 <?php if ($order->status === 'received'): ?>
                                     <a href="/store/<?= $order->store->store_id ?? '#' ?>" class="btn btn-primary">
-                                       Beli Lagi
+                                       Buy Again
                                     </a>
                                 <?php endif; ?>
                             </div>
