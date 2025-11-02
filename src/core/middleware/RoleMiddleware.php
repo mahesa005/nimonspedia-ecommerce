@@ -12,7 +12,7 @@ class RoleMiddleware implements MiddlewareInterface{
         
         // Check if user is SELLER
         if (!$role || $role !== 'SELLER') {
-            header('Location: /dashboard');
+            header('Location: /');
             return false;
         }
         

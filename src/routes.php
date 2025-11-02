@@ -12,6 +12,7 @@ use App\Controllers\StoreController;
 use App\Core\Middleware\AuthMiddleware;
 use App\Core\Middleware\GuestMiddleware;
 use App\Core\Middleware\RoleMiddleware;
+use App\Core\Middleware\RedirectSellerMiddleware;
 use App\Controllers\OrderManagementController;
 
 $router->add('GET', '/login',
@@ -60,7 +61,10 @@ $router->add('POST', '/cart/delete',
     [AuthMiddleware::class]
 );
 
-$router->add('GET', '/', [ProductController::class, 'showHomePage']);
+$router->add('GET', '/', 
+    [ProductController::class, 'showHomePage'],
+    [RedirectSellerMiddleware::class]
+);
 
 $router->add('GET', '/api/get-products', [ProductController::class, 'apiGetProducts']);
 
