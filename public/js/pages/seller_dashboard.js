@@ -27,11 +27,117 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function initEditStoreButton() {
-        const btn = document.getElementById('editStoreBtn');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                window.location.href = '/seller/store/edit';
+        const editBtn = document.getElementById('editStoreBtn');
+        const storeView = document.getElementById('storeView');
+        const editForm = document.getElementById('editStoreForm');
+        const cancelBtn = document.getElementById('cancelEditBtn');
+        const storeNameInput = document.getElementById('storeNameInput');
+        const storeNameView = document.getElementById('storeNameView');
+        const storeDescView = document.getElementById('storeDescView');
+        const storeDescInput = document.getElementById('storeDescriptionInput');
+        const logoInput = document.getElementById('storeLogoInput');
+        const logoPreview = document.getElementById('logoPreview');
+        const logoPreviewImg = document.getElementById('logoPreviewImg');
+        const storeLogoImg = document.getElementById('storeLogoImg');
+        let quill;
+
+        if (editBtn) {
+            editBtn.addEventListener('click', function() {
+                storeView.style.display = 'none';
+                editForm.style.display = 'block';
+
+                if (!quill) {
+                    quill = new Quill('#quillEditor', {
+                        theme: 'snow',
+                        placeholder: 'Tulis deskripsi toko...',
+                        modules: {
+                            toolbar: [
+                                [{ header: [1, 2, false] }],
+                                ['bold', 'italic', 'underline'],
+                                [{ list: 'ordered' }, { list: 'bullet' }],
+                                ['link', 'clean']
+                            ]
+                        }
+                    });
+                    quill.root.innerHTML = storeDescView.innerHTML;
+                }
             });
         }
+
+        cancelBtn.addEventListener('click', function() {
+            editForm.style.display = 'none';
+            storeView.style.display = 'block';
+        });
+
+        if (logoInput) {
+            logoInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        if (logoPreviewImg) {
+                            logoPreviewImg.src = ev.target.result;
+                        } else {
+                            const img = document.createElement('img');
+                            img.id = 'logoPreviewImg';
+                            img.src = ev.target.result;
+                            logoPreview.innerHTML = '';
+                            logoPreview.appendChild(img);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            storeDescInput.value = quill.root.innerHTML;
+            const formData = new FormData(editForm);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/seller/store/update', true);
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        try {
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.success) {
+                                storeNameView.textContent = formData.get('store_name');
+                                storeDescView.innerHTML = formData.get('store_description');
+
+                                if (res.logo_url) {
+                                    if (storeLogoImg) {
+                                        storeLogoImg.src = res.logo_url;
+                                    } else {
+                                        const newImg = document.createElement('img');
+                                        newImg.src = res.logo_url;
+                                        newImg.className = 'store-logo-img';
+                                        const container = document.createElement('div');
+                                        container.className = 'store-logo-container';
+                                        container.appendChild(newImg);
+                                        storeView.prepend(container);
+                                    }
+                                }
+
+                                editForm.style.display = 'none';
+                                storeView.style.display = 'block';
+                                showToast('Perubahan berhasil disimpan!', 'success');
+                            } else {
+                                showToast(res.message || 'Gagal menyimpan perubahan.', 'error');
+                            }
+                        } catch (err) {
+                            showToast('Terjadi kesalahan pada server.', 'error');
+                        }
+                    } else {
+                        showToast('Gagal terhubung ke server.', 'error');
+                    }
+                }
+            };
+
+            xhr.send(formData);
+        });
     }
 });

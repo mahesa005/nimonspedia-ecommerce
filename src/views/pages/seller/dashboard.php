@@ -14,6 +14,7 @@ function rph($n) {
 ?>
 
 <link rel="stylesheet" href="/css/pages/seller_dashboard.css">
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 
 <?php include __DIR__ . '/../../components/navbar_seller.php'; ?>
 
@@ -109,22 +110,54 @@ function rph($n) {
             </svg>
           </button>
         </div>
-        <div class="store-details">
-          <?php if (!empty($storeInfo['store_logo_path'])): ?>
-          <div class="store-logo-container">
-            <img src="<?= htmlspecialchars($storeInfo['store_logo_path']) ?>" alt="Store Logo" class="store-logo-img">
+        <div class="store-details" id="storeDetails">
+          <form id="editStoreForm" style="display: none;" enctype="multipart/form-data">
+            <div class="store-logo-upload">
+              <strong>Logo Toko</strong>
+              <div class="store-logo-preview" id="logoPreview">
+                <?php if (!empty($storeInfo['store_logo_path'])): ?>
+                  <img src="<?= htmlspecialchars($storeInfo['store_logo_path']) ?>" alt="Logo" id="logoPreviewImg">
+                <?php else: ?>
+                  <div class="placeholder">Tidak ada logo</div>
+                <?php endif; ?>
+              </div>
+              <input type="file" id="storeLogoInput" name="store_logo" accept="image/*" class="form-input-file">
+            </div>
+
+            <div class="store-info-item">
+              <strong>Nama Toko</strong>
+              <input type="text" id="storeNameInput" name="store_name"
+                    value="<?= htmlspecialchars($storeInfo['store_name'] ?? '') ?>"
+                    class="form-input" required>
+            </div>
+
+            <div class="store-info-item">
+              <strong>Deskripsi</strong>
+              <div id="quillEditor" style="height: 150px; background: #fff;"></div>
+              <input type="hidden" name="store_description" id="storeDescriptionInput">
+            </div>
+
+            <div class="form-actions">
+              <button type="button" id="cancelEditBtn" class="btn btn-ghost">Batal</button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+
+          <div id="storeView">
+            <?php if (!empty($storeInfo['store_logo_path'])): ?>
+              <div class="store-logo-container">
+                <img src="<?= htmlspecialchars($storeInfo['store_logo_path']) ?>" alt="Store Logo" id="storeLogoImg" class="store-logo-img">
+              </div>
+            <?php endif; ?>
+            <div class="store-info-item">
+              <strong>Nama Toko</strong>
+              <span id="storeNameView"><?= htmlspecialchars($storeInfo['store_name'] ?? '-') ?></span>
+            </div>
+            <div class="store-info-item">
+              <strong>Deskripsi</strong>
+              <div id="storeDescView" class="store-desc"><?= $storeInfo['store_description'] ?? '-' ?></div>
+            </div>
           </div>
-          <?php endif; ?>
-          <div class="store-info-item">
-            <strong>Nama Toko</strong>
-            <span><?= htmlspecialchars($storeInfo['store_name'] ?? '-') ?></span>
-          </div>
-          <?php if (!empty($storeInfo['store_description'])): ?>
-          <div class="store-info-item">
-            <strong>Deskripsi</strong>
-            <p class="store-desc"><?= htmlspecialchars($storeInfo['store_description']) ?></p>
-          </div>
-          <?php endif; ?>
         </div>
       </div>
     </div>
@@ -177,3 +210,4 @@ function rph($n) {
 </div>
 
 <script src="/js/pages/seller_dashboard.js"></script>
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>

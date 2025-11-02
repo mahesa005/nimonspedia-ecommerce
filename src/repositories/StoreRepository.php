@@ -67,9 +67,54 @@ class StoreRepository {
         return $data ? new Store($data) : null;
     }
 
+    public function findByUserId(int $user_id): ?Store {
+        $sql = 'SELECT * FROM "store" WHERE user_id = ?';
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$user_id]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $data ? new Store($data) : null;
+
+        } catch (PDOException $e) {
+            error_log("StoreRepository::findByUserId Gagal: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
     public function updateBalance(int $store_id, int $new_balance): bool {
         $sql = 'UPDATE "store" SET balance = :balance WHERE store_id = :store_id';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute(['balance' => $new_balance, 'store_id' => $store_id]);
+    }
+
+    public function update(int $store_id, string $store_name, string $store_description, ?string $new_logo_path): bool {
+        $params = [
+            'store_id' => $store_id,
+            'store_name' => $store_name,
+            'store_description' => $store_description,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $sql_logo_part = '';
+        if ($new_logo_path !== null) {
+            $sql_logo_part = ', store_logo_path = :logo_path';
+            $params['logo_path'] = $new_logo_path;
+        }
+
+        $sql = "UPDATE \"store\" SET 
+                    store_name = :store_name, 
+                    store_description = :store_description,
+                    updated_at = :updated_at
+                    $sql_logo_part
+                WHERE store_id = :store_id";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($params) && $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("StoreRepository::update Gagal: " . $e->getMessage());
+            throw $e;
+        }
     }
 }

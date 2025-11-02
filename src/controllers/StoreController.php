@@ -68,4 +68,40 @@ class StoreController {
 
         $this->view->renderPage('pages/store_detail.php');
     }
+
+    public function handleUpdateStore(Request $request): void {
+        header('Content-Type: application/json');
+        
+        try {
+            $seller_id = (int)Auth::id();
+            if (!$seller_id) {
+                throw new Exception("Akses ditolak.", 401);
+            }
+
+            $data = $request->getBody();
+            $file = $request->getFile('store_logo');
+
+            $result = $this->store_service->updateStoreInfo(
+                $seller_id, 
+                $data['store_name'] ?? null, 
+                $data['store_description'] ?? null, 
+                $file
+            );
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Info toko berhasil diperbarui!',
+                'logo_url' => $result['logo_url']
+            ]);
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code($e->getCode() === 401 ? 401 : 400);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+            exit;
+        }
+    }
 }

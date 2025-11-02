@@ -164,3 +164,8 @@ $router->add('POST', '/profile/password',
     [ProfileController::class, 'changePassword'],
     [AuthMiddleware::class]
 );
+
+$router->add('POST', '/seller/store/update', 
+    [StoreController::class, 'handleUpdateStore'],
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
