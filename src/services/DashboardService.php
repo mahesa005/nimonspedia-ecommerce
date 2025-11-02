@@ -1,10 +1,9 @@
 <?php
 namespace App\Services;
 
-use App\Repositories\OrderRepository;
-use App\Repositories\ProductRepository;
 use App\Repositories\StoreRepository;
-use Exception;
+use App\Repositories\ProductRepository;
+use App\Repositories\OrderRepository;
 
 class DashboardService {
     private StoreRepository $storeRepo;
@@ -17,32 +16,29 @@ class DashboardService {
         $this->orderRepo = new OrderRepository();
     }
 
+    // Get all dashboard data including store info
     public function getSellerDashboardData(int $user_id): array {
-        // 1. Get Store Info
-        $storeInfo = $this->storeRepo->getByUserId($user_id);
-        if (!$storeInfo) {
-            throw new Exception("Toko tidak ditemukan untuk user ID: $user_id");
+        $store = $this->storeRepo->getByUserId($user_id);
+        
+        if (!$store) {
+            throw new \Exception("Store not found for user ID: $user_id");
         }
-        $store_id = (int)$storeInfo['store_id'];
 
-        // 2. Get Quick Stats
-        $totalProducts = $this->productRepo->countByStoreId($store_id) ?? 0;
-        $pendingOrders = $this->orderRepo->countPendingOrders($store_id) ?? 0;
-        $storeBalance = $this->storeRepo->getStoreBalance($store_id) ?? 0;
+        $store_id = (int)$store['store_id'];
 
-        // 3. Total Revenue from storeInfo balance
-        $totalRevenue = (int)$storeInfo['balance'];
+        // Get quick stats
+        $total_products = $this->productRepo->countByStoreId($store_id);
+        $pending_orders = $this->orderRepo->countStoreOrders($store_id, 'waiting_approval', null);
+        $total_revenue = $this->orderRepo->getTotalRevenueByStoreId($store_id);
 
-        // 4. Return structured data
         return [
-            'store_info' => $storeInfo,
+            'store_info' => $store,
             'quick_stats' => [
-                'total_products' => $totalProducts,
-                'pending_orders' => $pendingOrders,
-                'store_balance' => $storeBalance,
-                'total_revenue' => $totalRevenue
+                'total_products' => $total_products,
+                'pending_orders' => $pending_orders,
+                'store_balance' => $store['balance'] ?? 0,
+                'total_revenue' => $total_revenue
             ]
         ];
     }
-
 }

@@ -15,6 +15,7 @@ $statusLabels = [
     'approved' => 'Disetujui',
     'rejected' => 'Ditolak',
     'on_delivery' => 'Dalam Pengiriman',
+    'received' => 'Diterima', 
     'completed' => 'Selesai'
 ];
 
@@ -23,6 +24,7 @@ $statusColors = [
     'approved' => 'blue',
     'rejected' => 'red',
     'on_delivery' => 'purple',
+    'received' => 'green', 
     'completed' => 'green'
 ];
 ?>
@@ -66,7 +68,7 @@ $statusColors = [
     </div>
 
     <div class="filters-section card">
-        <form method="GET" action="/seller/orders" class="filters-form">
+        <form method="GET" action="/seller/orders" class="filters-form" id="filterForm">
             <div class="filter-group">
                 <label for="status">Status:</label>
                 <select name="status" id="status" class="filter-select">
@@ -82,19 +84,17 @@ $statusColors = [
             <div class="filter-group">
                 <label for="search">Cari:</label>
                 <input type="text" name="search" id="search" class="filter-input" 
-                       placeholder="ID Pesanan atau Nama Pembeli" 
-                       value="<?= htmlspecialchars($filters['search'] ?? '') ?>">
+                    placeholder="ID Pesanan atau Nama Pembeli" 
+                    value="<?= htmlspecialchars($filters['search'] ?? '') ?>">
             </div>
 
             <div class="filter-actions">
-                <button type="submit" class="btn btn-primary">
+                <a href="/seller/orders" class="btn btn-ghost" title="Reset Filter">
                     <svg viewBox="0 0 24 24" width="16" height="16">
-                        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Filter
-                </button>
-                <a href="/seller/orders" class="btn btn-ghost">Reset</a>
+                    Reset
+                </a>
             </div>
         </form>
     </div>

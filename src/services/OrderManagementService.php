@@ -21,27 +21,24 @@ class OrderManagementService {
     /*
     * Retrieve all order data
     */
-    public function getOrdersPageData(int $user_id, array $querryParams) {
-        // 1. Get store_id from user_id
+    public function getOrdersPageData(int $user_id, array $queryParams): array {
         $store = $this->storeRepo->getByUserId($user_id);
         if (!$store) {
             throw new Exception("Toko tidak ditemukan untuk user ID: $user_id");
         }   
         $store_id = (int)$store['store_id'];
 
-        // 2. Get filter and pagination params
         $status = $queryParams['status'] ?? null;
         $search = $queryParams['search'] ?? null;
         $page = (int)($queryParams['page'] ?? 1);
         $limit = 10; 
         $offset = ($page - 1) * $limit;
 
-        // 3. Get data from repo
         $orders = $this->orderRepo->getStoreOrders($store_id, $status, $search, $limit, $offset);
         $totalOrders = $this->orderRepo->countStoreOrders($store_id, $status, $search);
         
-        // 4. Prepare data to be sent to controller
         return [
+            'store' => $store, // Include store data
             'orders' => $orders,
             'pagination' => [
                 'currentPage' => $page,

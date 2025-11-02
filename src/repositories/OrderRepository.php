@@ -54,7 +54,7 @@ class OrderRepository {
         }
     }
 
-    public function getStoreOrders($store_id, $status = nul, $search = null, $limit = 10, $offset = 0) {
+    public function getStoreOrders($store_id, $status = null, $search = null, $limit = 10, $offset = 0) {
         $sql = 'SELECT o.*, u.name as buyer_name 
                 FROM "order" o
                 JOIN "user" u ON o.buyer_id = u.user_id
@@ -65,7 +65,7 @@ class OrderRepository {
         }
 
         if ($search) {
-            $sql .= 'AND (o.order_id::text LIKE :search OR u.name ILIKE :search)';
+            $sql .= ' AND (o.order_id::text LIKE :search OR u.name ILIKE :search)';
         }
 
         $sql .= ' ORDER BY o.created_at DESC
@@ -163,7 +163,7 @@ class OrderRepository {
         }
     }
 
-    public function countStoreOrders(int $store_id, ?string $status, ?string $search) {
+    public function countStoreOrders(int $store_id, ?string $status, ?string $search): int {
         $sql = 'SELECT COUNT(*) 
                 FROM "order" o
                 JOIN "user" u ON o.buyer_id = u.user_id
@@ -174,7 +174,7 @@ class OrderRepository {
         }
 
         if ($search) {
-            $sql .= ' AND (o.order_id::text LIKE :search OR u.name ILIKE :search)';
+            $sql .= ' AND (o.order_id::text ILIKE :search OR u.name ILIKE :search)';
         }
 
         try {
@@ -216,32 +216,78 @@ class OrderRepository {
     }
 
     public function updateStatusSeller(int $order_id, string $new_status, ?string $reject_reason = null, ?string $delivery_time = null) {
-        $params = [':order_id' => $order_id];
-        
-        if ($new_status === 'approved') {
-            $sql = 'UPDATE "order" SET status = \'approved\', confirmed_at = NOW() 
-                    WHERE order_id = :order_id';
-        } 
-        elseif ($new_status === 'rejected') {
-            $sql = 'UPDATE "order" SET status = \'rejected\', confirmed_at = NOW(), reject_reason = :reason 
-                    WHERE order_id = :order_id';
-            $params[':reason'] = $reject_reason;
-        } 
-        elseif ($new_status === 'on_delivery') {
-            $sql = 'UPDATE "order" SET status = \'on_delivery\', delivery_time = :delivery_time 
-                    WHERE order_id = :order_id';
-            $params[':delivery_time'] = $delivery_time;
-        } 
-        else {
-            return false; 
-        }
-
         try {
+            $this->db->beginTransaction();
+
+            $orderSql = 'SELECT store_id, total_price, status FROM "order" WHERE order_id = :order_id';
+            $orderStmt = $this->db->prepare($orderSql);
+            $orderStmt->bindValue(':order_id', $order_id, PDO::PARAM_INT);
+            $orderStmt->execute();
+            $order = $orderStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$order) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            $sql = 'UPDATE "order" SET status = :status';
+            
+            if ($reject_reason !== null) {
+                $sql .= ', reject_reason = :reject_reason';
+            }
+            
+            if ($delivery_time !== null) {
+                $sql .= ', delivery_time = :delivery_time';
+            }
+            
+            $sql .= ' WHERE order_id = :order_id';
+            
             $stmt = $this->db->prepare($sql);
-            return $stmt->execute($params); 
-        } catch (PDOException $e) {
-            error_log("Error in updateStatus: " . $e->getMessage());
-            return false; 
+            $stmt->bindValue(':status', $new_status, PDO::PARAM_STR);
+            $stmt->bindValue(':order_id', $order_id, PDO::PARAM_INT);
+            
+            if ($reject_reason !== null) {
+                $stmt->bindValue(':reject_reason', $reject_reason, PDO::PARAM_STR);
+            }
+            
+            if ($delivery_time !== null) {
+                $stmt->bindValue(':delivery_time', $delivery_time, PDO::PARAM_STR);
+            }
+            
+            $success = $stmt->execute();
+
+            if (!$success) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            if ($new_status === 'received' && $order['status'] !== 'received') {
+                $balanceSql = 'UPDATE "store" 
+                              SET balance = balance + :amount 
+                              WHERE store_id = :store_id';
+                
+                $balanceStmt = $this->db->prepare($balanceSql);
+                $balanceStmt->bindValue(':amount', $order['total_price'], PDO::PARAM_STR);
+                $balanceStmt->bindValue(':store_id', $order['store_id'], PDO::PARAM_INT);
+                
+                $balanceUpdated = $balanceStmt->execute();
+                
+                if (!$balanceUpdated) {
+                    $this->db->rollBack();
+                    error_log("Failed to update store balance for order #$order_id");
+                    return false;
+                }
+
+                error_log("Store #{$order['store_id']} balance updated +{$order['total_price']} from order #$order_id");
+            }
+
+            $this->db->commit();
+            return true;
+
+        } catch (\PDOException $e) {
+            $this->db->rollBack();
+            error_log("Database error (updateStatus): " . $e->getMessage());
+            return false;
         }
     }
 
@@ -374,6 +420,19 @@ class OrderRepository {
             $this->db->rollBack();
             error_log("Transaction rolled back: " . $e->getMessage());
             throw $e;
+        }
+    }
+    public function getTotalRevenueByStoreId($store_id): ?int {
+        $sql = 'SELECT balance FROM "store" WHERE store_id = :store_id';
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['store_id' => $store_id]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? (int) $result['balance'] : null;
+        } catch (PDOException $e) {
+            error_log("Database error (getTotalRevenueByStoreId): " . $e->getMessage());
+            return null;
         }
     }
 }
