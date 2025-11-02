@@ -1,10 +1,36 @@
+<?php
+$componentDir = __DIR__ . '/../../components';
+$navbarFile = $componentDir . '/navbar_guest.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
+
+$user = $currentUser ?? null;
+if (!$user && isset($_SESSION['user'])) {
+    $user = $_SESSION['user'];
+}
+
+if ($user) {
+    $role = is_object($user) ? ($user->role ?? ($user->user_role ?? null)) : ($user['role'] ?? ($user['user_role'] ?? null));
+    if ($role === 'seller' || $role === 'store') {
+        $navbarFile = $componentDir . '/navbar_seller.php';
+    } else {
+        $navbarFile = $componentDir . '/navbar_buyer.php';
+    }
+}
+
+if (file_exists($navbarFile)) {
+    include_once $navbarFile;
+}
+?>
 <div class="cart-page">
     <h1>Keranjang Belanja Anda</h1>
     
     <?php if (empty($stores)): ?>
         
         <div class="cart-empty">
-            <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
+            <img src="/images/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
             <p>Keranjang Anda masih kosong.</p>
             <a href="/" class="btn btn-primary">Mulai Belanja</a>
         </div>
@@ -64,17 +90,7 @@
 
             <div class="cart-summary">
                 <h3>Rangkuman Belanja</h3>
-                <?php foreach ($stores as $storeName => $storeData): ?>
-                    <div class="summary-line">
-                        <span><?= htmlspecialchars($storeName) ?></span>
-                        <span class="price" id="summary-store-total-<?= $storeData['store_id'] ?>">
-                            Rp <?= number_format($storeData['storeTotal']) ?>
-                        </span>
-                    </div>
-
-                    <hr>
-                <?php endforeach; ?>
-                <div class="summary-line total">
+                <div class="summary-line">
                     <span>Grand Total</span>
                     <span class="price" id="grand-total">Rp <?= number_format($grandTotal) ?></span>
                 </div>

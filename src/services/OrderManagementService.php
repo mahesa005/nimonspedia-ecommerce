@@ -97,7 +97,7 @@ class OrderManagementService {
             throw new Exception("Hanya pesanan 'waiting_approval' yang bisa disetujui.");
         }
 
-        $success = $this->orderRepo->updateStatus($order->order_id, 'approved');
+        $success = $this->orderRepo->updateStatusSeller($order->order_id, 'approved');
         if (!$success) {
             throw new Exception("Database error: Gagal menyetujui pesanan.");
         }
@@ -117,7 +117,7 @@ class OrderManagementService {
             throw new Exception("Database error: Gagal melakukan refund saldo buyer.");
         }
 
-        $updateSuccess = $this->orderRepo->updateStatus($order->order_id, 'rejected', $reason);
+        $updateSuccess = $this->orderRepo->updateStatusSeller($order->order_id, 'rejected', $reason);
         if (!$updateSuccess) {
             throw new Exception("Database error: Gagal memperbarui status pesanan.");
         }
@@ -133,7 +133,7 @@ class OrderManagementService {
             throw new Exception("Waktu pengiriman (delivery_time) wajib diisi.");
         }
 
-        $success = $this->orderRepo->updateStatus($order->order_id, 'on_delivery', null, $delivery_time);
+        $success = $this->orderRepo->updateStatusSeller($order->order_id, 'on_delivery', null, $delivery_time);
         if (!$success) {
             throw new Exception("Database error: Gagal mengatur pengiriman.");
         }
