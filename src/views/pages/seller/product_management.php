@@ -134,7 +134,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-ghost" id="cancel-delete">Cancel</button>
-              <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
+              <button type="button" class="btn btn-danger" id="confirm-delete" href="/seller/products">Delete</button>
           </div>
       </div>
   </div>

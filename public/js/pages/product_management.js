@@ -100,17 +100,11 @@ confirmDeleteBtn.addEventListener('click', function() {
             // Close modal
             deleteModal.classList.remove('show');
             
-            // Show success message (optional)
-            alert('Product deleted successfully');
-            
             // Reload if no products left
-            const tbody = document.querySelector('.products-table tbody');
-            if (tbody && tbody.children.length === 0) {
-                window.location.reload();
+            window.location.reload();
+            } else {
+                alert('Error: ' + data.message);
             }
-        } else {
-            alert('Error: ' + data.message);
-        }
     })
     .catch(error => {
         console.error('Error:', error);

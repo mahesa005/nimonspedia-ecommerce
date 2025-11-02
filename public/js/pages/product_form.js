@@ -5,10 +5,47 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('productForm');
-    if (!form) {
-        console.warn('Product form not found on this page');
-        return;
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Clear previous errors
+            clearAllErrors();
+            
+            // Validate all fields
+            const isNameValid = validateProductName();
+            const isCategoryValid = validateCategory();
+            const isPriceValid = validatePrice();
+            const isStockValid = validateStock();
+            const isDescValid = validateDescription();
+            const isImageValid = validateImage();
+            
+            // If all valid, ensure hidden input has latest content
+            if (isNameValid && isCategoryValid && isPriceValid && isStockValid && isDescValid && isImageValid) {
+                if (quillEditor) {
+                    document.getElementById('description').value = quillEditor.root.innerHTML;
+                }
+                
+                // Show loading
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'flex';
+                }
+                
+                // Submit form
+                form.submit();
+            } else {
+                // Scroll to first error
+                const firstError = document.querySelector('.error-message:not(:empty)');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
     }
+
+    let quillEditor = null;
+    initQuillEditor();
     
     // Input elements
     const nameInput = document.getElementById('product_name');
@@ -28,20 +65,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const nameCount = document.getElementById('nameCount');
     const descCount = document.getElementById('descCount');
 
-    // ✅ Helper functions FIRST (before event listeners)
+    //  Helper functions FIRST (before event listeners)
     /**
      * Show error
      */
-    function showError(elementId, message) {
-        const errorElement = document.getElementById(elementId);
-        
-        if (!errorElement) {
-            console.warn(`Error element not found: ${elementId}`);
-            return;
+    function showError(input, errorElement, message) {
+        if (input) {
+            input.classList.add('error');
+            // For hidden input (description), highlight the editor
+            if (input.id === 'description') {
+                const editor = document.getElementById('descriptionEditor');
+                if (editor) editor.classList.add('error');
+            }
         }
-        
-        errorElement.textContent = message;
-        errorElement.classList.add('show');
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
     }
 
     /**
@@ -51,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const errorElement = document.getElementById(elementId);
         
         if (!errorElement) {
-            console.warn(`Error element not found: ${elementId}`);
+            console.warn(`Error element tidak ditemukan: ${elementId}`);
             return;
         }
         
@@ -68,17 +108,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const name = nameInput.value.trim();
         
         if (!name) {
-            showError('nameError', 'Product name is required');
+            showError('nameError', 'Nama produk dibutuhkan');
             return false;
         }
         
         if (name.length < 3) {
-            showError('nameError', 'Product name must be at least 3 characters');
+            showError('nameError', 'Nama produk minimal 3 karakter');
             return false;
         }
         
         if (name.length > 200) {
-            showError('nameError', 'Product name must not exceed 200 characters');
+            showError('nameError', 'Nama produk maksimal 200 karakter');
             return false;
         }
         
@@ -93,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!categoryInput) return true;
         
         if (!categoryInput.value) {
-            showError('categoryError', 'Please select a category');
+            showError('categoryError', 'Tolong pilih sebuah kategori');
             return false;
         }
         
@@ -110,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const price = parseFloat(priceInput.value);
         
         if (!price || price < 1000) {
-            showError('priceError', 'Price must be at least Rp 1,000');
+            showError('priceError', 'Harga minimal Rp 1.000,00');
             return false;
         }
         
@@ -127,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const stock = parseInt(stockInput.value);
         
         if (isNaN(stock) || stock < 0) {
-            showError('stockError', 'Stock cannot be negative');
+            showError('stockError', 'Stock tidak bisa bernilai negatif');
             return false;
         }
         
@@ -135,30 +175,126 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
+    function initQuillEditor() {
+        const editorElement = document.getElementById('descriptionEditor');
+        const hiddenInput = document.getElementById('description');
+        const charCount = document.getElementById('descCount');
+        
+        if (!editorElement || !hiddenInput) return;
+        
+        // Quill toolbar configuration
+        const toolbarOptions = [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'align': [] }],
+            ['blockquote', 'code-block'],
+            ['link'],
+            ['clean']
+        ];
+        
+        // Initialize Quill
+        quillEditor = new Quill('#descriptionEditor', {
+            theme: 'snow',
+            modules: {
+                toolbar: toolbarOptions
+            },
+            placeholder: 'Tulis deskripsi produk...',
+        });
+        
+        // Set initial content if exists (for edit mode)
+        const existingContent = hiddenInput.value;
+        if (existingContent) {
+            quillEditor.root.innerHTML = existingContent;
+        }
+        
+        // Update hidden input and character count when content changes
+        quillEditor.on('text-change', function() {
+            const html = quillEditor.root.innerHTML;
+            const textOnly = quillEditor.getText().trim();
+            const textLength = textOnly.length;
+            
+            // Update hidden input
+            hiddenInput.value = html;
+            
+            // Update character count
+            if (charCount) {
+                charCount.textContent = textLength;
+                
+                // Color coding based on length
+                const countSpan = charCount.parentElement;
+                if (textLength > 1000) {
+                    countSpan.style.color = '#ef4444'; // red
+                } else if (textLength > 900) {
+                    countSpan.style.color = '#f59e0b'; // orange
+                } else {
+                    countSpan.style.color = '#6b7280'; // gray
+                }
+            }
+            
+            // Validate
+            validateDescription();
+        });
+        
+        // Limit character count to 1000
+        quillEditor.on('text-change', function(delta, oldDelta, source) {
+            const textOnly = quillEditor.getText().trim();
+            if (textOnly.length > 1000) {
+                quillEditor.deleteText(1000, quillEditor.getLength());
+            }
+        });
+        
+        // Initial character count
+        const initialText = quillEditor.getText().trim();
+        if (charCount) {
+            charCount.textContent = initialText.length;
+        }
+    }
+
+    function clearError(input, errorElement) {
+        if (input) {
+            input.classList.remove('error');
+            // For hidden input (description), remove highlight from editor
+            if (input.id === 'description') {
+                const editor = document.getElementById('descriptionEditor');
+                if (editor) editor.classList.remove('error');
+            }
+        }
+        if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+        }
+    }
+
     /**
      * Validate description
      */
     function validateDescription() {
-        if (!descInput) return true;
+        const hiddenInput = document.getElementById('description');
+        const descError = document.getElementById('descError');
         
-        const desc = descInput.value.trim();
+        if (!quillEditor) return true;
         
-        if (!desc) {
-            showError('descError', 'Description is required');
+        const textOnly = quillEditor.getText().trim();
+        const textLength = textOnly.length;
+        
+        if (textLength === 0) {
+            showError(hiddenInput, descError, 'Deskripsi dibutuhkan');
             return false;
         }
         
-        if (desc.length < 10) {
-            showError('descError', 'Description must be at least 10 characters');
+        if (textLength < 20) {
+            showError(hiddenInput, descError, 'Deskripsi minimal 20 karakter');
             return false;
         }
         
-        if (desc.length > 1000) {
-            showError('descError', 'Description must not exceed 1000 characters');
+        if (textLength > 1000) {
+            showError(hiddenInput, descError, 'Deskripsi tidak boleh melebihi 1000 karakter');
             return false;
         }
         
-        hideError('descError');
+        clearError(hiddenInput, descError);
         return true;
     }
 
@@ -180,13 +316,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate file type
         if (!validTypes.includes(file.type)) {
-            showError('imageError', 'Please upload a valid image (JPG, PNG, or WEBP)');
+            showError('imageError', 'Tolong upload format gambar yang valid(JPG, PNG, or WEBP)');
             return false;
         }
         
         // Validate file size
         if (file.size > maxSize) {
-            showError('imageError', 'Image size must not exceed 2MB');
+            showError('imageError', 'Ukuran gambar maksimal 2MB');
             return false;
         }
         
@@ -239,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return isValid;
     }
 
-    // ✅ Event listeners
+    //  Event listeners
     if (nameInput) {
         nameInput.addEventListener('input', function() {
             validateProductName();
@@ -349,4 +485,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     console.log('Product form initialized');
+
+    function clearAllErrors() {
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        document.querySelectorAll('.form-control, .quill-editor').forEach(el => {
+            el.classList.remove('error');
+        });
+    }
 });

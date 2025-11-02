@@ -26,13 +26,15 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
 ?>
 
 <link rel="stylesheet" href="/css/pages/product_form.css">
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
 <div class="form-page">
     <div class="form-container card">
         <!-- Header -->
         <div class="form-header">
-            <h1>Edit Product</h1>
-            <p class="subtitle">Update product information</p>
+            <h1>Edit Produk</h1>
+            <p class="subtitle">Perbarui informasi produk</p>
         </div>
 
         <!-- Error Message -->
@@ -60,7 +62,7 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
             
             <!-- Product Name -->
             <div class="form-group">
-                <label for="product_name" class="required">Product Name</label>
+                <label for="product_name" class="required">Nama Produk</label>
                 <input 
                     type="text" 
                     id="product_name" 
@@ -75,9 +77,9 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
 
             <!-- Category -->
             <div class="form-group">
-                <label for="category_id" class="required">Category</label>
+                <label for="category_id" class="required">Kategori</label>
                 <select id="category_id" name="category_id" class="form-control" required>
-                    <option value="">Select a category</option>
+                    <option value="">Pilih kategori</option>
                     <?php foreach ($categories as $category): ?>
                         <option value="<?= $category['category_id'] ?>"
                                 <?= ($categoryId == $category['category_id']) ? 'selected' : '' ?>>
@@ -91,7 +93,7 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
             <!-- Price & Stock -->
             <div class="form-row">
                 <div class="form-group">
-                    <label for="price" class="required">Price (Rp)</label>
+                    <label for="price" class="required">Harga (Rp)</label>
                     <input 
                         type="number" 
                         id="price" 
@@ -105,7 +107,7 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
                 </div>
 
                 <div class="form-group">
-                    <label for="stock" class="required">Stock</label>
+                    <label for="stock" class="required">Stok</label>
                     <input 
                         type="number" 
                         id="stock" 
@@ -120,29 +122,29 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
 
             <!-- Description -->
             <div class="form-group">
-                <label for="description" class="required">Description</label>
-                <textarea 
+                <label for="description" class="required">Deskripsi</label>
+                <div id="descriptionEditor" class="quill-editor"></div>
+                <input 
+                    type="hidden" 
                     id="description" 
                     name="description" 
-                    class="form-control"
-                    rows="6"
-                    maxlength="1000"
-                    required><?= htmlspecialchars($description) ?></textarea>
-                <span class="char-count"><span id="descCount">0</span>/1000</span>
-                <div class="error-message" id="descError"></div> 
+                    value="<?= htmlspecialchars($description) ?>"
+                    required>
+                <span class="char-count"><span id="descCount">0</span>/1000 karakter</span>
+                <div class="error-message" id="descError"></div>
             </div>
 
             <!-- Image Upload (Optional) -->
             <div class="form-group">
-                <label for="image">Product Image (Optional)</label>
+                <label for="image">Gambar Produk (Opsional)</label>
                 <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 0.5rem;">
-                    Leave empty to keep current image
+                    Biarkan kosong untuk mempertahankan gambar saat ini
                 </p>
                 
                 <!-- Show current image -->
                 <?php if (!empty($product['main_image_path'])): ?>
                     <div class="current-image" style="margin-bottom: 1rem;">
-                        <p style="margin-bottom: 0.5rem; color: #666; font-weight: 500;">Current Image:</p>
+                        <p style="margin-bottom: 0.5rem; color: #666; font-weight: 500;">Gambar Saat Ini:</p>
                         <img src="<?= htmlspecialchars($product['main_image_path']) ?>" 
                             alt="Current product" 
                             style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;">
@@ -163,8 +165,8 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
                             <circle cx="8.5" cy="8.5" r="1.5"></circle>
                             <polyline points="21 15 16 10 5 21"></polyline>
                         </svg>
-                        <p class="upload-text">Click to upload new image (optional)</p>
-                        <p class="upload-hint">JPG, PNG or WEBP (max. 2MB)</p>
+                        <p class="upload-text">Klik untuk mengunggah gambar baru (opsional)</p>
+                        <p class="upload-hint">JPG, PNG atau WEBP (maks. 2MB)</p>
                     </div>
 
                     <div class="image-preview" id="imagePreview" style="display: none;">
@@ -174,7 +176,7 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                             </svg>
-                            Change Image
+                            Ganti Gambar
                         </button>
                     </div>
                 </div>
@@ -183,16 +185,16 @@ $categoryId = getSessionValue('category_id', $product['category_id'] ?? '');
 
             <!-- Form Actions -->
             <div class="form-actions">
-                <a href="/seller/products" class="btn btn-ghost">Cancel</a>
+                <a href="/seller/products" class="btn btn-ghost">Batal</a>
                 <button type="submit" class="btn btn-primary" id="btnSubmit">
-                    Update Product
+                    Perbarui Produk
                 </button>
             </div>
 
             <!-- Loading Overlay -->
             <div class="loading-overlay" id="loadingOverlay" style="display: none;">
                 <div class="spinner"></div>
-                <p>Updating product...</p>
+                <p>Memperbarui produk...</p>
             </div>
         </form>
     </div>
