@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\View;
 use App\Services\CartService;
+use App\Services\UserService;
 use App\Core\Request;
 
 class CartController {
@@ -16,6 +17,9 @@ class CartController {
 
     public function showPage() {
         $buyer_id = Auth::id();
+
+        $user_service = new UserService();
+        $user = $user_service->getUserById($buyer_id);
         
         $cartData = $this->cartService->getCartItems($buyer_id);
         $totalItems = $this->cartService->countUniqueItems($buyer_id);
@@ -27,6 +31,7 @@ class CartController {
         $view->setData('navbarFile', 'components/navbar_cart.php');
         $view->setData('pageStyles', ['/css/components/navbar_cart.css', '/css/pages/cart.css']);
         $view->setData('stores', $cartData['stores']);
+        $view->setData('user', $user);
         $view->setData('grandTotal', $cartData['grandTotal']);
         $view->setData('totalItems', $totalItems);
 
