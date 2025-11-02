@@ -3,10 +3,12 @@
     
     <?php if (empty($stores)): ?>
         
-        <div class="cart-empty">
-            <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
-            <p>Keranjang Anda masih kosong.</p>
-            <a href="/" class="btn btn-primary">Mulai Belanja</a>
+        <div class="cart-empty-wrapper">
+            <div class="cart-empty">
+                <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
+                <p>Keranjang Anda masih kosong.</p>
+                <a href="/" class="btn btn-primary">Mulai Belanja</a>
+            </div>
         </div>
 
     <?php else: ?>

@@ -23,10 +23,9 @@ class CartController {
         $view = new View();
  
         $view->setData('pageTitle', 'Keranjang Belanja');
-        $view->setData('pageStyles', ['/css/components/navbar_buyer.css', '/css/pages/cart.css']);
         $view->setData('pageScripts', ['/js/pages/cart.js']);
-        $view->setData('navbarFile', 'components/navbar_buyer.php');
-        
+        $view->setData('navbarFile', 'components/navbar_cart.php');
+        $view->setData('pageStyles', ['/css/components/navbar_buyer.css', '/css/pages/cart.css']);
         $view->setData('stores', $cartData['stores']);
         $view->setData('grandTotal', $cartData['grandTotal']);
         $view->setData('totalItems', $totalItems);
