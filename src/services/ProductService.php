@@ -341,33 +341,6 @@ class ProductService {
         }
     }
 
-    // private function normalizeValue($value) {
-    //         // Handle array (extract first element)
-    //     if (is_array($value)) {
-    //         if (count($value) === 0) {
-    //             return null; // Changed from '' to null
-    //         }
-            
-    //         $firstValue = reset($value);
-    //         return $firstValue !== false ? $firstValue : null;
-    //     }
-        
-    //     // Handle null
-    //     if ($value === null) {
-    //         return null;
-    //     }
-        
-    //     // Handle empty string
-    //     if ($value === '') {
-    //         return null;
-    //     }
-        
-    //     // Return value as-is (preserves int, float, string)
-    //     return $value;
-    // }
-    /**
-     * Normalize string values
-     */
     private function normalizeString($value): string {
         // Handle array (take first element)
         if (is_array($value)) {

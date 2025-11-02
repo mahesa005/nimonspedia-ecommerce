@@ -66,4 +66,10 @@ class StoreRepository {
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
         return $data ? new Store($data) : null;
     }
+
+    public function updateBalance(int $store_id, int $new_balance): bool {
+        $sql = 'UPDATE "store" SET balance = :balance WHERE store_id = :store_id';
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(['balance' => $new_balance, 'store_id' => $store_id]);
+    }
 }

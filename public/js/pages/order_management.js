@@ -3,6 +3,7 @@ const statusLabels = {
     'approved': 'Disetujui',
     'rejected': 'Ditolak',
     'on_delivery': 'Dalam Pengiriman',
+    'received': 'Diterima', 
     'completed': 'Selesai'
 };
 
@@ -11,8 +12,40 @@ const statusColors = {
     'approved': 'blue',
     'rejected': 'red',
     'on_delivery': 'purple',
+    'received': 'green', 
     'completed': 'green'
 };
+
+// Auto-submit filter form
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const statusSelect = document.getElementById('status');
+    const searchInput = document.getElementById('search');
+    let searchTimeout;
+
+    // Auto-submit on status change
+    statusSelect.addEventListener('change', function() {
+        filterForm.submit();
+    });
+
+    // Auto-submit on search input with debounce (wait 500ms after user stops typing)
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterForm.submit();
+        }, 500); // 500ms delay
+    });
+
+    // Auto-hide alerts
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-20px)';
+            setTimeout(() => alert.remove(), 300);
+        }, 5000);
+    });
+});
 
 function showOrderDetails(order) {
     const modal = document.getElementById('orderModal');
@@ -98,6 +131,20 @@ function renderOrderActions(order) {
                 <p style="margin-top: 8px">${new Date(order.delivery_time).toLocaleString('id-ID')}</p>
             </div>
         `;
+    
+    } else if (order.status === 'received') {
+        html = `
+            <div class="action-form" style="background: var(--tp-green-light); border: 1px solid var(--tp-green)">
+                <strong style="color: var(--tp-green-dark)">✓ Pesanan Diterima</strong>
+                <p style="margin-top: 8px">Balance toko telah diupdate dengan Rp ${parseInt(order.total_price).toLocaleString('id-ID')}</p>
+            </div>
+        `;
+    } else if (order.status === 'completed') {
+        html = `
+            <div class="action-form" style="background: var(--tp-green-light); border: 1px solid var(--tp-green)">
+                <strong style="color: var(--tp-green-dark)">✓ Pesanan Selesai</strong>
+            </div>
+        `;
     } else {
         html = '<p style="text-align: center; color: var(--tp-gray-500)">Tidak ada aksi yang tersedia</p>';
     }
@@ -121,14 +168,3 @@ window.onclick = function(event) {
         closeModal();
     }
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-20px)';
-            setTimeout(() => alert.remove(), 300);
-        }, 5000);
-    });
-});

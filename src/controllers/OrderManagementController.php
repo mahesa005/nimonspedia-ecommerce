@@ -9,7 +9,6 @@ use App\Services\OrderManagementService;
 use Exception;
 
 class OrderManagementController {
-    
     private OrderManagementService $orderService;
     private View $view;
 
@@ -18,57 +17,47 @@ class OrderManagementController {
         $this->view = new View();
     }
 
-    /**
-     * Handle GET /seller/orders
-     * Display orders list page with filters and pagination
-     */
+    // Handle GET /seller/orders
+    // Display orders list page with filters and pagination
     public function index(Request $request) {
         $user_id = Auth::id();
         $queryParams = $_GET;
 
         try {
-            // fetch data needed by the view
+            // Get all data from service (includes store info)
             $data = $this->orderService->getOrdersPageData($user_id, $queryParams);
 
             // Set data to be sent to the view
-            $this->view->setData('pageTitle', 'Manage Orders');
+            $this->view->setData('pageTitle', 'Kelola Pesanan');
             $this->view->setData('orders', $data['orders']);
             $this->view->setData('pagination', $data['pagination']);
             $this->view->setData('filters', $data['filters']);
+            $this->view->setData('store', $data['store']); // Store from service
 
             // Render page
             $this->view->renderPage('pages/seller/order_management.php');
 
         } catch (Exception $e) {
-            // If failed (e.g. store not found), redirect to dashboard with error
             Session::set('error_message', $e->getMessage());
             header('Location: /seller/dashboard');
             exit;
         }
     }
 
-    /**
-     * Handle POST /seller/orders/action
-     * Process approve, reject, or set_delivery actions
-     */
+    // Handle POST /seller/orders/action
+    // Process approve, reject, or set_delivery actions
     public function handleAction(Request $request) {
         $user_id = Auth::id();
-        $postData = $request->getBody(); // retrieve request body ($_POST)
+        $postData = $request->getBody();
 
         try {
-            // Call service to process action
             $result = $this->orderService->processOrderAction($user_id, $postData);
-
-            // Set success message to session
             Session::set('success_message', $result['message']);
 
         } catch (Exception $e) {
-            // Set error message to session
             Session::set('error_message', $e->getMessage());
         }
 
-        // Always redirect back to order management page
-        // (to display success/error message)
         header('Location: /seller/orders');
         exit;
     }
