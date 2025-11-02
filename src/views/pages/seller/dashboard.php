@@ -7,6 +7,7 @@ $totalProducts = $quickStats['total_products'] ?? 0;
 $pendingOrders = $quickStats['pending_orders'] ?? 0;
 $storeBalance = $quickStats['store_balance'] ?? 0;
 $totalRevenue = $quickStats['total_revenue'] ?? 0;
+$lowStockProducts = $quickStats['low_stock_products'] ?? 0;
 
 function rph($n) {
     return 'Rp ' . number_format((float)$n, 0, ',', '.');
@@ -53,19 +54,6 @@ function rph($n) {
       </div>
     </div>
 
-    <div class="metric card" data-metric="revenue">
-      <div class="metric-icon green">
-        <svg viewBox="0 0 24 24" width="24" height="24">
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="metric-content">
-        <div class="label">Total Pendapatan</div>
-        <div class="value"><?= rph($totalRevenue) ?></div>
-        <div class="delta">Dari semua penjualan</div>
-      </div>
-    </div>
-
     <div class="metric card" data-metric="orders">
       <div class="metric-icon purple">
         <svg viewBox="0 0 24 24" width="24" height="24">
@@ -82,17 +70,29 @@ function rph($n) {
       </div>
     </div>
 
-    <div class="metric card" data-metric="balance">
-      <div class="metric-icon gray">
+    <div class="metric card" data-metric="low-stock">
+      <div class="metric-icon orange">
         <svg viewBox="0 0 24 24" width="24" height="24">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-          <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M4 4h16v16H4zM4 9h16M9 4v16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
         </svg>
       </div>
       <div class="metric-content">
-        <div class="label">Saldo Toko</div>
-        <div class="value"><?= rph($storeBalance) ?></div>
-        <div class="delta">Saldo tersedia</div>
+        <div class="label">Produk Stok Rendah</div>
+        <div class="value"><?= number_format($lowStockProducts) ?></div>
+        <div class="delta">Perlu restock segera</div>
+      </div>
+    </div>  
+
+    <div class="metric card" data-metric="revenue">
+      <div class="metric-icon green">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <div class="label">Total Pendapatan</div>
+        <div class="value"><?= rph($totalRevenue) ?></div>
+        <div class="delta">Dari semua penjualan</div>
       </div>
     </div>
   </div>
