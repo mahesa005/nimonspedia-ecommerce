@@ -353,6 +353,19 @@ class OrderRepository {
 
             error_log("Balance refunded: " . $order->total_price);
 
+            $returnStockSql = '
+                UPDATE product
+                SET stock = stock + oi.quantity
+                FROM order_items oi
+                WHERE oi.product_id = product.product_id
+                AND oi.order_id = :order_id
+            ';
+
+            $returnStockStmt = $this->db->prepare($returnStockSql);
+            $returnStockStmt->execute(['order_id' => $order_id]);
+
+            error_log("Stock returned for order_id: {$order_id}");
+
             $this->db->commit();
             error_log("Transaction committed successfully");
             return true;
