@@ -341,33 +341,6 @@ class ProductService {
         }
     }
 
-    // private function normalizeValue($value) {
-    //         // Handle array (extract first element)
-    //     if (is_array($value)) {
-    //         if (count($value) === 0) {
-    //             return null; // Changed from '' to null
-    //         }
-            
-    //         $firstValue = reset($value);
-    //         return $firstValue !== false ? $firstValue : null;
-    //     }
-        
-    //     // Handle null
-    //     if ($value === null) {
-    //         return null;
-    //     }
-        
-    //     // Handle empty string
-    //     if ($value === '') {
-    //         return null;
-    //     }
-        
-    //     // Return value as-is (preserves int, float, string)
-    //     return $value;
-    // }
-    /**
-     * Normalize string values
-     */
     private function normalizeString($value): string {
         // Handle array (take first element)
         if (is_array($value)) {
@@ -413,7 +386,8 @@ class ProductService {
         array $category_ids = [], 
         ?int $min_price = null, 
         ?int $max_price = null,
-        string $sort = 'newest'
+        string $sort = 'newest',
+        ?int $store_id = null
     ): array {
         $offset = max(0, ($page - 1) * $limit);
 
@@ -428,10 +402,10 @@ class ProductService {
         }
 
         $products = $this->productRepo->findPaginated(
-            $limit, $offset, $search, $category_ids, $min_price, $max_price, $sort_by, $sort_order
+            $limit, $offset, $search, $category_ids, $min_price, $max_price, $sort_by, $sort_order, $store_id
         );
         $total_count = $this->productRepo->countAllVisible(
-            $search, $category_ids, $min_price, $max_price
+            $search, $category_ids, $min_price, $max_price, $store_id
         );
         $total_pages = ($limit > 0) ? ceil($total_count / $limit) : 0;
 

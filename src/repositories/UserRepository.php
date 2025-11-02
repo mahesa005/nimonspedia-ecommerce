@@ -73,4 +73,43 @@ class UserRepository {
             throw $e;
         }
     }
+
+    public function refundBalance(int $user_id, int $amount) {
+        $sql = 'UPDATE "user" SET balance = balance + :amount
+                WHERE user_id = :user_id AND role =\'BUYER\'';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                'amount' => $amount,
+                'user_id' => $user_id
+            ]);
+        } catch (PDOException $e) {
+            error_log("UserRepository::refundBalance Gagal: " . $e->getMessage());
+            throw $e;
+        }
+    }
+    
+    public function updateProfile(int $user_id, string $name, string $address): bool {
+        $sql = 'UPDATE "user" SET name = ?, address = ?, updated_at = NOW() 
+                WHERE user_id = ?';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$name, $address, $user_id]);
+        } catch (\PDOException $e) {
+            error_log("Error updating profile for user $user_id: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updatePassword(int $user_id, string $new_hashed_password): bool {
+        $sql = 'UPDATE "user" SET "password" = ?, updated_at = NOW() 
+                WHERE user_id = ?';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$new_hashed_password, $user_id]);
+        } catch (\PDOException $e) {
+            error_log("Error updating password for user $user_id: " . $e->getMessage());
+            return false;
+        }
+    }
 }

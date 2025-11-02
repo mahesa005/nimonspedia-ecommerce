@@ -43,4 +43,21 @@ class CategoryRepository {
         }
         return $categories;
     }
+
+        public function findAllByStoreId(int $store_id): array {
+        $sql = 'SELECT DISTINCT c.* FROM "category" c
+                JOIN "category_item" ci ON c.category_id = ci.category_id
+                JOIN "product" p ON ci.product_id = p.product_id
+                WHERE p.store_id = ? AND p.deleted_at IS NULL
+                ORDER BY c.name ASC';
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$store_id]);
+        
+        $categories = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $categories[] = new Category($row);
+        }
+        return $categories;
+    }
 }
