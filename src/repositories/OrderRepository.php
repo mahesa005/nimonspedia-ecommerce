@@ -3,18 +3,14 @@ namespace App\Repositories;
 
 use App\Core\Database;
 use App\Models\Order;
-use App\Repositories\OrderItemRepository;
 use PDO;
 use PDOException;
 
 class OrderRepository {
     private PDO $db;
-    private OrderItemRepository $orderItemRepo;
 
     public function __construct() {
         $this->db = Database::getInstance();
-        $this->orderItemRepo = new OrderItemRepository();
-
     }
 
     public function countPendingOrders(int $store_id): ?int {
@@ -215,21 +211,6 @@ class OrderRepository {
                 }
 
                 error_log("Store #{$order['store_id']} balance updated +{$order['total_price']} from order #$order_id");
-            }
-
-            if ($new_status === 'rejected' && $order['status'] !== 'rejected') {
-                // get all items from order
-                $orderItems = $this->orderItemRepo->getOrderItemsByOrderId($order_id);
-                foreach ($orderItems as $item) {
-                    $itemQty = $this->orderItemRepo->getQuantityByOrderItemId((int)$item['order_item_id']);
-                    $restockSql = 'UPDATE "product" 
-                                   SET stock = stock + :quantity 
-                                   WHERE product_id = :product_id';
-                    $restockStmt = $this->db->prepare($restockSql);
-                    $restockStmt->bindValue(':quantity', $itemQty, PDO::PARAM_INT);
-                    $restockStmt->bindValue(':product_id', $item['product_id'], PDO::PARAM_INT);
-                    $restockStmt->execute();
-                }
             }
 
             $this->db->commit();
