@@ -166,8 +166,10 @@
 }
 .order-item {
     display: flex;
+    align-items: flex-start;
     gap: 1rem;
-    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
 }
 .item-image {
     width: 80px;
@@ -182,28 +184,31 @@
 }
 
 .item-details {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
+    word-wrap: break-word;
+    overflow: visible;
 }
 .item-name {
     font-weight: 600;
     color: #333;
     margin-bottom: 4px;
     font-size: 1rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
 }
+
 .item-quantity {
     color: #6c757d;
     font-size: 0.9rem;
 }
 .item-price {
+    text-align: right;
     font-weight: 700;
     color: #333;
-    text-align: right;
-    font-size: 1rem;
     white-space: nowrap;
+    margin-left: auto;
 }
 
 /* Expandable Details */
@@ -239,10 +244,12 @@
 
 /* Active/Expanded State */
 .order-card.details-active .item-description {
-    max-height: 100px;
+    max-height: 200px;
     overflow-y: auto;
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 8px;
+    padding: 6px 0;
+    white-space: normal;
+    word-wrap: break-word;
 }
 .order-card.details-active .order-details-expandable {
     max-height: 1000px;
@@ -429,56 +436,179 @@
     }
 }
 
-@media (max-width: 992px) {
-    .order-history-page h1 {
-        font-size: 1.8rem;
+@media (max-width: 768px) {
+    .order-history-page {
+        padding: 12px;
+        margin: 1rem auto;
     }
+
+    .order-history-page h1 {
+        font-size: 1.6rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .order-filters {
+        gap: 6px;
+        padding-bottom: 4px;
+        overflow-x: auto;
+    }
+
+    .filter-btn {
+        font-size: 0.9rem;
+        padding: 8px 14px;
+    }
+
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    .order-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
+    .order-header-actions {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+    }
+
+    .item-image {
+        width: 100%;
+        height: 80px;
+    }
+
+    .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item-name {
+        font-size: 0.95rem;
+        white-space: normal;
+    }
+
+    .item-price {
+        text-align: left;
+        width: 100%;
+        margin-top: 6px;
+        font-size: 0.95rem;
+    }
+
     .order-footer {
         flex-direction: column;
         align-items: stretch;
+        gap: 1rem;
     }
+
     .order-total-section {
         align-items: flex-start;
         width: 100%;
     }
-    .order-actions {
-        justify-content: flex-start;
+
+    .total-price {
+        font-size: 1.5rem;
     }
-}
-@media (max-width: 768px) {
-    .order-history-page {
-        padding: 15px;
-    }
-    .order-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .order-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-        width: 100%;
-    }
-    .order-header-actions {
-        width: 100%;
-        margin-top: 1rem;
-        justify-content: space-between;
-    }
-    .item-image {
-        width: 100%;
-        height: 180px;
-    }
-    .item-price {
-        text-align: left;
-        width: 100%;
-        margin-top: 8px;
-    }
+
     .order-actions {
         flex-direction: column;
         align-items: stretch;
     }
+
     .btn {
         width: 100%;
-        justify-content: center;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .order-history-page {
+        padding: 10px;
+    }
+
+    .order-history-page h1 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    .order-card {
+        border-radius: 6px;
+    }
+
+    .order-header {
+        padding: 0.8rem 1rem;
+    }
+
+    .order-body {
+        padding: 1rem;
+    }
+
+    .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item-image {
+        width: 100%;
+        height: auto;
+    }
+
+    .item-name {
+        font-size: 0.9rem;
+    }
+
+    .item-price {
+        text-align: left;
+        margin-top: 4px;
+        width: 100%;
+    }
+
+    .item-quantity,
+    .order-date,
+    .info-text {
+        font-size: 0.85rem;
+    }
+
+    .total-label {
+        font-size: 0.9rem;
+    }
+
+    .total-price {
+        font-size: 1.3rem;
+    }
+
+    .order-actions {
+        gap: 0.6rem;
+    }
+
+    .btn {
+        font-size: 0.85rem;
+        padding: 8px 14px;
+    }
+
+    .empty-orders {
+        padding: 2.5rem 1rem;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+    }
+
+    .empty-orders p {
+        font-size: 1rem;
+    }
+
+    .empty-orders .btn {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 0.95rem;
     }
 }
