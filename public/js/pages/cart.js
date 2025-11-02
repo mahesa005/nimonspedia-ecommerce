@@ -1,3 +1,11 @@
+const emptyCartHTML = `
+    <div class="cart-empty">
+        <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
+        <p>Keranjang Anda masih kosong.</p>
+        <a href="/" class="btn btn-primary">Mulai Belanja</a>
+    </div>
+`;
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const cartItemsContainer = document.querySelector('.cart-items');
@@ -42,12 +50,28 @@ function handleDelete(button) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.querySelector(`.cart-item[data-item-id="${itemId}"]`).remove();
+            const itemElem = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+            const storeGroup = itemElem.closest('.store-group');
+
+            itemElem.remove();
+
+            if (storeGroup.querySelectorAll('.cart-item').length === 0) {
+                storeGroup.remove();
+            }
 
             updateTotals(data.grandTotal);
             updateNavbarBadge(data.newCount);
 
+            if (data.stores) updateStoreTotals(data.stores);
+
             showToast('Item berhasil dihapus', 'success');
+
+            const cartContainer = document.querySelector('.cart-container');
+            const remainingStores = document.querySelectorAll('.store-group');
+
+            if (remainingStores.length === 0 && cartContainer) {
+                cartContainer.outerHTML = emptyCartHTML;
+            }
         } else {
             showToast(data.message || 'Gagal menghapus item', 'error');
         }
@@ -111,6 +135,8 @@ function updateItemOnServer(itemId, quantity, input) {
                 }
             }
 
+            if (data.stores) updateStoreTotals(data.stores);
+
             const grandTotalElem = document.getElementById('grand-total');
             if (grandTotalElem) {
                 grandTotalElem.textContent =
@@ -135,9 +161,26 @@ function updateTotals(newGrandTotal) {
 }
 
 function updateNavbarBadge(newCount) {
-    const badge = document.getElementById('cart-badge');
-    if(badge) {
-        badge.textContent = newCount;
-        badge.style.display = newCount > 0 ? 'block' : 'none';
+    const badge = document.querySelector('.item-counter');
+    if (badge) {
+        if (newCount > 0) {
+            badge.textContent = newCount;
+        } else {
+            badge.remove();
+        }
     }
+}
+
+function updateStoreTotals(stores) {
+    Object.values(stores).forEach(store => {
+        const storeTotalElem = document.getElementById(`store-total-${store.store_id}`);
+        if (storeTotalElem) {
+            storeTotalElem.textContent = `Rp ${store.storeTotal.toLocaleString('id-ID')}`;
+        }
+
+        const storeSummaryTotal = document.getElementById(`summary-store-total-${store.store_id}`);
+        if (storeSummaryTotal) {
+            storeSummaryTotal.textContent = `Rp ${store.storeTotal.toLocaleString('id-ID')}`;
+        }
+    });
 }

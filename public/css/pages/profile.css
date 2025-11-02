@@ -1,0 +1,152 @@
+.profile-page {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.profile-page h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.profile-box {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.profile-box h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.eye-icon {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+
+.eye-closed {
+    display: none;
+}
+
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.form-group input[type="email"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+.form-group .input-wrapper input[type="password"],
+.form-group .input-wrapper input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    padding-right: 45px; /* Memberi ruang untuk ikon */
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box; 
+    font-size: 1rem;
+}
+
+.form-group input[readonly] {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+.btn-primary { background-color: #42b549; color: white; }
+.btn-secondary { background-color: #42b549; color: white; }
+
+.form-message {
+    margin-top: 15px;
+    font-size: 0.95rem;
+    padding: 10px;
+    border-radius: 6px;
+    display: none;
+}
+.form-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    display: block;
+}
+.form-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    display: block;
+}
+
+.password-change-password {
+    position: relative;
+}
+
+.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+.btn-secondary .loading-spinner {
+    border-top-color: #fff;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

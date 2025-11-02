@@ -1,0 +1,66 @@
+@import url("home.css");
+
+.store-info-header {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+}
+
+.store-info-logo {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+.store-info-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #888;
+}
+
+.store-info-details {
+    flex-grow: 1;
+}
+
+.store-info-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.store-info-description {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+@media (max-width: 600px) {
+    .store-info-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .store-info-name {
+        font-size: 1.5rem;
+    }
+    .store-info-description {
+        max-height: 150px;
+    }
+}

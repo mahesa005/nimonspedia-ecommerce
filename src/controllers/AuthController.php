@@ -32,7 +32,7 @@ class AuthController {
         $this->view->setData('pageScripts', $scripts);
         $this->view->setData('navbarFile', 'components/navbar_auth.php');
 
-        $this->view->renderPage('pages/auth/login.php');
+        $this->view->renderPage('pages/login.php');
     }
 
     public function handleLogin(Request $request): void {
@@ -87,7 +87,7 @@ class AuthController {
         $this->view->setData('navbarFile', 'components/navbar_auth.php');
         $this->view->setData('old', $old_data);
 
-        $this->view->renderPage('pages/auth/register.php');
+        $this->view->renderPage('pages/register.php');
     }
 
     public function handleRegister(Request $request): void {
