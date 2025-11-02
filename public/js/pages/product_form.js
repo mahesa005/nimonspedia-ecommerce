@@ -495,4 +495,51 @@ document.addEventListener('DOMContentLoaded', function() {
             el.classList.remove('error');
         });
     }
+
+    /**
+     * Show toast notification
+     */
+    function showToast(message, type = 'info', duration = 3000) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        
+        // Set toast content and class
+        toast.textContent = message;
+        toast.className = `toast toast-${type} show`;
+        
+        // Add icon based on type
+        let icon = '';
+        if (type === 'success') {
+            icon = '✓';
+        } else if (type === 'error') {
+            icon = '✕';
+        } else if (type === 'warning') {
+            icon = '⚠';
+        } else {
+            icon = 'ℹ';
+        }
+        
+        toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${message}</span>`;
+        toast.style.display = 'flex';
+        
+        // Auto hide after duration
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.style.display = 'none';
+            }, duration);
+        }
+    }
+
+    /**
+     * Hide toast notification
+     */
+    function hideToast() {
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.classList.remove('show');
+            toast.style.display = 'none';
+        }
+    }
+    
 });

@@ -111,7 +111,8 @@ class ProductManagementController {
         $result = $this->productService->createProduct($userId, $data, $file);
 
         if ($result['success']) {
-            header('Location: /seller/products?success=' . urlencode($result['message']));
+            $_SESSION['success_message'] = '✓ Produk berhasil ditambahkan!';
+            header('Location: /seller/products');
         } else {
             $_SESSION['form_data'] = $data;
             $_SESSION['form_error'] = $result['message'];
@@ -170,7 +171,8 @@ class ProductManagementController {
         $result = $this->productService->updateProduct($userId, $productId, $data, $file);
 
         if ($result['success']) {
-            header('Location: /seller/products?success=' . urlencode($result['message']));
+            $_SESSION['success_message'] = '✓ Produk berhasil diperbarui!';
+            header('Location: /seller/products');
         } else {
             $_SESSION['form_data'] = $data;
             $_SESSION['form_error'] = $result['message'];
