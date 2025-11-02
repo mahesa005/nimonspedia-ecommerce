@@ -1,4 +1,3 @@
-// Tunggu sampai semua HTML dimuat
 document.addEventListener('DOMContentLoaded', () => {
 
     const profileForm = document.getElementById('form-update-profile');
@@ -11,18 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
         passwordForm.addEventListener('submit', handlePasswordChange);
     }
 
-    const toggleButtons = document.querySelectorAll('.btn-toggle-password');
-    toggleButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetInput = document.getElementById(btn.dataset.target);
-            if (targetInput.type === 'password') {
-                targetInput.type = 'text';
-                btn.textContent = 'Sembunyikan';
-            } else {
-                targetInput.type = 'password';
-                btn.textContent = 'Lihat';
-            }
-        });
+    const toggleIcons = document.querySelectorAll('.eye-icon');
+    toggleIcons.forEach(icon => {
+        icon.addEventListener('click', togglePasswordVisibility);
     });
 });
 
@@ -125,5 +115,30 @@ function showToastMessage(message, type = 'info') {
     } else {
         console.warn('Fungsi showToast() tidak ditemukan. Tampilkan via alert.');
         alert(message);
+    }
+}
+
+function togglePasswordVisibility(event) {
+    const clickedIcon = event.currentTarget;
+    
+    const targetInputId = clickedIcon.dataset.target;
+    if (!targetInputId) return;
+
+    const input = document.getElementById(targetInputId);
+    if (!input) return;
+
+    const wrapper = clickedIcon.parentElement;
+    const eyeOpen = wrapper.querySelector('.eye-open');
+    const eyeClosed = wrapper.querySelector('.eye-closed');
+
+    // Ganti tipe input
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (eyeOpen) eyeOpen.style.display = 'none';
+        if (eyeClosed) eyeClosed.style.display = 'block';
+    } else {
+        input.type = 'password';
+        if (eyeOpen) eyeOpen.style.display = 'block';
+        if (eyeClosed) eyeClosed.style.display = 'none';
     }
 }

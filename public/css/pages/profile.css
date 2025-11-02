@@ -24,6 +24,28 @@
     margin-bottom: 20px;
 }
 
+.eye-icon {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+
+.eye-closed {
+    display: none;
+}
+
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
 .form-group {
     margin-bottom: 20px;
     position: relative;
@@ -36,15 +58,24 @@
     color: #333;
 }
 
-.form-group input[type="text"],
 .form-group input[type="email"],
-.form-group input[type="password"],
 .form-group textarea {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
     box-sizing: border-box;
+    font-size: 1rem;
+}
+
+.form-group .input-wrapper input[type="password"],
+.form-group .input-wrapper input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    padding-right: 45px; /* Memberi ruang untuk ikon */
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box; 
     font-size: 1rem;
 }
 
@@ -65,18 +96,6 @@
     color: #777;
 }
 
-.btn-toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 42px;
-    background: none;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    padding: 5px 8px;
-}
-
 .form-actions {
     margin-top: 20px;
 }
@@ -92,8 +111,8 @@
     align-items: center;
     gap: 10px;
 }
-.btn-primary { background-color: #007bff; color: white; }
-.btn-secondary { background-color: #6c757d; color: white; }
+.btn-primary { background-color: #42b549; color: white; }
+.btn-secondary { background-color: #42b549; color: white; }
 
 .form-message {
     margin-top: 15px;
@@ -111,6 +130,10 @@
     background-color: #f8d7da;
     color: #721c24;
     display: block;
+}
+
+.password-change-password {
+    position: relative;
 }
 
 .loading-spinner {
