@@ -30,7 +30,7 @@ class OrderHistoryController {
 
       $view->setData('pageTitle', 'Riwayat Pesanan');
       $view->setData('pageStyles', ['/css/components/navbar_buyer.css','/css/pages/order_history.css']);
-      $view->setData('pageScripts', ['/js/pages/order_history.js']);
+      $view->setData('pageScripts', ['/js/modules/topup_modal.js','/js/pages/order_history.js']);
       $view->setData('navbarFile', 'components/navbar_buyer.php');
       $view->setData('orders', $orders);
       $view->setData('current_filter', $status_filter);
@@ -63,8 +63,8 @@ class OrderHistoryController {
                 exit;
             }
 
-            $order_id = $_POST['order_id'] ?? $request->post('order_id') ?? null;
-            $status = $_POST['status'] ?? $request->post('status') ?? null;
+            $order_id = $_POST['order_id'] ?? $request->getDataBody('order_id') ?? null;
+            $status = $_POST['status'] ?? $request->getDataBody('status') ?? null;
 
             error_log("Raw - Order ID: {$order_id}, Status: {$status}, Buyer ID: {$buyer_id}");
 

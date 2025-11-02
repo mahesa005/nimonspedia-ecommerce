@@ -27,7 +27,7 @@ class CartController {
  
         $view->setData('pageTitle', 'Keranjang Belanja');
         $view->setData('pageStyles', ['/css/components/navbar_buyer.css', '/css/pages/cart.css']);
-        $view->setData('pageScripts', ['/js/pages/cart.js']);
+        $view->setData('pageScripts', ['/js/modules/topup_modal.js', '/js/pages/cart.js']);
         $view->setData('navbarFile', 'components/navbar_buyer.php');
         
         $view->setData('cart_item_count', $totalItems);
