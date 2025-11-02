@@ -42,7 +42,7 @@ class OrderItemRepository {
     
     public function findByOrderId(int $order_id): array {
         $sql = 'SELECT oi.*, p.product_name, p.main_image_path
-                FROM "order_item" oi
+                FROM "order_items" oi
                 JOIN "product" p ON oi.product_id = p.product_id
                 WHERE oi.order_id = :order_id';
         
