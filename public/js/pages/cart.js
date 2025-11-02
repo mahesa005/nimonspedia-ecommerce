@@ -1,9 +1,11 @@
 const emptyCartHTML = `
-    <div class="cart-empty">
-        <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
-        <p>Keranjang Anda masih kosong.</p>
-        <a href="/" class="btn btn-primary">Mulai Belanja</a>
-    </div>
+        <div class="cart-empty-wrapper">
+            <div class="cart-empty">
+                <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
+                <p>Keranjang Anda masih kosong.</p>
+                <a href="/" class="btn btn-primary">Mulai Belanja</a>
+            </div>
+        </div>
 `;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -85,30 +87,45 @@ function handleDelete(button) {
 function handleQuantityChange(button) {
     const itemId = button.dataset.itemId;
     const input = document.querySelector(`.input-quantity[data-item-id="${itemId}"]`);
+    const stock = parseInt(input.dataset.stock);
     let quantity = parseInt(input.value);
-    
-    if(button.classList.contains('btn-inc')) {
+
+    if (button.classList.contains('btn-inc')) {
         quantity++;
     } else {
         quantity--;
     }
-    
+
     if (quantity < 1) quantity = 1;
     
+    if (stock && quantity > stock) {
+        quantity = stock;
+        input.value = stock;
+        showToast(`Stok maksimal ${stock}`, 'warning');
+        return;
+    }
+
     input.value = quantity;
-    
     updateItemOnServer(itemId, quantity, input);
 }
 
 function handleQuantityInputChange(input) {
     let quantity = parseInt(input.value);
     const itemId = input.dataset.itemId;
+    const stock = parseInt(input.dataset.stock);
 
     if (isNaN(quantity) || quantity < 1) {
         quantity = 1;
         input.value = 1;
     }
-    
+
+    if (stock && quantity > stock) {
+        quantity = stock;
+        input.value = stock;
+        showToast(`Stok maksimal ${stock}`, 'warning');
+        return;
+    }
+
     updateItemOnServer(itemId, quantity, input);
 }
 
@@ -127,11 +144,20 @@ function updateItemOnServer(itemId, quantity, input) {
         if (data.success) {
             const subtotalElem = document.getElementById(`subtotal-${itemId}`);
             if (subtotalElem && data.stores) {
-                const store = Object.values(data.stores)[0];
-                const item = store.items.find(i => i.cart_item_id === itemId);
-                if (item) {
-                    subtotalElem.textContent =
-                        `Rp ${(item.product.price * item.quantity).toLocaleString('id-ID')}`;
+                let foundItem = null;
+
+                for (const store of Object.values(data.stores)) {
+                    const item = store.items.find(i => i.cart_item_id == itemId);
+                    if (item) {
+                        foundItem = item;
+                        break;
+                    }
+                }
+
+                console.log({foundItem});
+                if (foundItem) {
+                    subtotalElem.textContent = 
+                        `Rp ${(foundItem.product.price * foundItem.quantity).toLocaleString('id-ID')}`;
                 }
             }
 
@@ -146,7 +172,10 @@ function updateItemOnServer(itemId, quantity, input) {
             showToast('Kuantitas diperbarui', 'success');
         } else {
             showToast(data.message || 'Gagal update kuantitas', 'error');
-            if (input) input.value = data.oldQuantity; 
+            if (input) {
+                const safeValue = data.oldQuantity ?? input.value ?? 1;
+                input.value = parseInt(safeValue) || 1;
+            }
         }
     })
     .catch(err => {
