@@ -5,6 +5,7 @@ use App\Core\Auth;
 use App\Core\View;
 use App\Services\OrderService;
 use App\Services\UserService;
+use App\Services\CartService;
 use App\Core\Request;
 
 class OrderHistoryController {
@@ -33,7 +34,8 @@ class OrderHistoryController {
       $view->setData('navbarFile', 'components/navbar_buyer.php');
       $view->setData('orders', $orders);
       $view->setData('current_filter', $status_filter);
-      $unique_item_count = $this->cart_service->countUniqueItems($buyer_id);
+      $cart_service = new CartService();
+      $unique_item_count = $cart_service->countUniqueItems($buyer_id);
       $view->setData('cart_item_count', $unique_item_count);
       $view->setData('user', $user);
         

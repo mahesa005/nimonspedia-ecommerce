@@ -317,6 +317,21 @@ class OrderRepository {
                 throw new \Exception("Status tidak valid: {$new_status}");
             }
 
+            $this->db->beginTransaction();
+            $orderSql = 'SELECT store_id, total_price, status FROM "order" WHERE order_id = :order_id AND buyer_id = :buyer_id';
+            $orderStmt = $this->db->prepare($orderSql);
+            $orderStmt->execute([
+                ':order_id' => $order_id,
+                ':buyer_id' => $buyer_id
+            ]);
+            $order = $orderStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$order) {
+                $this->db->rollBack();
+                error_log("Order not found for buyer_id={$buyer_id}, order_id={$order_id}");
+                return false;
+            }
+
             $sql = 'UPDATE "order" 
                     SET status = CAST(:status AS order_status)';
 
@@ -338,7 +353,32 @@ class OrderRepository {
             $rowCount = $stmt->rowCount();
             error_log("Rows affected: {$rowCount}");
 
-            return $result && $rowCount > 0;
+            if (!$result || $rowCount === 0) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            if ($new_status === 'received' && $order['status'] !== 'received') {
+                $balanceSql = 'UPDATE "store" 
+                            SET balance = balance + :amount 
+                            WHERE store_id = :store_id';
+                $balanceStmt = $this->db->prepare($balanceSql);
+                $balanceStmt->execute([
+                    ':amount' => $order['total_price'],
+                    ':store_id' => $order['store_id']
+                ]);
+
+                if ($balanceStmt->rowCount() === 0) {
+                    $this->db->rollBack();
+                    error_log("Failed to update store balance for store_id={$order['store_id']}");
+                    return false;
+                }
+
+                error_log("Store #{$order['store_id']} balance updated +{$order['total_price']} from order #$order_id");
+            }
+
+            $this->db->commit();
+            return true;
 
         } catch (PDOException $e) {
             error_log("PDOException in updateStatus: " . $e->getMessage());
