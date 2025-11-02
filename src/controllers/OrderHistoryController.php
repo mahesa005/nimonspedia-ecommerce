@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\View;
 use App\Services\OrderService;
+use App\Services\UserService;
 use App\Core\Request;
 
 class OrderHistoryController {
@@ -17,6 +18,9 @@ class OrderHistoryController {
    public function showPage(Request $request) {
       $buyer_id = Auth::id(); 
         
+      $user_service = new UserService();
+      $user = $user_service->getUserById($buyer_id);
+        
       $status_filter = $_GET['status'] ?? null;
         
       $orders = $this->orderService->getBuyerHistory($buyer_id, $status_filter);
@@ -24,11 +28,14 @@ class OrderHistoryController {
       $view = new View();
 
       $view->setData('pageTitle', 'Riwayat Pesanan');
-      $view->setData('pageStyles', ['/css/pages/order_history.css']);
+      $view->setData('pageStyles', ['/css/components/navbar_buyer.css','/css/pages/order_history.css']);
       $view->setData('pageScripts', ['/js/pages/order_history.js']);
       $view->setData('navbarFile', 'components/navbar_buyer.php');
       $view->setData('orders', $orders);
       $view->setData('current_filter', $status_filter);
+      $unique_item_count = $this->cart_service->countUniqueItems($buyer_id);
+      $view->setData('cart_item_count', $unique_item_count);
+      $view->setData('user', $user);
         
       $view->renderPage('pages/order_history.php');
    }
