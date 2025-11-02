@@ -283,6 +283,35 @@ class OrderRepository {
                 error_log("Store #{$order['store_id']} balance updated +{$order['total_price']} from order #$order_id");
             }
 
+            if ($new_status === 'rejected' && $order['status'] !== 'rejected') {
+                $orderItemsSql = '
+                    SELECT product_id, quantity
+                    FROM order_items
+                    WHERE order_id = :order_id
+                ';
+
+                $orderItemsStmt = $this->db->prepare($orderItemsSql);
+                $orderItemsStmt->execute([':order_id' => $order_id]);
+                $orderItems = $orderItemsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+                foreach ($orderItems as $item) {
+                    $returnStockSql = '
+                        UPDATE product
+                        SET stock = stock + :quantity
+                        WHERE product_id = :product_id
+                    ';
+
+                    $returnStockStmt = $this->db->prepare($returnStockSql);
+                    $returnStockStmt->execute([
+                        ':quantity' => $item['quantity'],
+                        ':product_id' => $item['product_id']
+                    ]);
+
+                    error_log("Returned stock +{$item['quantity']} for product_id={$item['product_id']}");
+                }
+            }
+
             $this->db->commit();
             return true;
 
