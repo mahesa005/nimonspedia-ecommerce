@@ -108,7 +108,7 @@ class OrderRepository {
         $params = ['buyer_id' => $buyer_id];
         $sql = 'SELECT 
                     o.order_id, o.buyer_id, o.store_id, o.total_price, 
-                    o.shipping_address, o.status, o.created_at, o.received_at,
+                    o.shipping_address, o.delivery_time, o.reject_reason, o.status, o.created_at, o.received_at,
                     s.store_id AS s_store_id,
                     s.user_id AS s_user_id,
                     s.store_name AS s_store_name,
@@ -138,6 +138,8 @@ class OrderRepository {
                     'store_id' => $row['store_id'],
                     'total_price' => $row['total_price'],
                     'shipping_address' => $row['shipping_address'],
+                    'delivery_time' => $row['delivery_time'],
+                    'reject_reason' => $row['reject_reason'],
                     'status' => $row['status'],
                     'created_at' => $row['created_at'],
                     'received_at' => $row['received_at']
