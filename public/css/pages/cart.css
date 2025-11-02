@@ -143,6 +143,27 @@
 .cart-item:last-child {
     border-bottom: none;
 }
+
+.cart-item.out-of-stock .item-details,
+.cart-item.out-of-stock .item-image,
+.cart-item.out-of-stock .item-quantity,
+.cart-item.out-of-stock .item-subtotal {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.cart-item.out-of-stock .item-actions {
+    opacity: 1;
+    pointer-events: auto;
+    font-weight: bold;
+}
+.item-details .out-of-stock-label {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-top: 6px;
+}
+
 .item-image {
     width: 80px;
     height: 80px;

@@ -22,13 +22,16 @@
                         </h3>
                         
                         <?php foreach ($storeData['items'] as $item):?>
-                            <div class="cart-item" data-item-id="<?= $item->cart_item_id ?>">
+                            <div class="cart-item <?= $item->product->isOutOfStock() ? 'out-of-stock' : '' ?>" data-item-id="<?= $item->cart_item_id ?>">
                                 <img src="<?= htmlspecialchars($item->product->main_image_path ?? '/images/default-product.png') ?>" 
                                      alt="<?= htmlspecialchars($item->product->product_name) ?>" class="item-image">
                                 
                                 <div class="item-details">
                                     <p class="item-name"><?= htmlspecialchars($item->product->product_name) ?></p>
                                     <p class="item-price">Rp <?= number_format($item->product->price) ?></p>
+                                    <?php if ($item->product->isOutOfStock()): ?>
+                                        <p class="out-of-stock-label">Stok Habis</p>
+                                    <?php endif; ?>
                                 </div>
                                 
                                 <div class="item-quantity">
@@ -72,9 +75,14 @@
                             Rp <?= number_format($storeData['storeTotal']) ?>
                         </span>
                     </div>
-
                     <hr>
                 <?php endforeach; ?>
+
+                <div class="summary-line">
+                    <span>Total Item</span>
+                    <span class="price" id="total-items"><?= $totalItems ?></span>
+                </div>
+
                 <div class="summary-line total">
                     <span>Grand Total</span>
                     <span class="price" id="grand-total">Rp <?= number_format($grandTotal) ?></span>

@@ -186,4 +186,20 @@ class CartService {
             'num_of_items' => $num_of_items
         ];
     }
+
+    public function countTotalQuantity(int $buyer_id): int {
+    try {
+        $rows = $this->cart_repo->findAllByBuyerId($buyer_id);
+        $total = 0;
+
+        foreach ($rows as $row) {
+            $total += (int)($row['quantity'] ?? 0);
+        }
+
+        return $total;
+    } catch (PDOException $e) {
+        error_log("Error counting total quantity for buyer $buyer_id: " . $e->getMessage());
+        return 0;
+    }
+}
 }

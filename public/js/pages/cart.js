@@ -60,7 +60,9 @@ function handleDelete(button) {
                     updateNavbarBadge(data.newCount);
 
                     if (data.stores) updateStoreTotals(data.stores);
-
+                    if (data.success && data.totalItems !== undefined) {
+                        updateTotalItemsDisplay(data.totalItems);
+                    }
                     showToast('Item berhasil dihapus', 'success');
 
                     const cartContainer = document.querySelector('.cart-container');
@@ -176,6 +178,10 @@ function updateItemOnServer(itemId, quantity, input) {
                             `Rp ${data.grandTotal.toLocaleString('id-ID')}`;
                     }
 
+                    if (data.success && data.totalItems !== undefined) {
+                        updateTotalItemsDisplay(data.totalItems);
+                    }
+
                     showToast('Kuantitas diperbarui', 'success');
                 } else {
                     showToast(data.message || 'Gagal update kuantitas', 'error');
@@ -228,4 +234,9 @@ function updateStoreTotals(stores) {
             storeSummaryTotal.textContent = `Rp ${store.storeTotal.toLocaleString('id-ID')}`;
         }
     });
+}
+
+function updateTotalItemsDisplay(totalItems) {
+    const totalElem = document.getElementById('total-items');
+    if (totalElem) totalElem.textContent = totalItems;
 }

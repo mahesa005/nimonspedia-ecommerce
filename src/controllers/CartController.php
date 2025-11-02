@@ -22,17 +22,18 @@ class CartController {
         $user = $user_service->getUserById($buyer_id);
         
         $cartData = $this->cartService->getCartItems($buyer_id);
-        $totalItems = $this->cartService->countUniqueItems($buyer_id);
-
+        $unique_item_count = $this->cartService->countUniqueItems($buyer_id);
+        $totalItems = $this->cartService->countTotalQuantity($buyer_id);
         $view = new View();
  
         $view->setData('pageTitle', 'Keranjang Belanja');
         $view->setData('pageScripts', ['/js/pages/cart.js']);
-        $view->setData('navbarFile', 'components/navbar_cart.php');
-        $view->setData('pageStyles', ['/css/components/navbar_cart.css', '/css/pages/cart.css']);
+        $view->setData('navbarFile', 'components/navbar_buyer.php');
+        $view->setData('pageStyles', ['/css/components/navbar_buyer.css', '/css/pages/cart.css']);
         $view->setData('stores', $cartData['stores']);
         $view->setData('user', $user);
         $view->setData('grandTotal', $cartData['grandTotal']);
+        $view->setData('cart_item_count', $unique_item_count);
         $view->setData('totalItems', $totalItems);
 
         $view->setData('pageScripts', [
@@ -106,13 +107,14 @@ class CartController {
 
         try {
             $this->cartService->addItem($buyer_id, $product_id, $quantity);
-            
+            $totalItems = $this->cartService->countTotalQuantity($buyer_id);
             $newCount = $this->cartService->countUniqueItems($buyer_id);
             
             echo json_encode([
                 'success' => true, 
                 'newCount' => $newCount, 
-                'message' => 'Produk ditambahkan ke keranjang!'
+                'message' => 'Produk ditambahkan ke keranjang!',
+                'totalItems' => $totalItems
             ]);
 
         } catch (\Exception $e) {
@@ -137,12 +139,14 @@ class CartController {
             
             $cartData = $this->cartService->getCartItems($buyer_id);
             $newCount = $this->cartService->countUniqueItems($buyer_id);
+            $totalItems = $this->cartService->countTotalQuantity($buyer_id);
 
             echo json_encode([
                 'success' => true,
                 'newCount' => $newCount,
                 'grandTotal' => $cartData['grandTotal'],
-                'stores' => $cartData['stores'] 
+                'stores' => $cartData['stores'],
+                'totalItems' => $totalItems
             ]);
         } catch (\Exception $e) {
             http_response_code(400);
@@ -165,12 +169,14 @@ class CartController {
             
             $newCount = $this->cartService->countUniqueItems($buyer_id);
             $cartData = $this->cartService->getCartItems($buyer_id);
-         
+            $totalItems = $this->cartService->countTotalQuantity($buyer_id);
+            
             echo json_encode([
                 'success' => true,
                 'newCount' => $newCount,
                 'grandTotal' => $cartData['grandTotal'],
-                'stores' => $cartData['stores']
+                'stores' => $cartData['stores'],
+                'totalItems' => $totalItems
             ]);
         } catch (\Exception $e) {
             http_response_code(400);
