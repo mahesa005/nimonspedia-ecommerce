@@ -334,3 +334,117 @@ textarea {
     justify-content: center;
     margin-top: 1.5rem;
 }
+
+@media (max-width: 768px) {
+    .checkout-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-right {
+        position: static;
+        margin-top: 24px;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    .shipping-section,
+    .store-section,
+    .summary-card,
+    .balance-section {
+        padding: 16px;
+    }
+
+    .section-title {
+        font-size: 16px;
+    }
+
+    .product-item {
+        grid-template-columns: 60px 1fr;
+    }
+
+    .product-image {
+        width: 60px;
+        height: 60px;
+    }
+
+    .address-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .address-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .checkout-btn {
+        font-size: 15px;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 12px;
+    }
+
+    .checkout-wrapper {
+        gap: 12px;
+    }
+
+    .section-title {
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+
+    .address-info h3 {
+        font-size: 15px;
+    }
+
+    .address-detail {
+        font-size: 13px;
+    }
+
+    .product-item {
+        grid-template-columns: 50px 1fr;
+        gap: 12px;
+        padding: 12px 0;
+    }
+
+    .product-name {
+        font-size: 13px;
+    }
+
+    .summary-row,
+    .balance-row {
+        font-size: 13px;
+    }
+
+    .summary-total .summary-value {
+        font-size: 16px;
+    }
+
+    .checkout-btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .modal-wrapper {
+        padding: 16px;
+    }
+
+    .confirm-dialog {
+        width: 90%;
+        padding: 1.5rem;
+    }
+
+    .dialog-actions {
+        flex-direction: column;
+    }
+
+    .dialog-actions button {
+        width: 100%;
+    }
+}
