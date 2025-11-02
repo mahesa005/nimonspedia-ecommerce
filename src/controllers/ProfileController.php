@@ -27,6 +27,7 @@ class ProfileController {
         $view->setData('pageStyles', ['/css/pages/profile.css']);
         $view->setData('pageScripts', ['/js/pages/profile.js']);
         $view->setData('navbarFile', 'components/navbar_buyer.php');
+        $view->setData('pageStyles', ['/css/components/navbar_buyer.css','/css/pages/profile.css']);
         $view->setData('user', $user);
         $view->renderPage('pages/profile.php');
     }
