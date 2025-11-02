@@ -88,4 +88,28 @@ class UserRepository {
             throw $e;
         }
     }
+    
+    public function updateProfile(int $user_id, string $name, string $address): bool {
+        $sql = 'UPDATE "user" SET name = ?, address = ?, updated_at = NOW() 
+                WHERE user_id = ?';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$name, $address, $user_id]);
+        } catch (\PDOException $e) {
+            error_log("Error updating profile for user $user_id: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updatePassword(int $user_id, string $new_hashed_password): bool {
+        $sql = 'UPDATE "user" SET "password" = ?, updated_at = NOW() 
+                WHERE user_id = ?';
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$new_hashed_password, $user_id]);
+        } catch (\PDOException $e) {
+            error_log("Error updating password for user $user_id: " . $e->getMessage());
+            return false;
+        }
+    }
 }

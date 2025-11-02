@@ -4,6 +4,7 @@ use App\Controllers\TestController;
 use App\Controllers\ProductManagementController;
 use App\Controllers\ProductController;
 use App\Controllers\OrderHistoryController;
+use App\Controllers\ProfileController;
 use App\Controllers\BuyerProfileController;
 use App\Controllers\SellerDashboardController;
 use App\Controllers\CartController;
@@ -148,3 +149,18 @@ $router->add('POST', '/seller/orders/action',
     [AuthMiddleware::class, RoleMiddleware::class]  
 );
 $router->add('GET', '/store/{id}', [StoreController::class, 'showStoreDetailPage']);
+
+$router->add('GET', '/profile',
+    [ProfileController::class, 'showPage'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/profile/update',
+    [ProfileController::class, 'update'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/profile/password',
+    [ProfileController::class, 'changePassword'],
+    [AuthMiddleware::class]
+);
