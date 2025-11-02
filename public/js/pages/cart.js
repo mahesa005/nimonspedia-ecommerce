@@ -1,15 +1,14 @@
 const emptyCartHTML = `
-        <div class="cart-empty-wrapper">
-            <div class="cart-empty">
-                <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
-                <p>Keranjang Anda masih kosong.</p>
-                <a href="/" class="btn btn-primary">Mulai Belanja</a>
-            </div>
+    <div class="cart-empty-wrapper">
+        <div class="cart-empty">
+            <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
+            <p>Keranjang Anda masih kosong.</p>
+            <a href="/" class="btn btn-primary">Mulai Belanja</a>
         </div>
+    </div>
 `;
 
 document.addEventListener('DOMContentLoaded', () => {
-
     const cartItemsContainer = document.querySelector('.cart-items');
 
     if (cartItemsContainer) {
@@ -19,69 +18,74 @@ document.addEventListener('DOMContentLoaded', () => {
             if (target.classList.contains('btn-delete')) {
                 handleDelete(target);
             }
-            
+
             if (target.classList.contains('btn-inc') || target.classList.contains('btn-dec')) {
                 handleQuantityChange(target);
             }
         });
 
         cartItemsContainer.addEventListener('change', (event) => {
-             const target = event.target;
-             if(target.classList.contains('input-quantity')) {
+            const target = event.target;
+            if (target.classList.contains('input-quantity')) {
                 handleQuantityInputChange(target);
-             }
+            }
         });
     }
-
 });
-
 
 function handleDelete(button) {
     const itemId = button.dataset.itemId;
-
     if (!confirm('Anda yakin ingin menghapus item ini dari keranjang?')) return;
 
-    fetch('/cart/delete', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({ cart_item_id: itemId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const itemElem = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
-            const storeGroup = itemElem.closest('.store-group');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/cart/delete', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-            itemElem.remove();
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+                const data = JSON.parse(xhr.responseText);
 
-            if (storeGroup.querySelectorAll('.cart-item').length === 0) {
-                storeGroup.remove();
-            }
+                if (data.success) {
+                    const itemElem = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+                    const storeGroup = itemElem.closest('.store-group');
+                    itemElem.remove();
 
-            updateTotals(data.grandTotal);
-            updateNavbarBadge(data.newCount);
+                    if (storeGroup.querySelectorAll('.cart-item').length === 0) {
+                        storeGroup.remove();
+                    }
 
-            if (data.stores) updateStoreTotals(data.stores);
+                    updateTotals(data.grandTotal);
+                    updateNavbarBadge(data.newCount);
 
-            showToast('Item berhasil dihapus', 'success');
+                    if (data.stores) updateStoreTotals(data.stores);
 
-            const cartContainer = document.querySelector('.cart-container');
-            const remainingStores = document.querySelectorAll('.store-group');
+                    showToast('Item berhasil dihapus', 'success');
 
-            if (remainingStores.length === 0 && cartContainer) {
-                cartContainer.outerHTML = emptyCartHTML;
+                    const cartContainer = document.querySelector('.cart-container');
+                    const remainingStores = document.querySelectorAll('.store-group');
+
+                    if (remainingStores.length === 0 && cartContainer) {
+                        cartContainer.outerHTML = emptyCartHTML;
+                    }
+                } else {
+                    showToast(data.message || 'Gagal menghapus item', 'error');
+                }
+            } catch (err) {
+                console.error('JSON parse error:', err);
+                showToast('Terjadi kesalahan saat memproses respons', 'error');
             }
         } else {
-            showToast(data.message || 'Gagal menghapus item', 'error');
+            showToast('Terjadi kesalahan jaringan', 'error');
         }
-    })
-    .catch(err => {
-        console.error('Network or JSON error:', err);
+    };
+
+    xhr.onerror = function() {
         showToast('Terjadi kesalahan jaringan', 'error');
-    });
+    };
+
+    xhr.send(JSON.stringify({ cart_item_id: itemId }));
 }
 
 function handleQuantityChange(button) {
@@ -96,12 +100,16 @@ function handleQuantityChange(button) {
         quantity--;
     }
 
-    if (quantity < 1) quantity = 1;
-    
+    if (quantity < 1) {
+        quantity = 1;
+        showToast(`Belanja minimal 1 produk`, 'error');
+        return;
+    }
+
     if (stock && quantity > stock) {
         quantity = stock;
         input.value = stock;
-        showToast(`Stok maksimal ${stock}`, 'warning');
+        showToast(`Stok maksimal ${stock}`, 'error');
         return;
     }
 
@@ -117,76 +125,84 @@ function handleQuantityInputChange(input) {
     if (isNaN(quantity) || quantity < 1) {
         quantity = 1;
         input.value = 1;
+        showToast(`Belanja minimal 1 produk`, 'error');
+        return;
     }
 
     if (stock && quantity > stock) {
         quantity = stock;
         input.value = stock;
-        showToast(`Stok maksimal ${stock}`, 'warning');
+        showToast(`Stok maksimal ${stock}`, 'error');
         return;
     }
 
     updateItemOnServer(itemId, quantity, input);
 }
 
-
 function updateItemOnServer(itemId, quantity, input) {
-    fetch('/cart/update', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({ cart_item_id: itemId, quantity: quantity })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const subtotalElem = document.getElementById(`subtotal-${itemId}`);
-            if (subtotalElem && data.stores) {
-                let foundItem = null;
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/cart/update', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-                for (const store of Object.values(data.stores)) {
-                    const item = store.items.find(i => i.cart_item_id == itemId);
-                    if (item) {
-                        foundItem = item;
-                        break;
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+                const data = JSON.parse(xhr.responseText);
+
+                if (data.success) {
+                    const subtotalElem = document.getElementById(`subtotal-${itemId}`);
+                    if (subtotalElem && data.stores) {
+                        let foundItem = null;
+                        for (const store of Object.values(data.stores)) {
+                            const item = store.items.find(i => i.cart_item_id == itemId);
+                            if (item) {
+                                foundItem = item;
+                                break;
+                            }
+                        }
+
+                        if (foundItem) {
+                            subtotalElem.textContent =
+                                `Rp ${(foundItem.product.price * foundItem.quantity).toLocaleString('id-ID')}`;
+                        }
+                    }
+
+                    if (data.stores) updateStoreTotals(data.stores);
+
+                    const grandTotalElem = document.getElementById('grand-total');
+                    if (grandTotalElem) {
+                        grandTotalElem.textContent =
+                            `Rp ${data.grandTotal.toLocaleString('id-ID')}`;
+                    }
+
+                    showToast('Kuantitas diperbarui', 'success');
+                } else {
+                    showToast(data.message || 'Gagal update kuantitas', 'error');
+                    if (input) {
+                        const safeValue = data.oldQuantity ?? input.value ?? 1;
+                        input.value = parseInt(safeValue) || 1;
                     }
                 }
-
-                console.log({foundItem});
-                if (foundItem) {
-                    subtotalElem.textContent = 
-                        `Rp ${(foundItem.product.price * foundItem.quantity).toLocaleString('id-ID')}`;
-                }
+            } catch (err) {
+                console.error('JSON parse error:', err);
+                showToast('Terjadi kesalahan saat memproses respons', 'error');
             }
-
-            if (data.stores) updateStoreTotals(data.stores);
-
-            const grandTotalElem = document.getElementById('grand-total');
-            if (grandTotalElem) {
-                grandTotalElem.textContent =
-                    `Rp ${data.grandTotal.toLocaleString('id-ID')}`;
-            }
-
-            showToast('Kuantitas diperbarui', 'success');
         } else {
-            showToast(data.message || 'Gagal update kuantitas', 'error');
-            if (input) {
-                const safeValue = data.oldQuantity ?? input.value ?? 1;
-                input.value = parseInt(safeValue) || 1;
-            }
+            showToast('Terjadi kesalahan jaringan', 'error');
         }
-    })
-    .catch(err => {
-        console.error('Network or JSON error:', err);
+    };
+
+    xhr.onerror = function() {
         showToast('Terjadi kesalahan jaringan', 'error');
-    });
+    };
+
+    xhr.send(JSON.stringify({ cart_item_id: itemId, quantity }));
 }
 
-
 function updateTotals(newGrandTotal) {
-    document.getElementById('grand-total').textContent = `Rp ${newGrandTotal.toLocaleString('id-ID')}`;
+    const el = document.getElementById('grand-total');
+    if (el) el.textContent = `Rp ${newGrandTotal.toLocaleString('id-ID')}`;
 }
 
 function updateNavbarBadge(newCount) {
