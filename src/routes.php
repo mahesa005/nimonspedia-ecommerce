@@ -3,6 +3,7 @@ use App\Controllers\AuthController;
 use App\Controllers\TestController;
 use App\Controllers\ProductManagementController;
 use App\Controllers\ProductController;
+use App\Controllers\OrderHistoryController;
 use App\Controllers\BuyerProfileController;
 use App\Controllers\SellerDashboardController;
 use App\Controllers\CartController;
@@ -115,6 +116,17 @@ $router->add('GET', '/checkout', [CheckoutController::class, 'showCheckoutPage']
 
 $router->add('POST', '/checkout', 
     [CheckoutController::class, 'handleCheckout'], 
+    [AuthMiddleware::class]
+);
+
+// Order History Routes
+$router->add('GET', '/orders',
+    [OrderHistoryController::class, 'showPage'],
+    [AuthMiddleware::class]
+);
+
+$router->add('POST', '/orders/update-status',
+    [OrderHistoryController::class, 'updateStatus'],
     [AuthMiddleware::class]
 );
 
