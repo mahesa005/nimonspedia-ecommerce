@@ -14,7 +14,7 @@ class StoreService {
 
     // Get store by ID
     public function getStoreById(int $store_id): ?Store {
-        return $this->storeRepo->getById($store_id);
+        return $this->storeRepo->findById($store_id);
     }
 
     // Get store by user ID

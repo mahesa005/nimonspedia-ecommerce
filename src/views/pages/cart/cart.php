@@ -64,7 +64,17 @@
 
             <div class="cart-summary">
                 <h3>Rangkuman Belanja</h3>
-                <div class="summary-line">
+                <?php foreach ($stores as $storeName => $storeData): ?>
+                    <div class="summary-line">
+                        <span><?= htmlspecialchars($storeName) ?></span>
+                        <span class="price" id="summary-store-total-<?= $storeData['store_id'] ?>">
+                            Rp <?= number_format($storeData['storeTotal']) ?>
+                        </span>
+                    </div>
+
+                    <hr>
+                <?php endforeach; ?>
+                <div class="summary-line total">
                     <span>Grand Total</span>
                     <span class="price" id="grand-total">Rp <?= number_format($grandTotal) ?></span>
                 </div>

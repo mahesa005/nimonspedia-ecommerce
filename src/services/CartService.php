@@ -27,6 +27,7 @@ class CartService {
 
             foreach ($rows as $row) {
                 $product = new Product($row); 
+                $product->store_name = $row['store_name'] ?? null;
                 $cartItem = new CartItem($row);
                 $cartItem->product = $product;
                 

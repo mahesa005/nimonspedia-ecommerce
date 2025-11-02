@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     quantityInput.value = 1;
                     updateButtonStates();
                     
-                    if (response.cartItemCount !== undefined) {
+                    if (response.cartItemCount) {
                         updateCartBadge(response.cartItemCount);
                     }
                 } else {
@@ -167,6 +167,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const cartBadge = document.querySelector('.item-counter');
         if (cartBadge && count !== undefined) {
             cartBadge.textContent = count;
+        } else if (!cartBadge && count == 1) {
+            const newBadge = document.createElement('div');
+            newBadge.classList.add('item-counter');
+            newBadge.textContent = count;
+            const cartIcon = document.querySelector('.navbar-cart');
+            if (cartIcon) {
+                cartIcon.appendChild(newBadge);
+            }
         }
     }
     
