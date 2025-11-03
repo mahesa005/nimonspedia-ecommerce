@@ -56,12 +56,70 @@ function showOrderDetails(order) {
     document.getElementById('modalAddress').textContent = order.shipping_address || '-';
     document.getElementById('modalDate').textContent = new Date(order.created_at).toLocaleString('id-ID');
     
-    const statusBadge = `<span class="status-badge status-${statusColors[order.status] || 'gray'}">${statusLabels[order.status] || order.status}</span>`;
-    document.getElementById('modalStatus').innerHTML = statusBadge;
+    // Set status
+    const statusLabels = {
+        'waiting_approval': 'Menunggu Persetujuan',
+        'approved': 'Disetujui',
+        'rejected': 'Ditolak',
+        'on_delivery': 'Dalam Pengiriman',
+        'received': 'Diterima',
+        'completed': 'Selesai'
+    };
     
+    const statusColors = {
+        'waiting_approval': 'orange',
+        'approved': 'blue',
+        'rejected': 'red',
+        'on_delivery': 'purple',
+        'received': 'green',
+        'completed': 'green'
+    };
+    
+    const statusLabel = statusLabels[order.status] || order.status;
+    const statusColor = statusColors[order.status] || 'gray';
+    
+    document.getElementById('modalStatus').innerHTML = 
+        `<span class="status-badge status-${statusColor}">${statusLabel}</span>`;
+    
+    // Render products list
+
     renderOrderActions(order);
+    const productsList = document.getElementById('modalProductsList');
+    productsList.innerHTML = '';
+    if (order.products && order.products.length > 0) {
+        order.products.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'product-item';
+            const img = p.main_image_path ? `<img src="${p.main_image_path}" alt="${escapeHtml(p.product_name)}" class="product-image">`
+                                          : `<div class="product-image-placeholder"><svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></div>`;
+            item.innerHTML = `
+                ${img}
+                <div class="product-details">
+                    <div class="product-name"><strong>${escapeHtml(p.product_name)}</strong></div>
+                    <div class="product-meta">
+                        <span>Kuantitas: ${p.quantity}</span>
+                        <span class="product-price"> Rp ${Number(p.subtotal * p.quantity).toLocaleString('id-ID')}</span>
+                        <span>Subtotal: Rp ${Number(p.subtotal).toLocaleString('id-ID')}</span>
+                    </div>
+                </div>
+            `;
+            productsList.appendChild(item);
+        });
+    } else {
+        productsList.innerHTML = '<div class="muted">Tidak ada produk</div>';
+    }
     
     modal.classList.add('active');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 function closeModal() {

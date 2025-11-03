@@ -36,7 +36,6 @@ class OrderManagementService {
 
         $orders = $this->orderRepo->getStoreOrders($store_id, $status, $search, $limit, $offset);
         $totalOrders = $this->orderRepo->countStoreOrders($store_id, $status, $search);
-        
         return [
             'store' => $store, // Include store data
             'orders' => $orders,

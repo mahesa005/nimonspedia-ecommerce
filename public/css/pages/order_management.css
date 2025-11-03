@@ -438,3 +438,35 @@ tr:hover {
     padding: 8px;
   }
 }
+
+.product-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.product-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tp-gray-200);
+  font-size: 14px;
+}
+
+.product-list li:last-child {
+  border-bottom: none;
+}
+
+.product-list li strong {
+  color: var(--tp-gray-900);
+  font-weight: 600;
+}
+
+.product-list li .quantity {
+  color: var(--tp-gray-500);
+  margin: 0 8px;
+}
+
+.product-list li .price {
+  color: var(--tp-green-dark);
+  font-weight: 700;
+  float: right;
+}

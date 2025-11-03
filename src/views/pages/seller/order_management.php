@@ -120,6 +120,7 @@ $statusColors = [
                         <tr>
                             <th>ID Pesanan</th>
                             <th>Pembeli</th>
+                            <th>Produk</th>
                             <th>Total</th>
                             <th>Status</th>
                             <th>Tanggal</th>
@@ -131,6 +132,18 @@ $statusColors = [
                             <tr>
                                 <td class="order-id">#<?= $order['order_id'] ?></td>
                                 <td><?= htmlspecialchars($order['buyer_name'] ?? 'N/A') ?></td>
+                                <td>
+                                    <?php if (!empty($order['products'])): ?>
+                                        <div class="product-preview">
+                                            <?= htmlspecialchars($order['products'][0]['product_name']) ?>
+                                            <?php if (count($order['products']) > 1): ?>
+                                                <span class="product-count-badge">+<?= count($order['products']) - 1 ?> lainnya</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="muted">-</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="price">Rp <?= number_format($order['total_price'], 0, ',', '.') ?></td>
                                 <td>
                                     <span class="status-badge status-<?= $statusColors[$order['status']] ?? 'gray' ?>">
@@ -206,8 +219,10 @@ $statusColors = [
                     <strong>Tanggal Pesanan:</strong>
                     <span id="modalDate"></span>
                 </div>
-            </div>
-
+                <div class="info-item">
+                    <strong>Produk:</strong>
+                    <ul id="modalProductsList" class="product-list"></ul>
+                </div>
             <div class="order-actions" id="orderActions"></div>
         </div>
     </div>

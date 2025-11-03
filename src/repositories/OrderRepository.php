@@ -89,6 +89,16 @@ class OrderRepository {
             $stmt->execute();
             $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            error_log("Fetched " . count($orders) . " orders for store_id {$store_id}");
+
+            foreach ($orders as &$order) {
+                $orderId = (int)$order['order_id'];
+                $order['products'] = $this->getOrderItems($orderId);
+                error_log("Order {$orderId} products: " . count($order['products']));
+                $order['product_count'] = count($order['products']);
+                $order['first_product_name'] = $order['products'][0]['product_name'] ?? null;
+                $order['total_quantity'] = array_sum(array_column($order['products'], 'quantity')) ?: 0;
+            }
             return $orders;
         } catch (PDOException $e) {
             error_log("Database error (getStoreOrders): " . $e->getMessage());
@@ -327,7 +337,8 @@ class OrderRepository {
             $sql = 'SELECT oi.*, p.product_name, p.main_image_path 
                     FROM "order_items" oi
                     JOIN "product" p ON oi.product_id = p.product_id
-                    WHERE oi.order_id = :order_id';
+                    WHERE oi.order_id = :order_id
+                    ORDER BY oi.order_item_id';
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':order_id' => $order_id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

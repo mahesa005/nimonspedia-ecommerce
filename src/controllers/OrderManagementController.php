@@ -33,6 +33,7 @@ class OrderManagementController {
             $this->view->setData('pagination', $data['pagination']);
             $this->view->setData('filters', $data['filters']);
             $this->view->setData('store', $data['store']); // Store from service
+            error_log("DEBUG orders dump: " . print_r($data['orders'] ?? [], true));
 
             // Render page
             $this->view->renderPage('pages/seller/order_management.php');
