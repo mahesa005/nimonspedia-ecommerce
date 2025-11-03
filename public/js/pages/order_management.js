@@ -81,34 +81,62 @@ function showOrderDetails(order) {
     document.getElementById('modalStatus').innerHTML = 
         `<span class="status-badge status-${statusColor}">${statusLabel}</span>`;
     
-    // Render products list
-
-    renderOrderActions(order);
+    // Render products list with images
     const productsList = document.getElementById('modalProductsList');
     productsList.innerHTML = '';
+    
     if (order.products && order.products.length > 0) {
-        order.products.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'product-item';
-            const img = p.main_image_path ? `<img src="${p.main_image_path}" alt="${escapeHtml(p.product_name)}" class="product-image">`
-                                          : `<div class="product-image-placeholder"><svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></div>`;
-            item.innerHTML = `
-                ${img}
-                <div class="product-details">
-                    <div class="product-name"><strong>${escapeHtml(p.product_name)}</strong></div>
+        order.products.forEach((product, index) => {
+            const li = document.createElement('li');
+            const productName = escapeHtml(product.product_name);
+            const quantity = product.quantity;
+            const subtotal = Number(product.subtotal);
+            
+            // Hitung harga per item dari subtotal / quantity
+            const pricePerItem = quantity > 0 ? subtotal / quantity : 0;
+            const price = Number(product.price) || pricePerItem; // Gunakan dari DB atau hitung ulang
+            
+            const priceFormatted = price.toLocaleString('id-ID');
+            const subtotalFormatted = subtotal.toLocaleString('id-ID');
+            
+            const imageUrl = product.main_image_path || '/images/placeholder.png';
+            
+            li.className = 'product-item';
+            li.innerHTML = `
+                <div class="product-item-image">
+                    <img src="${imageUrl}" alt="${productName}" onerror="this.src='/images/placeholder.png'">
+                </div>
+                <div class="product-item-details">
+                    <p></p>
+                    <strong class="product-name">${productName}</strong>
                     <div class="product-meta">
-                        <span>Kuantitas: ${p.quantity}</span>
-                        <span class="product-price"> Rp ${Number(p.subtotal * p.quantity).toLocaleString('id-ID')}</span>
-                        <span>Subtotal: Rp ${Number(p.subtotal).toLocaleString('id-ID')}</span>
+                        <span class="quantity">Qty: ${quantity}</span>
+                        <span class="price-per-item">@ Rp ${priceFormatted}</span>
+                    </div>
+                    <div class="product-subtotal">
+                        Subtotal: <strong>Rp ${subtotalFormatted}</strong>
+                        <small class="calculation">(Rp ${priceFormatted} × ${quantity})</small>
                     </div>
                 </div>
             `;
-            productsList.appendChild(item);
+            
+            // Add separator (except for last item)
+            if (index < order.products.length - 1) {
+                const separator = document.createElement('div');
+                separator.className = 'product-separator';
+                li.appendChild(separator);
+            }
+            
+            productsList.appendChild(li);
         });
     } else {
-        productsList.innerHTML = '<div class="muted">Tidak ada produk</div>';
+        const li = document.createElement('li');
+        li.textContent = 'Tidak ada produk';
+        li.style.color = '#6b7280';
+        productsList.appendChild(li);
     }
     
+    // Open modal
     modal.classList.add('active');
 }
 
