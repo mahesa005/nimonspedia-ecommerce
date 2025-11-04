@@ -58,7 +58,7 @@ use App\Core\View;
             <button class="filter-toggle" id="filterToggle">☰ Filter</button>
             <div class="search-bar">
                 <input type="search" id="search-input" placeholder="Search products..."> 
-                <select class="sort-dropdown" id="sort-dropdown"> 
+                <select class="sort-dropdown" id="sort-dropdown" aria-label="Urutkan berdasarkan"> 
                     <option value="newest">Terbaru</option>
                     <option value="price-low">Harga: Rendah ke Tinggi</option>
                     <option value="price-high">Harga: Tinggi ke Rendah</option>

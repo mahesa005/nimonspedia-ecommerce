@@ -51,7 +51,7 @@ use App\Core\Auth;
                             <?php endif; ?>
                         </div>
                         <div class="store-details">
-                            <h3 class="store-name" id="storeName"><?php echo htmlspecialchars($product->store_name)?></h3>
+                            <h2 class="store-name" id="storeName"><?php echo htmlspecialchars($product->store_name)?></h2>
                         </div>
                     </div>
                     <div class="store-description"><?php echo ($store->store_description) ?></div>

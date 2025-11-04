@@ -2,7 +2,7 @@
     <h1>Keranjang Belanja Anda</h1>
     
     <?php if (empty($stores)): ?>
-        <div class="cart-empty-wrapper">
+        <div class="cart-empty-wrapper" role="region" aria-label="Status Keranjang">
             <div class="cart-empty">
                 <img src="/image/empty-cart.svg" alt="Keranjang Kosong" class="empty-cart-icon">
                 <p>Keranjang Anda masih kosong.</p>
@@ -17,9 +17,9 @@
             <div class="cart-items">
                 <?php foreach ($stores as $storeName => $storeData): ?>
                     <div class="store-group">
-                        <h3 class="store-name">
+                        <h2 class="store-name">
                             <a href="/store/<?= $storeData['store_id'] ?>"><?= htmlspecialchars($storeName) ?></a>
-                        </h3>
+                        </h2>
                         
                         <?php foreach ($storeData['items'] as $item):?>
                             <div class="cart-item <?= $item->product->isOutOfStock() ? 'out-of-stock' : '' ?>" data-item-id="<?= $item->cart_item_id ?>">
@@ -38,7 +38,8 @@
                                     <button class="btn-quantity btn-dec" data-item-id="<?= $item->cart_item_id ?>">-</button>
                                     <input type="number" value="<?= $item->quantity ?>" class="input-quantity" 
                                            data-item-id="<?= $item->cart_item_id ?>" 
-                                           min="1" max="<?= $item->product->stock ?>">
+                                           min="1" max="<?= $item->product->stock ?>>"
+                                           aria-label="Kuantitas untuk <?= htmlspecialchars($item->product->product_name) ?>">
                                     <button class="btn-quantity btn-inc" data-item-id="<?= $item->cart_item_id ?>">+</button>
                                 </div>
                                 
@@ -67,7 +68,7 @@
 
 
             <div class="cart-summary">
-                <h3>Rangkuman Belanja</h3>
+                <h2>Rangkuman Belanja</h2>
                 <?php foreach ($stores as $storeName => $storeData): ?>
                     <div class="summary-line">
                         <span><?= htmlspecialchars($storeName) ?></span>
