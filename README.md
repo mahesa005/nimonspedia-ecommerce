@@ -96,6 +96,9 @@ Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasika
 - **Halaman Detail Produk**
   ![Halaman Detail Produk](image/pages/detail_produk.png "Halaman Detail Produk")
 
+- **Halaman Detail Store**
+  ![Halaman Detail Store](image/pages/store_detail.png "Halaman Detail Store")
+
 - **Halaman Shopping Cart**
   ![Halaman Shopping Cart](image/pages/cart.png "Halaman Shopping Cart")
 
