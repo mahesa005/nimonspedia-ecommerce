@@ -159,6 +159,7 @@ Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasika
 - **Add Product (Seller):** 13523140
 - **Edit Product (Seller):** 13523140
 - **Order Management (Seller):** 13523140
+- **Data Export (Seller):** 13523140
 
 ### Client-side (HTML/CSS/JS)
 
@@ -177,3 +178,4 @@ Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasika
 - **Add Product (Seller):** 13523140
 - **Edit Product (Seller):** 13523140
 - **Order Management (Seller):** 13523140
+- **Data Export (Seller):** 13523140
