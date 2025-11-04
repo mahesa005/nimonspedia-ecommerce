@@ -43,7 +43,7 @@ class ExportService {
                 $iter = $this->repo->iterOrdersBySeller($sellerUserId, $from, $to, $status);
                 break;
             case 'products':
-                $headers = ['product_id','product_name','category_name','price','stock','status','updated_at'];
+                $headers = ['product_id','product_name','price','stock', 'updated_at'];
                 $iter = $this->repo->iterProductsBySeller($sellerUserId);
                 break;
             default: 

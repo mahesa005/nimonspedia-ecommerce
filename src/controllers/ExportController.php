@@ -1,5 +1,4 @@
 <?php
-// src/Controllers/ExportController.php
 namespace App\Controllers;
 
 use App\Core\Auth;
@@ -14,7 +13,6 @@ class ExportController {
         $this->svc = new ExportService();
     }
 
-    // src/Controllers/ExportController.php
     public function download(Request $req): void {
         $sellerUserId = Auth::id();
         $entity = $req->getQuery('entity') ?? 'orders';
@@ -25,16 +23,13 @@ class ExportController {
         ];
 
         try {
-            // Service akan mengirim header + CSV dan lalu exit();
             $this->svc->streamCsv($sellerUserId, $entity, $params);
-            return; // jaga-jaga
+            return;
         } catch (\Throwable $e) {
-            // Kalau BELUM ada output, baru boleh redirect.
             if (!headers_sent()) {
                 Session::set('error', 'Export gagal: '.$e->getMessage());
                 header('Location: /seller/dashboard');
             } else {
-                // Sudah ada output -> jangan kirim header apa pun lagi
                 error_log('Export CSV error (headers already sent): '.$e->getMessage());
             }
         }

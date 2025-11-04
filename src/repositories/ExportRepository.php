@@ -22,9 +22,9 @@ class ExportRepository {
             FROM "order" o
             JOIN "user" u ON u.user_id = o.buyer_id
             WHERE o.store_id = (SELECT s.store_id FROM "store" s WHERE s.user_id = :uid)
-              AND (:from IS NULL OR o.created_at::date >= CAST(:from AS date))
-              AND (:to   IS NULL OR o.created_at::date <= CAST(:to   AS date))
-              AND (:status IS NULL OR o.status = :status)
+                AND (:from::date IS NULL OR o.created_at::date >= :from::date)
+                AND (:to::date   IS NULL OR o.created_at::date <= :to::date)
+                AND (:status::order_status IS NULL OR o.status = :status::order_status)
             ORDER BY o.created_at DESC';
         
         error_log("ExportRepository::iterOrdersBySeller - Query: {$sql}");
@@ -83,8 +83,8 @@ class ExportRepository {
               END AS avg_order_value
             FROM "order" o
             WHERE o.store_id = (SELECT s.store_id FROM "store" s WHERE s.user_id = :uid)
-              AND (:from IS NULL OR o.created_at::date >= CAST(:from AS date))
-              AND (:to   IS NULL OR o.created_at::date <= CAST(:to   AS date))
+              AND (:from::date IS NULL OR o.created_at::date >= :from::date)
+              AND (:to::date   IS NULL OR o.created_at::date <= :to::date)
               AND o.status IN (\'received\')
             GROUP BY 1
             ORDER BY 1 DESC';
