@@ -15,6 +15,7 @@ use App\Core\Middleware\GuestMiddleware;
 use App\Core\Middleware\RoleMiddleware;
 use App\Core\Middleware\RedirectSellerMiddleware;
 use App\Controllers\OrderManagementController;
+use App\Controllers\ExportController;
 
 $router->add('GET', '/login',
     [AuthController::class, 'showLoginPage'],
@@ -167,5 +168,10 @@ $router->add('POST', '/profile/password',
 
 $router->add('POST', '/seller/store/update', 
     [StoreController::class, 'handleUpdateStore'],
+    [AuthMiddleware::class, RoleMiddleware::class]
+);
+
+$router->add('GET', '/seller/export.csv',
+    [ExportController::class, 'download'],
     [AuthMiddleware::class, RoleMiddleware::class]
 );

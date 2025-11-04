@@ -730,3 +730,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+.export-popover{
+  position:absolute; top:110%; right:0;
+  width:280px; padding:12px;
+  background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.10);
+  display:none; z-index:40;
+}
+.export-popover.show{ display:block; }
+.export-title{ font-size:12px; color:#6b7280; margin-bottom:8px; }
+.form-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:8px 0; }
+.form-row > span{ font-size:12px; color:#374151; flex:0 0 70px; }
+.form-input{ flex:1 1 auto; padding:8px 10px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; font-size:14px; }
+.filters{ margin-top:4px; }
+.export-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }

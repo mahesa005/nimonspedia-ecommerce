@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     initMetricAnimations();
     initEditStoreButton();
+    initExportPopover();
 
     function initMetricAnimations() {
         const metrics = document.querySelectorAll('.metric');
@@ -139,5 +140,81 @@ document.addEventListener('DOMContentLoaded', function() {
 
             xhr.send(formData);
         });
+    }
+    
+    function initExportPopover() {
+        const btn = document.getElementById('btnExport');
+        const pop = document.getElementById('exportPopover');
+        const entitySel = document.getElementById('exportEntity');
+        const fromEl = document.getElementById('filterFrom');
+        const toEl = document.getElementById('filterTo');
+        const statusWrap = document.getElementById('statusFilter');
+        const dateWrap = document.getElementById('dateFilters');
+        const submit = document.getElementById('exportSubmit');
+        const cancel = document.getElementById('exportCancel');
+
+        const STATUS_UI_TO_CODE = {
+            'Menunggu Persetujuan': 'waiting_approval',
+            'Disetujui': 'approved',
+            'Ditolak': 'rejected',
+            'Dalam Pengiriman': 'on_delivery',  
+            'Diterima': 'received',
+        };
+
+        if (!btn || !pop) return;
+
+        const openPop = () => { pop.classList.add('show'); pop.setAttribute('aria-hidden','false'); };
+        const closePop = () => { pop.classList.remove('show'); pop.setAttribute('aria-hidden','true'); };
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            pop.classList.contains('show') ? closePop() : openPop();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!pop.contains(e.target) && e.target !== btn) closePop();
+        });
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
+
+        const applyVisibility = () => {
+            if (!entitySel) return;
+            const val = entitySel.value;
+            const needDate = (val === 'orders' || val === 'revenue');
+            if (dateWrap)  dateWrap.style.display  = needDate ? 'block' : 'none';
+            if (statusWrap) statusWrap.style.display = (val === 'orders') ? 'block' : 'none';
+        };
+        if (entitySel) {
+            entitySel.addEventListener('change', applyVisibility);
+            applyVisibility();
+        }
+
+        const buildUrl = () => {
+            const params = new URLSearchParams();
+            if (entitySel) params.set('entity', entitySel.value || 'orders');
+
+            if (dateWrap && dateWrap.style.display !== 'none') {
+                if (fromEl && fromEl.value) params.set('from', fromEl.value);
+                if (toEl && toEl.value) params.set('to', toEl.value);
+            }
+            if (statusWrap && statusWrap.style.display !== 'none') {
+                const stEl = document.getElementById('filterStatus');
+                if (stEl && stEl.value) {
+                    const code = STATUS_UI_TO_CODE[stEl.value] || stEl.value; 
+                    params.set('status', code);
+                }
+            }
+            return '/seller/export.csv?' + params.toString();
+        };
+
+        if (submit) {
+            submit.addEventListener('click', () => {
+                window.location.href = buildUrl();
+                closePop();
+            });
+        }
+        if (cancel) {
+            cancel.addEventListener('click', (e) => { e.preventDefault(); closePop(); });
+        }
     }
 });

@@ -26,6 +26,60 @@ function rph($n) {
       <p class="sub">Pantau performa toko Anda secara real-time</p>
     </div>
     <div class="right">
+      <div class="export-wrap" style="position:relative; display:inline-block; margin-right:8px;">
+      <button id="btnExport" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        Export
+      </button>
+
+      <!-- Popover kecil muncul setelah tombol dipencet -->
+      <div id="exportPopover" class="export-popover" aria-hidden="true">
+        <div class="export-title">Export CSV</div>
+
+        <label class="form-row">
+          <span>Jenis data</span>
+          <select id="exportEntity" class="form-input">
+            <option value="orders">Orders</option>
+            <option value="products">Products</option>
+            <option value="revenue">Revenue harian</option>
+          </select>
+        </label>
+
+        <!-- Filter khusus orders dan revenue -->
+        <div id="dateFilters" class="filters">
+          <label class="form-row">
+            <span>Dari</span>
+            <input type="date" id="filterFrom" class="form-input">
+          </label>
+          <label class="form-row">
+            <span>Sampai</span>
+            <input type="date" id="filterTo" class="form-input">
+          </label>
+        </div>
+
+        <!-- Hanya untuk orders -->
+        <div id="statusFilter" class="filters">
+          <label class="form-row">
+            <span>Status</span>
+            <select id="filterStatus" class="form-input">
+              <option value="">Semua Status</option>
+              <option value="Menunggu Persetujuan">Menunggu Persetujuan</option>
+              <option value="Disetujui">Disetujui</option>
+              <option value="Ditolak">Ditolak</option>
+              <option value="Dalam Pengiriman">Dalam Pengiriman</option>
+              <option value="Diterima">Diterima</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="export-actions">
+          <button id="exportCancel" class="btn btn-ghost">Batal</button>
+          <button id="exportSubmit" class="btn btn-primary">Download</button>
+        </div>
+      </div>
+    </div>
       <a href="/seller/products" class="btn btn-ghost">
         <svg viewBox="0 0 24 24" width="16" height="16">
           <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2" fill="none"/>
