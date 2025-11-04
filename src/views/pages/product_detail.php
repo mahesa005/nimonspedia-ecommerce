@@ -64,7 +64,7 @@ use App\Core\Auth;
                     <label class="quantity-label">Jumlah:</label>
                     <div class="quantity-controls">
                         <button class="quantity-btn" id="decreaseBtn">-</button>
-                        <input type="number" class="quantity-input" id="quantityInput" value="1" min="1" readonly>
+                        <input type="number" class="quantity-input" id="quantityInput" value="1" min="1" readonly aria-label="Product quantity">
                         <button class="quantity-btn" id="increaseBtn">+</button>
                     </div>
                 </div>
