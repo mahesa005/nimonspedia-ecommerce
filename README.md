@@ -178,11 +178,11 @@ Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasika
 - **Add Product (Seller):** 13523140
 - **Edit Product (Seller):** 13523140
 - **Order Management (Seller):** 13523140
+- **Data Export (Seller):** 13523140
 
 ---
 
 ## 7. Bonus
-###  **Data Export (Seller):** 13523140
 ### Google Lighthouse
 - ![alt text](docs/lighthouse/l1.png)
 - ![alt text](docs/lighthouse/l2.png)
