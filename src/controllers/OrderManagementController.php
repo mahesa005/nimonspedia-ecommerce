@@ -24,10 +24,10 @@ class OrderManagementController {
         
 
         try {
-            $limit = (int)$request->getQuery('limit', 10);
+            $limit = (int)$request->getQuery('limit', 8);
             $validLimits = [4, 8, 12, 20];
             if (!in_array($limit, $validLimits)) {
-                $limit = 10;
+                $limit = 8;
             }
             
             $page = max(1, (int)$request->getQuery('page', 1));

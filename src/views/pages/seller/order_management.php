@@ -173,11 +173,18 @@ $statusColors = [
                         <div class="items-per-page">
                             <label for="itemsPerPage">Tampilkan:</label>
                             <select id="itemsPerPage">
-                                <option value="4" <?= isset($_GET['limit']) && $_GET['limit'] == 4 ? 'selected' : '' ?>>4</option>
-                                <option value="8" <?= isset($_GET['limit']) && $_GET['limit'] == 8 ? 'selected' : '' ?>>8</option>
-                                <option value="12" <?= isset($_GET['limit']) && $_GET['limit'] == 12 ? 'selected' : '' ?>>12</option>
-                                <option value="20" <?= isset($_GET['limit']) && $_GET['limit'] == 20 ? 'selected' : '' ?>>20</option>
+                                <option value="4" <?= $currentLimit == 4 ? 'selected' : '' ?>>4</option>
+                                <option value="8" <?= $currentLimit == 8 ? 'selected' : '' ?>>8</option>
+                                <option value="12" <?= $currentLimit == 12 ? 'selected' : '' ?>>12</option>
+                                <option value="20" <?= $currentLimit == 20 ? 'selected' : '' ?>>20</option>
                             </select>
+                        </div>
+                        
+                        <div class="pagination-info" id="paginationInfo">
+                            Menampilkan <?= (($pagination['currentPage'] - 1) * $currentLimit) + 1 ?> 
+                            hingga 
+                            <?= min($pagination['currentPage'] * $currentLimit, $pagination['totalOrders']) ?>
+                            dari <?= $pagination['totalOrders'] ?>
                         </div>
                         
                         <div class="pagination-info" id="paginationInfo">
@@ -199,15 +206,22 @@ $statusColors = [
                                 <?php if ($i == $pagination['currentPage']): ?>
                                     <span class="pagination-btn active"><?= $i ?></span>
                                 <?php else: ?>
-                                    <a href="?page=<?= $i ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
+                                    <a href="?page=<?= $i ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?>&limit=<?= $currentLimit ?>" 
                                        class="pagination-btn">
                                         <?= $i ?>
                                     </a>
                                 <?php endif; ?>
                             <?php endfor; ?>
 
+                            <?php if ($pagination['currentPage'] > 1): ?>
+                                <a href="?page=<?= $pagination['currentPage'] - 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?>&limit=<?= $currentLimit ?>" 
+                                   class="pagination-btn">
+                                    ← Prev
+                                </a>
+                            <?php endif; ?>
+
                             <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
-                                <a href="?page=<?= $pagination['currentPage'] + 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
+                                <a href="?page=<?= $pagination['currentPage'] + 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?>&limit=<?= $currentLimit ?>" 
                                    class="pagination-btn">
                                     Next →
                                 </a>
