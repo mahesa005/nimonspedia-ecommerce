@@ -174,3 +174,24 @@ Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasika
 - **Add Product (Seller):** 13523140
 - **Edit Product (Seller):** 13523140
 - **Order Management (Seller):** 13523140
+
+---
+
+## 7. Bonus
+### Google Lighthouse
+- ![alt text](docs/lighthouse/l1.png)
+- ![alt text](docs/lighthouse/l2.png)
+- ![alt text](docs/lighthouse/l3.png)
+- ![alt text](docs/lighthouse/l4.png)
+- ![alt text](docs/lighthouse/l5.png)
+- ![alt text](docs/lighthouse/l6.png)
+- ![alt text](docs/lighthouse/l7.png)
+- ![alt text](docs/lighthouse/l8.png)
+- ![alt text](docs/lighthouse/l9.png)
+- ![alt text](docs/lighthouse/l10.png)
+- ![alt text](docs/lighthouse/l11.png)
+- ![alt text](docs/lighthouse/l12.png)
+**Nilai accesibility rendah disebabkan oleh 3rd party rich text editor** 
+- ![alt text](docs/lighthouse/l13.png)
+**Nilai accesibility rendah disebabkan oleh 3rd party rich text editor** 
+- ![alt text](docs/lighthouse/l14.png)
