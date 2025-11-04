@@ -146,6 +146,8 @@ function showOrderDetails(order) {
         li.style.color = '#6b7280';
         productsList.appendChild(li);
     }
+
+    renderOrderActions(order);
     
     // Open modal
     modal.classList.add('active');
