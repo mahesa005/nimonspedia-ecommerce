@@ -172,6 +172,6 @@ $router->add('POST', '/seller/store/update',
 );
 
 $router->add('GET', '/seller/export.csv',
-    [App\Controllers\ExportController::class, 'download'],
+    [ExportController::class, 'download'],
     [AuthMiddleware::class, RoleMiddleware::class]
 );
