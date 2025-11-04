@@ -168,23 +168,52 @@ $statusColors = [
 
             <?php if ($pagination['totalPages'] > 1): ?>
                 <div class="pagination">
-                    <?php if ($pagination['currentPage'] > 1): ?>
-                        <a href="?page=<?= $pagination['currentPage'] - 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?>" 
-                           class="pagination-btn">
-                            ← Prev
-                        </a>
-                    <?php endif; ?>
+                    <!-- Items per page selector -->
+                    <div class="pagination-section">
+                        <div class="items-per-page">
+                            <label for="itemsPerPage">Tampilkan:</label>
+                            <select id="itemsPerPage">
+                                <option value="4" <?= isset($_GET['limit']) && $_GET['limit'] == 4 ? 'selected' : '' ?>>4</option>
+                                <option value="8" <?= isset($_GET['limit']) && $_GET['limit'] == 8 ? 'selected' : '' ?>>8</option>
+                                <option value="12" <?= isset($_GET['limit']) && $_GET['limit'] == 12 ? 'selected' : '' ?>>12</option>
+                                <option value="20" <?= isset($_GET['limit']) && $_GET['limit'] == 20 ? 'selected' : '' ?>>20</option>
+                            </select>
+                        </div>
+                        
+                        <div class="pagination-info" id="paginationInfo">
+                            Menampilkan <?= (($pagination['currentPage'] - 1) * (isset($_GET['limit']) ? (int)$_GET['limit'] : 10)) + 1 ?> 
+                            hingga 
+                            <?= min($pagination['currentPage'] * (isset($_GET['limit']) ? (int)$_GET['limit'] : 10), $pagination['totalOrders']) ?>
+                            dari <?= $pagination['totalOrders'] ?>
+                        </div>
+                        
+                        <div class="pagination-buttons">
+                            <?php if ($pagination['currentPage'] > 1): ?>
+                                <a href="?page=<?= $pagination['currentPage'] - 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
+                                   class="pagination-btn">
+                                    ← Prev
+                                </a>
+                            <?php endif; ?>
 
-                    <span class="pagination-info">
-                        Halaman <?= $pagination['currentPage'] ?> dari <?= $pagination['totalPages'] ?>
-                    </span>
+                            <?php for ($i = 1; $i <= $pagination['totalPages']; $i++): ?>
+                                <?php if ($i == $pagination['currentPage']): ?>
+                                    <span class="pagination-btn active"><?= $i ?></span>
+                                <?php else: ?>
+                                    <a href="?page=<?= $i ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
+                                       class="pagination-btn">
+                                        <?= $i ?>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
 
-                    <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
-                        <a href="?page=<?= $pagination['currentPage'] + 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?>" 
-                           class="pagination-btn">
-                            Next →
-                        </a>
-                    <?php endif; ?>
+                            <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
+                                <a href="?page=<?= $pagination['currentPage'] + 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
+                                   class="pagination-btn">
+                                    Next →
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             <?php endif; ?>
         <?php endif; ?>

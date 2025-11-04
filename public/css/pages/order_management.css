@@ -272,34 +272,142 @@ tr:hover {
 }
 
 .pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  padding-top: 20px;
-  margin-top: 20px;
-  border-top: 1px solid var(--tp-gray-200);
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
 }
 
-.pagination-btn {
-  padding: 8px 16px;
-  background: var(--tp-green);
-  color: white;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.2s;
+.pagination-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
-.pagination-btn:hover {
-  background: var(--tp-green-dark);
+.items-per-page {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.items-per-page label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.items-per-page select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background-color: #fff;
+    cursor: pointer;
+    color: #374151;
+}
+
+.items-per-page select:hover {
+    border-color: #9ca3af;
+}
+
+.items-per-page select:focus {
+    outline: none;
+    border-color: #03ac0e;
+    box-shadow: 0 0 0 3px rgba(3, 172, 14, 0.1);
 }
 
 .pagination-info {
-  font-size: 14px;
-  color: var(--tp-gray-600);
-  font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-align: center;
+    flex: 1;
+    min-width: 250px;
+}
+
+.pagination-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.pagination-btn {
+    padding: 0.6rem 0.9rem;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: #374151;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+}
+
+.pagination-btn:hover:not(.active) {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+    color: #111827;
+}
+
+.pagination-btn.active {
+    background-color: #03ac0e;
+    border-color: #03ac0e;
+    color: white;
+    cursor: default;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f9fafb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pagination-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .items-per-page {
+        justify-content: center;
+    }
+
+    .items-per-page select {
+        width: 100%;
+        max-width: 150px;
+    }
+
+    .pagination-info {
+        min-width: auto;
+        order: -1;
+    }
+
+    .pagination-buttons {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination-btn {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.85rem;
+        min-width: 35px;
+    }
+
+    .pagination-info {
+        font-size: 0.8rem;
+    }
 }
 
 .modal {
@@ -480,8 +588,8 @@ tr:hover {
 
 .product-item-image {
   flex-shrink: 0;
-  width: 25%; /* Relative to modal width */
-  max-width: 100px; /* Max size to prevent too big */
+  width: 30%; /* Relative to modal width */
+  max-width: 300px; /* Max size to prevent too big */
   aspect-ratio: 1; /* Square ratio */
   border-radius: 8px;
   overflow: hidden;
@@ -576,4 +684,8 @@ tr:hover {
     flex-direction: column;
     gap: 4px;
   }
+}
+
+.product-count-badge {
+  color: #03ac0e;
 }

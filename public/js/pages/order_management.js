@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterForm = document.getElementById('filterForm');
     const statusSelect = document.getElementById('status');
     const searchInput = document.getElementById('search');
+    const limitSelect = document.getElementById('itemsPerPage');
     let searchTimeout;
 
     // Auto-submit on status change
@@ -35,6 +36,16 @@ document.addEventListener('DOMContentLoaded', function() {
             filterForm.submit();
         }, 500); // 500ms delay
     });
+
+    if (limitSelect) {
+        limitSelect.addEventListener('change', function() {
+            const limit = this.value;
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('limit', limit);
+            urlParams.set('page', '1'); // Reset ke halaman 1
+            window.location.href = '?' + urlParams.toString();
+        });
+    }
 
     // Auto-hide alerts
     const alerts = document.querySelectorAll('.alert');
