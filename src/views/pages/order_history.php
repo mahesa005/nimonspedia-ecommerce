@@ -26,7 +26,10 @@
 
     <?php if (!isset($orders) || empty($orders)): ?>
         <div class="empty-orders">
-            </div>
+            <div class="empty-icon"></div>
+            <p>Belum ada pesanan.</p>
+            <a href="/" class="btn btn-primary">Mulai Belanja</a>
+        </div>
     <?php else: ?>
         <div class="order-list">
             <?php foreach ($orders as $order): ?>
