@@ -187,13 +187,6 @@ $statusColors = [
                             dari <?= $pagination['totalOrders'] ?>
                         </div>
                         
-                        <div class="pagination-info" id="paginationInfo">
-                            Menampilkan <?= (($pagination['currentPage'] - 1) * (isset($_GET['limit']) ? (int)$_GET['limit'] : 10)) + 1 ?> 
-                            hingga 
-                            <?= min($pagination['currentPage'] * (isset($_GET['limit']) ? (int)$_GET['limit'] : 10), $pagination['totalOrders']) ?>
-                            dari <?= $pagination['totalOrders'] ?>
-                        </div>
-                        
                         <div class="pagination-buttons">
                             <?php if ($pagination['currentPage'] > 1): ?>
                                 <a href="?page=<?= $pagination['currentPage'] - 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
