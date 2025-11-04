@@ -194,8 +194,9 @@ function rph($n) {
 
           <a href="/seller/orders" class="action-item">
             <div class="action-icon purple">
-              <svg viewBox="0 0 24 24" width="20" height="20">
-                <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#000000" stroke-width="2">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                <path d="M13 6v4a1 1 0 011 1v3"/>
               </svg>
             </div>
             <div class="action-text">

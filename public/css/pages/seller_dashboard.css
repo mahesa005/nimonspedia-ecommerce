@@ -453,12 +453,12 @@
   flex-shrink: 0;
 }
 
-.action-icon.blue { background: var(--blue-dark); }
-.action-icon.purple { background: var(--purple-dark); }
-.action-icon.green { background: var(--tp-green-dark); }
+.action-icon.blue { background: var(--blue-light); }
+.action-icon.purple { background: var(--purple-light); }
+.action-icon.green { background: var(--tp-green-light); }
 
 .action-icon svg {
-  stroke: white;
+  stroke: black;
 }
 
 .action-title {
