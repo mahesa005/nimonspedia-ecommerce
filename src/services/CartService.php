@@ -109,26 +109,6 @@ class CartService {
             throw new Exception("Gagal menambahkan item ke keranjang karena masalah database.");
             throw new Exception("Kuantitas harus lebih dari 0");
         }
-        
-        $product = $this->product_repo->findById($product_id);
-        if (!$product) {
-            throw new Exception("Produk tidak ditemukan.");
-        }
-
-        $existingItem = $this->cart_repo->findByBuyerAndProduct($buyer_id, $product_id);
-
-        if ($existingItem) {
-            $newQuantity = $existingItem->quantity + $quantity;
-            if ($product->stock < $newQuantity) {
-                throw new Exception("Stok tidak mencukupi (tersisa $product->stock)");
-            }
-            return $this->cart_repo->updateQuantity($existingItem->cart_item_id, $newQuantity, $buyer_id);
-        } else {
-            if ($product->stock < $quantity) {
-                throw new Exception("Stok tidak mencukupi (tersisa $product->stock)");
-            }
-            return $this->cart_repo->create($buyer_id, $product_id, $quantity) > 0;
-        }
     }
 
     public function updateItemQuantity(int $cart_item_id, int $new_quantity, int $buyer_id): bool {

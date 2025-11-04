@@ -13,4 +13,18 @@ require_once __DIR__ . '/../src/routes.php';
 $path = $request->getPath();
 $method = $request->getMethod();
 
-$router->dispatch($path, $method, $request);
+try {
+    $router->dispatch($path, $method, $request);
+} catch (Exception $e) {
+    if (strpos($path, '/api/') === 0) {
+        header('Content-Type: application/json');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+    } else {
+        http_response_code(500);
+        echo "Error: " . htmlspecialchars($e->getMessage());
+    }
+}
