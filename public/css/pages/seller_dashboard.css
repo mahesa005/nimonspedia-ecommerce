@@ -87,7 +87,7 @@
 }
 
 .tp-heading {
-  padding: 20px 24px;
+  padding: 20px 0px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -717,6 +717,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    padding-inline: 0px;
   }
   .tp-heading .right {
     width: 100%;
