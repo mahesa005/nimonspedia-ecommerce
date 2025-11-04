@@ -85,36 +85,49 @@ Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasika
 ### Halaman Buyer
 
 - **Halaman Login**
-  ![Halaman Login](image/login_page.png "Halaman Login")
+  ![Halaman Login](image/pages/login_page.png "Halaman Login")
 
 - **Halaman Register**
-  _(Placeholder)_
+  ![Halaman Register](image/pages/register_page.png "Halaman Register")
 
 - **Halaman Product Discovery (Home)**
-  _(Placeholder)_
+  ![Halaman Product Discovery](image/pages/Product_discovery.png "Halaman Product Discover")
 
 - **Halaman Detail Produk**
-  _(Placeholder)_
+  ![Halaman Detail Produk](image/pages/detail_produk.png "Halaman Detail Produk")
 
 - **Halaman Shopping Cart**
-  _(Placeholder)_
+  ![Halaman Shopping Cart](image/pages/cart.png "Halaman Shopping Cart")
 
 - **Halaman Checkout**
-  _(Placeholder)_
+  ![Halaman Checkout](image/pages/checkout.png "Halaman Checkout")
 
 - **Halaman Order History**
-  _(Placeholder)_
+  ![Halaman Order History](image/pages/order_history.png "Halaman Order History")
+  ![Halaman Order History](image/pages/order_history_detail.png)
+- **Halaman Profile**
+  ![Halaman Profile](image/pages/profile.png "Halaman Profile")
+
+- **Halaman TopUp**
+  ![Halaman TopUp](image/pages/topup.png "Halaman TopUp")
 
 ### Halaman Seller
 
 - **Halaman Dashboard (Seller)**
-  _(Placeholder)_
+  ![Halaman Dashboard (Seller)](image/pages/dashboard_seller.png "Halaman Dashboard Seller")
 
 - **Halaman Product Management (Seller)**
-  _(Placeholder)_
+  ![Halaman Product Management (Seller)](image/pages/product_management.png "Halaman Product Management (Seller)")
 
 - **Halaman Order Management (Seller)**
-  _(Placeholder)_
+  ![Halaman Order Management (Seller)](image/pages/order_management.png "Halaman Order Management (Seller)")
+  ![Halaman Order Management (Seller)](image/pages/seller_orders.png)
+
+- **Halaman Add Product (Seller)**
+  ![Halaman Add Product (Seller)](image/pages/products_add.png "Halaman Add Product (Seller)")
+
+- **Halaman Edit Product (Seller)**
+  ![Halaman Edit Product (Seller](image/pages/seller_products_edit.png "Halaman Edit Product (Seller")
 
 ---
 
