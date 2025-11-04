@@ -16,36 +16,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-async function handleProfileUpdate(event) {
+function handleProfileUpdate(event) {
     event.preventDefault();
     const form = event.target;
     const button = form.querySelector('#btn-save-profile');
     const msgEl = document.getElementById('profile-msg');
-    
-    setLoading(button, true);
-    const formData = new FormData(form);
 
-    try {
-        const response = await fetch('/profile/update', {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
-        
-        if (response.ok && result.success) {
-            showToastMessage(result.message, 'success');
-        } else {
-            showToastMessage(result.message || 'Gagal memperbarui profil.', 'error');
+    setLoading(button, true);
+
+    const formData = new FormData(form);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/profile/update', true);
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            setLoading(button, false);
+
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const result = JSON.parse(xhr.responseText);
+                    if (result.success) {
+                        showToastMessage(result.message, 'success');
+                    } else {
+                        showToastMessage(result.message || 'Gagal memperbarui profil.', 'error');
+                    }
+                } catch (e) {
+                    console.error('Invalid JSON:', e);
+                    showToastMessage('Respon server tidak valid.', 'error');
+                }
+            } else {
+                showToastMessage('Terjadi kesalahan jaringan.', 'error');
+            }
         }
-    } catch (error) {
-        console.error('Fetch error:', error);
-        showToastMessage('Terjadi kesalahan jaringan.', 'error');
-    } finally {
+    };
+
+    xhr.onerror = function() {
         setLoading(button, false);
-    }
+        showToastMessage('Terjadi kesalahan jaringan.', 'error');
+    };
+
+    xhr.send(formData);
 }
 
-async function handlePasswordChange(event) {
+function handlePasswordChange(event) {
     event.preventDefault();
     const form = event.target;
     const button = form.querySelector('#btn-save-password');
@@ -59,48 +72,60 @@ async function handlePasswordChange(event) {
         showMessage(msgEl, 'Password baru dan konfirmasi tidak cocok.', 'error');
         return;
     }
-    
+
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!regex.test(newPass)) {
         showMessage(msgEl, 'Password baru harus minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol.', 'error');
         return;
     }
 
-    const isConfirmed = confirm('Anda yakin ingin mengubah password Anda?');
-    if (!isConfirmed) return;
+    if (!confirm('Anda yakin ingin mengubah password Anda?')) return;
 
     setLoading(button, true);
-    const formData = new FormData(form);
 
-    try {
-        const response = await fetch('/profile/password', {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
-        
-        if (response.ok && result.success) {
-            showToastMessage(result.message, 'success');
-            form.reset();
-        } else {
-            showToastMessage(result.message || 'Gagal mengubah password.', 'error');
+    const formData = new FormData(form);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/profile/password', true);
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            setLoading(button, false);
+
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const result = JSON.parse(xhr.responseText);
+                    if (result.success) {
+                        showToastMessage(result.message, 'success');
+                        form.reset();
+                    } else {
+                        showToastMessage(result.message || 'Gagal mengubah password.', 'error');
+                    }
+                } catch (e) {
+                    console.error('Invalid JSON:', e);
+                    showToastMessage('Respon server tidak valid.', 'error');
+                }
+            } else {
+                showToastMessage('Terjadi kesalahan jaringan.', 'error');
+            }
         }
-    } catch (error) {
-        console.error('Fetch error:', error);
-        showToastMessage('Terjadi kesalahan jaringan.', 'error');
-    } finally {
+    };
+
+    xhr.onerror = function() {
         setLoading(button, false);
-    }
+        showToastMessage('Terjadi kesalahan jaringan.', 'error');
+    };
+
+    xhr.send(formData);
 }
 
 function setLoading(button, isLoading) {
     const spinner = button.querySelector('.loading-spinner');
     if (isLoading) {
         button.disabled = true;
-        spinner.style.display = 'inline-block';
+        if (spinner) spinner.style.display = 'inline-block';
     } else {
         button.disabled = false;
-        spinner.style.display = 'none';
+        if (spinner) spinner.style.display = 'none';
     }
 }
 
@@ -113,14 +138,13 @@ function showToastMessage(message, type = 'info') {
     if (typeof window.showToast === 'function') {
         window.showToast(message, type);
     } else {
-        console.warn('Fungsi showToast() tidak ditemukan. Tampilkan via alert.');
+        console.warn('Fungsi showToast() tidak ditemukan. Menampilkan via alert.');
         alert(message);
     }
 }
 
 function togglePasswordVisibility(event) {
     const clickedIcon = event.currentTarget;
-    
     const targetInputId = clickedIcon.dataset.target;
     if (!targetInputId) return;
 
@@ -131,7 +155,6 @@ function togglePasswordVisibility(event) {
     const eyeOpen = wrapper.querySelector('.eye-open');
     const eyeClosed = wrapper.querySelector('.eye-closed');
 
-    // Ganti tipe input
     if (input.type === 'password') {
         input.type = 'text';
         if (eyeOpen) eyeOpen.style.display = 'none';

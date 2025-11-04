@@ -7,37 +7,27 @@ const sortSelect = document.getElementById('sort-select');
 // Debounce search
 searchInput.addEventListener('input', function() {
     clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        applyFilters();
-    }, 500); // 500ms debounce
+    searchTimeout = setTimeout(applyFilters, 500);
 });
 
-// Category filter
-categoryFilter.addEventListener('change', function() {
-    applyFilters();
-});
+categoryFilter.addEventListener('change', applyFilters);
 
-// Sort change
-sortSelect.addEventListener('change', function() {
-    applyFilters();
-});
+sortSelect.addEventListener('change', applyFilters);
 
-// Apply filters by updating URL
 function applyFilters() {
     const search = searchInput.value;
     const category = categoryFilter.value;
-    const sort = sortSelect.value.split('-');
-    
+    const sortParts = sortSelect.value.split('-');
+
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (category) params.set('category', category);
-    if (sort[0]) params.set('sort_by', sort[0]);
-    if (sort[1]) params.set('sort_order', sort[1]);
-    
+    if (sortParts[0]) params.set('sort_by', sortParts[0]);
+    if (sortParts[1]) params.set('sort_order', sortParts[1]);
+
     window.location.href = '/seller/products?' + params.toString();
 }
 
-// Delete product
 const deleteButtons = document.querySelectorAll('.btn-delete');
 const deleteModal = document.getElementById('deleteModal');
 const deleteProductName = document.getElementById('delete-product-name');
@@ -51,14 +41,11 @@ deleteButtons.forEach(btn => {
         productToDelete = this.dataset.productId;
         const productName = this.dataset.productName;
 
-        console.log(productToDelete)
-        console.log(deleteModal.classList)
         deleteProductName.textContent = productName;
         deleteModal.classList.add('show');
     });
 });
 
-// Close modal on outside click
 deleteModal.addEventListener('click', function(e) {
     if (e.target === deleteModal) {
         deleteModal.classList.remove('show');
@@ -73,49 +60,53 @@ cancelDeleteBtn.addEventListener('click', function() {
 
 confirmDeleteBtn.addEventListener('click', function() {
     if (!productToDelete) return;
-    
-    // Show loading
+
     confirmDeleteBtn.disabled = true;
     confirmDeleteBtn.textContent = 'Deleting...';
-    
-    // Send delete request
-    fetch('/seller/products/delete', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            product_id: productToDelete
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove row from table
-            const row = document.querySelector(`tr[data-product-id="${productToDelete}"]`);
-            if (row) {
-                row.remove();
-            }
-            
-            // Close modal
-            deleteModal.classList.remove('show');
-            
-            // Reload if no products left
-            window.location.reload();
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/seller/products/delete', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            confirmDeleteBtn.disabled = false;
+            confirmDeleteBtn.textContent = 'Delete';
+
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+
+                    if (data.success) {
+                        const row = document.querySelector(`tr[data-product-id="${productToDelete}"]`);
+                        if (row) row.remove();
+
+                        deleteModal.classList.remove('show');
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                    }
+                } catch (e) {
+                    console.error('Invalid JSON:', e);
+                    alert('Invalid server response');
+                }
             } else {
-                alert('Error: ' + data.message);
+                console.error('XHR Error:', xhr.status, xhr.statusText);
+                alert('Failed to delete product');
             }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to delete product');
-    })
-    .finally(() => {
+
+            productToDelete = null;
+        }
+    };
+
+    xhr.onerror = function() {
         confirmDeleteBtn.disabled = false;
         confirmDeleteBtn.textContent = 'Delete';
+        console.error('XHR network error');
+        alert('Network error occurred');
         productToDelete = null;
-    });
+    };
+
+    const body = JSON.stringify({ product_id: productToDelete });
+    xhr.send(body);
 });
-
-
-
