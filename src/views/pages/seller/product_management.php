@@ -134,10 +134,23 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-ghost" id="cancel-delete">Cancel</button>
-              <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
+              <button type="button" class="btn btn-danger" id="confirm-delete" href="/seller/products">Delete</button>
           </div>
       </div>
   </div>
 </div>
+
+<?php 
+// Check if there's a success message
+if (isset($_SESSION['success_message'])): 
+    $message = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('<?php echo addslashes($message); ?>', 'success');
+        });
+    </script>
+<?php endif; ?>
 
 <script src="/js/pages/product_management.js"></script>

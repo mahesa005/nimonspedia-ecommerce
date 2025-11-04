@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterForm = document.getElementById('filterForm');
     const statusSelect = document.getElementById('status');
     const searchInput = document.getElementById('search');
+    const limitSelect = document.getElementById('itemsPerPage');
     let searchTimeout;
 
     // Auto-submit on status change
@@ -35,6 +36,16 @@ document.addEventListener('DOMContentLoaded', function() {
             filterForm.submit();
         }, 500); // 500ms delay
     });
+
+    if (limitSelect) {
+        limitSelect.addEventListener('change', function() {
+            const limit = this.value;
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('limit', limit);
+            urlParams.set('page', '1'); // Reset ke halaman 1
+            window.location.href = '?' + urlParams.toString();
+        });
+    }
 
     // Auto-hide alerts
     const alerts = document.querySelectorAll('.alert');
@@ -56,12 +67,98 @@ function showOrderDetails(order) {
     document.getElementById('modalAddress').textContent = order.shipping_address || '-';
     document.getElementById('modalDate').textContent = new Date(order.created_at).toLocaleString('id-ID');
     
-    const statusBadge = `<span class="status-badge status-${statusColors[order.status] || 'gray'}">${statusLabels[order.status] || order.status}</span>`;
-    document.getElementById('modalStatus').innerHTML = statusBadge;
+    // Set status
+    const statusLabels = {
+        'waiting_approval': 'Menunggu Persetujuan',
+        'approved': 'Disetujui',
+        'rejected': 'Ditolak',
+        'on_delivery': 'Dalam Pengiriman',
+        'received': 'Diterima',
+        'completed': 'Selesai'
+    };
     
-    renderOrderActions(order);
+    const statusColors = {
+        'waiting_approval': 'orange',
+        'approved': 'blue',
+        'rejected': 'red',
+        'on_delivery': 'purple',
+        'received': 'green',
+        'completed': 'green'
+    };
     
+    const statusLabel = statusLabels[order.status] || order.status;
+    const statusColor = statusColors[order.status] || 'gray';
+    
+    document.getElementById('modalStatus').innerHTML = 
+        `<span class="status-badge status-${statusColor}">${statusLabel}</span>`;
+    
+    // Render products list with images
+    const productsList = document.getElementById('modalProductsList');
+    productsList.innerHTML = '';
+    
+    if (order.products && order.products.length > 0) {
+        order.products.forEach((product, index) => {
+            const li = document.createElement('li');
+            const productName = escapeHtml(product.product_name);
+            const quantity = product.quantity;
+            const subtotal = Number(product.subtotal);
+            
+            // Hitung harga per item dari subtotal / quantity
+            const pricePerItem = quantity > 0 ? subtotal / quantity : 0;
+            const price = Number(product.price) || pricePerItem; // Gunakan dari DB atau hitung ulang
+            
+            const priceFormatted = price.toLocaleString('id-ID');
+            const subtotalFormatted = subtotal.toLocaleString('id-ID');
+            
+            const imageUrl = product.main_image_path || '/images/placeholder.png';
+            
+            li.className = 'product-item';
+            li.innerHTML = `
+                <div class="product-item-image">
+                    <img src="${imageUrl}" alt="${productName}" onerror="this.src='/images/placeholder.png'">
+                </div>
+                <div class="product-item-details">
+                    <p></p>
+                    <strong class="product-name">${productName}</strong>
+                    <div class="product-meta">
+                        <span class="quantity">Qty: ${quantity}</span>
+                        <span class="price-per-item">@ Rp ${priceFormatted}</span>
+                    </div>
+                    <div class="product-subtotal">
+                        Subtotal: <strong>Rp ${subtotalFormatted}</strong>
+                        <small class="calculation">(Rp ${priceFormatted} × ${quantity})</small>
+                    </div>
+                </div>
+            `;
+            
+            // Add separator (except for last item)
+            if (index < order.products.length - 1) {
+                const separator = document.createElement('div');
+                separator.className = 'product-separator';
+                li.appendChild(separator);
+            }
+            
+            productsList.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.textContent = 'Tidak ada produk';
+        li.style.color = '#6b7280';
+        productsList.appendChild(li);
+    }
+    
+    // Open modal
     modal.classList.add('active');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 function closeModal() {

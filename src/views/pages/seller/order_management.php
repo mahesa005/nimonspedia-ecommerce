@@ -120,6 +120,7 @@ $statusColors = [
                         <tr>
                             <th>ID Pesanan</th>
                             <th>Pembeli</th>
+                            <th>Produk</th>
                             <th>Total</th>
                             <th>Status</th>
                             <th>Tanggal</th>
@@ -131,6 +132,18 @@ $statusColors = [
                             <tr>
                                 <td class="order-id">#<?= $order['order_id'] ?></td>
                                 <td><?= htmlspecialchars($order['buyer_name'] ?? 'N/A') ?></td>
+                                <td>
+                                    <?php if (!empty($order['products'])): ?>
+                                        <div class="product-preview">
+                                            <?= htmlspecialchars($order['products'][0]['product_name']) ?>
+                                            <?php if (count($order['products']) > 1): ?>
+                                                <span class="product-count-badge">+<?= count($order['products']) - 1 ?> lainnya</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="muted">-</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="price">Rp <?= number_format($order['total_price'], 0, ',', '.') ?></td>
                                 <td>
                                     <span class="status-badge status-<?= $statusColors[$order['status']] ?? 'gray' ?>">
@@ -155,23 +168,52 @@ $statusColors = [
 
             <?php if ($pagination['totalPages'] > 1): ?>
                 <div class="pagination">
-                    <?php if ($pagination['currentPage'] > 1): ?>
-                        <a href="?page=<?= $pagination['currentPage'] - 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?>" 
-                           class="pagination-btn">
-                            ← Prev
-                        </a>
-                    <?php endif; ?>
+                    <!-- Items per page selector -->
+                    <div class="pagination-section">
+                        <div class="items-per-page">
+                            <label for="itemsPerPage">Tampilkan:</label>
+                            <select id="itemsPerPage">
+                                <option value="4" <?= isset($_GET['limit']) && $_GET['limit'] == 4 ? 'selected' : '' ?>>4</option>
+                                <option value="8" <?= isset($_GET['limit']) && $_GET['limit'] == 8 ? 'selected' : '' ?>>8</option>
+                                <option value="12" <?= isset($_GET['limit']) && $_GET['limit'] == 12 ? 'selected' : '' ?>>12</option>
+                                <option value="20" <?= isset($_GET['limit']) && $_GET['limit'] == 20 ? 'selected' : '' ?>>20</option>
+                            </select>
+                        </div>
+                        
+                        <div class="pagination-info" id="paginationInfo">
+                            Menampilkan <?= (($pagination['currentPage'] - 1) * (isset($_GET['limit']) ? (int)$_GET['limit'] : 10)) + 1 ?> 
+                            hingga 
+                            <?= min($pagination['currentPage'] * (isset($_GET['limit']) ? (int)$_GET['limit'] : 10), $pagination['totalOrders']) ?>
+                            dari <?= $pagination['totalOrders'] ?>
+                        </div>
+                        
+                        <div class="pagination-buttons">
+                            <?php if ($pagination['currentPage'] > 1): ?>
+                                <a href="?page=<?= $pagination['currentPage'] - 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
+                                   class="pagination-btn">
+                                    ← Prev
+                                </a>
+                            <?php endif; ?>
 
-                    <span class="pagination-info">
-                        Halaman <?= $pagination['currentPage'] ?> dari <?= $pagination['totalPages'] ?>
-                    </span>
+                            <?php for ($i = 1; $i <= $pagination['totalPages']; $i++): ?>
+                                <?php if ($i == $pagination['currentPage']): ?>
+                                    <span class="pagination-btn active"><?= $i ?></span>
+                                <?php else: ?>
+                                    <a href="?page=<?= $i ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
+                                       class="pagination-btn">
+                                        <?= $i ?>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
 
-                    <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
-                        <a href="?page=<?= $pagination['currentPage'] + 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?>" 
-                           class="pagination-btn">
-                            Next →
-                        </a>
-                    <?php endif; ?>
+                            <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
+                                <a href="?page=<?= $pagination['currentPage'] + 1 ?><?= $filters['status'] ? '&status=' . $filters['status'] : '' ?><?= $filters['search'] ? '&search=' . urlencode($filters['search']) : '' ?><?= isset($_GET['limit']) ? '&limit=' . $_GET['limit'] : '' ?>" 
+                                   class="pagination-btn">
+                                    Next →
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             <?php endif; ?>
         <?php endif; ?>
@@ -206,8 +248,10 @@ $statusColors = [
                     <strong>Tanggal Pesanan:</strong>
                     <span id="modalDate"></span>
                 </div>
-            </div>
-
+                <div class="info-item">
+                    <strong>Produk:</strong>
+                    <ul id="modalProductsList" class="product-list"></ul>
+                </div>
             <div class="order-actions" id="orderActions"></div>
         </div>
     </div>

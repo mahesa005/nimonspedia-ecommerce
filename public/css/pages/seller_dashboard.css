@@ -213,6 +213,10 @@
 .metric-icon.green { background: var(--tp-green-light); color: var(--tp-green-dark); }
 .metric-icon.purple { background: var(--purple-light); color: var(--purple-dark); }
 .metric-icon.gray { background: var(--tp-gray-200); color: var(--tp-gray-700); }
+.metric-icon.orange { 
+    background: hsl(32, 64%, 87%); /* Orange light */
+    color: #ea580c; /* Orange dark */
+}
 
 .metric .label {
   font-size: 12px;

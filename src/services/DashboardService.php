@@ -30,14 +30,16 @@ class DashboardService {
         $total_products = $this->productRepo->countByStoreId($store_id);
         $pending_orders = $this->orderRepo->countStoreOrders($store_id, 'waiting_approval', null);
         $total_revenue = $this->orderRepo->getTotalRevenueByStoreId($store_id);
-
+        $low_stock_products = $this->productRepo->countLowStockProducts($store_id, 10); // 10 as threshold
+        
         return [
             'store_info' => $store,
             'quick_stats' => [
                 'total_products' => $total_products,
                 'pending_orders' => $pending_orders,
                 'store_balance' => $store['balance'] ?? 0,
-                'total_revenue' => $total_revenue
+                'total_revenue' => $total_revenue,
+                'low_stock_products' => $low_stock_products
             ]
         ];
     }
