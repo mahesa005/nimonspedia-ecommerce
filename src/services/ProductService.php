@@ -74,8 +74,8 @@ class ProductService {
         try {
             // Normalize data
             $normalizedData = [
-            'product_name' => $this->normalizeString($data['product_name'] ?? ''),
-            'description' => $this->normalizeString($data['description'] ?? ''),
+            'product_name' => $this->purifyProductName($data['product_name'] ?? ''),
+            'description' => $this->purifyDescription($data['description'] ?? ''),
             'price' => $this->normalizeNumber($data['price'] ?? 0),
             'stock' => $this->normalizeNumber($data['stock'] ?? 0),
             'category_id' => $this->normalizeNumber($data['category_id'] ?? null),
@@ -124,6 +124,51 @@ class ProductService {
                 'message' => $e->getMessage()
             ];
         }
+    }
+
+    private function purifyProductName(string $name): string {
+        $name = strip_tags($name);
+        
+        $name = preg_replace('/[\x00-\x1F\x7F\xA0\xAD]/u', '', $name);
+        
+        $name = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $name = htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        
+        $name = trim($name);
+        
+        return mb_substr($name, 0, 200);
+    }
+
+    private function purifyDescription(string $html): string {
+        if (empty($html)) {
+            return '';
+        }
+
+        $html = preg_replace('#<script[^>]*?>.*?</script>#is', '', $html);
+        $html = preg_replace('#<style[^>]*?>.*?</style>#is', '', $html);
+        $html = preg_replace('/\s*on\w+\s*=\s*["\'][^"\']*["\']/i', '', $html);
+        $html = preg_replace('/javascript:/i', '', $html);
+        $html = preg_replace('/data:/i', '', $html);       
+        $allowedTags = '<p><br><b><strong><i><em><u><ul><ol><li><h1><h2><h3><h4><h5><h6><a><span><div>';
+        $html = strip_tags($html, $allowedTags);        
+        $html = preg_replace_callback(
+            '/<a\s+([^>]*?)href\s*=\s*["\']([^"\']*)["\']([^>]*?)>/i',
+            function($matches) {
+                $href = $matches[2];
+                if (preg_match('#^(https?://|/)#i', $href)) {
+                    return "<a {$matches[1]}href=\"" . htmlspecialchars($href, ENT_QUOTES) . "\"{$matches[3]}>";
+                }
+                return "<a {$matches[1]}{$matches[3]}>";
+            },
+            $html
+        );        
+        $dangerousAttrs = ['formaction', 'action', 'xlink:href', 'FSCommand', 'seekSegmentTime'];
+        foreach ($dangerousAttrs as $attr) {
+            $html = preg_replace('/\s*' . preg_quote($attr, '/') . '\s*=\s*["\'][^"\']*["\']/i', '', $html);
+        }        
+        $html = trim($html);
+        
+        return mb_substr($html, 0, 10000);
     }
 
     public function getProductForEdit(int $userId, int $productId): ?array {
