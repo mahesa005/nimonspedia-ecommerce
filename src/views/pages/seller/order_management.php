@@ -166,7 +166,7 @@ $statusColors = [
                 </table>
             </div>
 
-            <?php if ($pagination['totalPages'] > 1): ?>
+            <?php if ($pagination['totalPages'] >= 1): ?>
                 <div class="pagination">
                     <!-- Items per page selector -->
                     <div class="pagination-section">

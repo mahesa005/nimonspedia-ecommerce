@@ -36,3 +36,4 @@ if ($current_store) {
         </div>
     </nav>
 </header>
+<script src="/js/modules/navbar_seller.js" defer></script>
