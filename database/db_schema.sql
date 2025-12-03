@@ -1,4 +1,4 @@
-CREATE TYPE user_role AS ENUM ('BUYER', 'SELLER');
+CREATE TYPE user_role AS ENUM ('BUYER', 'SELLER', 'ADMIN');
 
 CREATE TYPE order_status AS ENUM (
     'waiting_approval',
@@ -133,3 +133,76 @@ INSERT INTO "category" (name) VALUES
 ('Perawatan Tubuh'),
 ('Perawatan Hewan'),
 ('Lainnya');
+
+-- MILESTONE 2 SCHEMA UPDATES
+CREATE TABLE IF NOT EXISTS "auctions" (
+    auction_id SERIAL PRIMARY KEY,
+    product_id INT NOT NULL,
+    starting_price INT NOT NULL,
+    current_price INT NOT NULL,
+    min_increment INT NOT NULL,
+    quantity INT NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('scheduled', 'active', 'ended', 'cancelled')),
+    winner_id INT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (product_id) REFERENCES "product"(product_id),
+    FOREIGN KEY (winner_id) REFERENCES "user"(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS "auction_bids" (
+    bid_id SERIAL PRIMARY KEY,
+    auction_id INT NOT NULL,
+    bidder_id INT NOT NULL,
+    bid_amount INT NOT NULL,
+    bid_time TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (auction_id) REFERENCES "auctions"(auction_id),
+    FOREIGN KEY (bidder_id) REFERENCES "user"(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS "chat_room" (
+    store_id INT NOT NULL,
+    buyer_id INT NOT NULL,
+    last_message_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    PRIMARY KEY (store_id, buyer_id),
+    FOREIGN KEY (store_id) REFERENCES "store"(store_id),
+    FOREIGN KEY (buyer_id) REFERENCES "user"(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS "chat_messages" (
+    message_id SERIAL PRIMARY KEY,
+    store_id INT NOT NULL,
+    buyer_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    message_type VARCHAR(20) NOT NULL CHECK (message_type IN ('text', 'image', 'item_preview')),
+    content TEXT NOT NULL,
+    product_id INT, -- Nullable
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (store_id, buyer_id) REFERENCES "chat_room"(store_id, buyer_id),
+    FOREIGN KEY (sender_id) REFERENCES "user"(user_id),
+    FOREIGN KEY (product_id) REFERENCES "Product"(product_id)
+);
+
+CREATE TABLE IF NOT EXISTS "push_subscriptions" (
+    subscription_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    endpoint TEXT NOT NULL,
+    p256dh_key VARCHAR(255) NOT NULL,
+    auth_key VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS "user_feature_access" (
+    access_id SERIAL PRIMARY KEY,
+    user_id INT, -- Null -> Global Flag
+    feature_name VARCHAR(50) NOT NULL CHECK (feature_name IN ('checkout_enabled', 'chat_enabled', 'auction_enabled')),
+    is_enabled BOOLEAN DEFAULT TRUE,
+    reason TEXT,
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id)
+);
