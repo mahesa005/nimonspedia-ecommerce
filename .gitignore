@@ -1,2 +1,21 @@
 .env
-.public/uploads
+.php/public/uploads
+
+# Node
+node/node_modules/
+node/npm-debug.log
+node/yarn-error.log
+node/coverage/
+
+# React
+react/node_modules/
+react/dist/
+react/build/
+react/.eslintcache
+react/npm-debug.log
+react/yarn-error.log
+# React specific env files
+react/.env.local
+react/.env.development.local
+react/.env.test.local
+react/.env.production.local
