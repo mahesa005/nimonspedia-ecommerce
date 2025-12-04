@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS "chat_messages" (
     created_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (store_id, buyer_id) REFERENCES "chat_room"(store_id, buyer_id),
     FOREIGN KEY (sender_id) REFERENCES "user"(user_id),
-    FOREIGN KEY (product_id) REFERENCES "Product"(product_id)
+    FOREIGN KEY (product_id) REFERENCES "product"(product_id)
 );
 
 CREATE TABLE IF NOT EXISTS "push_subscriptions" (
