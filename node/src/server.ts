@@ -4,6 +4,10 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 
+import { adminLoginController } from './controllers/adminAuthController';
+import { adminMeHandler } from './controllers/adminMeController';
+import { requireAdmin } from './middleware/requireAdmin';
+
 const app = express();
 const server = http.createServer(app);
 
@@ -28,6 +32,10 @@ app.get('/', (req: Request, res: Response) => {
     timestamp: new Date() 
   });
 });
+
+// Admin Authentication Routes
+app.post('/admin/login', adminLoginController);
+app.get('/admin/me', requireAdmin, adminMeHandler);
 
 // WebSocket Logic
 io.on('connection', (socket: Socket) => {
