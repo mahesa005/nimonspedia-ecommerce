@@ -1,3 +1,4 @@
+// User model definition
 type user_role = 'ADMIN' | 'SELLER' | ' BUYER'
 
 interface User {
