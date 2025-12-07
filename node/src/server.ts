@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 import cors from 'cors';
+import auctionRoutes from './routes/auctionRoutes';
 
 import { adminLoginController } from './controllers/adminAuthController';
 import { adminMeHandler } from './controllers/adminMeController';
@@ -45,6 +46,8 @@ io.on('connection', (socket: Socket) => {
     console.log(`Client disconnected: ${socket.id}`);
   });
 });
+
+app.use('/auctions', auctionRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
