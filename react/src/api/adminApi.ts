@@ -1,4 +1,4 @@
-const BASE_URL = '/admin'
+const BASE_URL = '/api/node/admin'
 
 export interface AdminInfo {
     user_id: number;
