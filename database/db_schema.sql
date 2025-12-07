@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS "auctions" (
     quantity INT NOT NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('scheduled', 'active', 'ended', 'cancelled')),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('scheduled', 'active', 'ongoing', 'ended', 'cancelled')),
     winner_id INT,
     created_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (product_id) REFERENCES "product"(product_id),
