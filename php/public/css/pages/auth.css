@@ -288,3 +288,50 @@ input[type="file"] {
         font-size: 0.9rem;
     }
 }
+
+/* Admin Login Button */
+.admin-login-divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0 16px;
+    color: #999;
+    font-size: 0.875rem;
+}
+
+.admin-login-divider::before,
+.admin-login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e0e0e0;
+}
+
+.admin-login-divider span {
+    padding: 0 12px;
+}
+
+.admin-login-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: #1a1a2e;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.admin-login-button:hover {
+    background: #16213e;
+}
+
+.admin-login-button svg {
+    flex-shrink: 0;
+}
