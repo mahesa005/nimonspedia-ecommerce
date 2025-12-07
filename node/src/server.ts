@@ -38,6 +38,8 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Admin Authentication Routes
+// Accessible via Nginx proxy at /api/node/admin/...
+// or directly at localhost:3000/admin/...
 app.post('/admin/login', adminLoginController);
 app.get('/admin/me', requireAdmin, adminMeHandler);
 

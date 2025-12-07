@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* CSS RESET */
+/* CSS RESET
 *,
 *::before,
 *::after {
@@ -59,4 +59,4 @@ table {
 
 main {
     padding-top: 64px;
-}
+} */
