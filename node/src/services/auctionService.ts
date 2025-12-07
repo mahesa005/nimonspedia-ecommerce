@@ -1,4 +1,4 @@
-import { AuctionData, AuctionDetailData, AuctionDetailResponse, BidData } from '../models/auctionModel';
+import { AuctionData, AuctionDetailData, AuctionDetailResponse, BidData, PublicBid } from '../models/auctionModel';
 import { AuctionRepository } from '../repositories/auctionRepository';
 
 export const AuctionService = {
@@ -15,7 +15,7 @@ export const AuctionService = {
     };
   },
 
-  async placeBid(auctionId: number, userId: number, amount: number): Promise<{bid: BidData, newEndTime: Date}> {
+  async placeBid(auctionId: number, userId: number, amount: number): Promise<{bid: PublicBid, newEndTime: Date}> {
     const auction = await AuctionRepository.findDetailById(auctionId);
     if (!auction) throw new Error("Auction not found");
 
