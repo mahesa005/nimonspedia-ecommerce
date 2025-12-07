@@ -4,6 +4,7 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import auctionRoutes from './routes/auctionRoutes';
+import auctionSocket from './sockets/auctionSocket';
 
 import { adminLoginController } from './controllers/adminAuthController';
 import { adminMeHandler } from './controllers/adminMeController';
@@ -38,16 +39,19 @@ app.get('/', (req: Request, res: Response) => {
 app.post('/admin/login', adminLoginController);
 app.get('/admin/me', requireAdmin, adminMeHandler);
 
+// Auction API Routes
+app.use('/auctions', auctionRoutes);
+
 // WebSocket Logic
 io.on('connection', (socket: Socket) => {
   console.log(`Client connected: ${socket.id}`);
   
+  auctionSocket(io, socket);
+
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
   });
 });
-
-app.use('/auctions', auctionRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

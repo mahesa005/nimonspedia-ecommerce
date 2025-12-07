@@ -62,6 +62,11 @@ export interface NewBidEvent {
   new_end_time: string;
 }
 
+export interface AuctionStartedEvent {
+  status: 'active';
+  message: string;
+}
+
 export interface AuctionEndedEvent {
   auctionId: number;
   winnerId: number | null;
