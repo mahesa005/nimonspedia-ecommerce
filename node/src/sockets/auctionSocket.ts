@@ -48,8 +48,13 @@ export default (io: Server, socket: Socket) => {
     console.log(`[BID] Received place_bid auctionId=${auctionId}, amount=${amount}, from socket ${socket.id}`);
 
     try {
-      // PLACEHOLDER
-      const userId = socket.data.user?.user_id ?? 1;
+      const user = socket.data.user;
+      
+      if (!user || !user.user_id) {
+        throw new Error("Unauthorized: User not identified");
+      }
+
+      const userId = user.user_id;
       console.log(`[BID] Using userId=${userId}`);
 
       const result = await AuctionService.placeBid(auctionId, userId, amount);
