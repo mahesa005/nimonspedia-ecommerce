@@ -1,5 +1,5 @@
 import pool from '../config/database';
-import { AuctionData, AuctionDetailData, BidHistoryData } from '../models/auctionModel';
+import { AuctionData, AuctionDetailData, BidData, BidHistoryData } from '../models/auctionModel';
 
 export const AuctionRepository = {
   async findDetailById(auctionId: number): Promise<AuctionDetailData | null> {
@@ -32,5 +32,81 @@ export const AuctionRepository = {
     `;
     const result = await pool.query<BidHistoryData>(query, [auctionId, limit]);
     return result.rows;
+  },
+
+  async createBid(auctionId: number, userId: number, amount: number): Promise<{ bid: BidData; newEndTime: Date; }> {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const auctionRes = await client.query<AuctionData>(
+        'SELECT * FROM "auctions" WHERE auction_id = $1 FOR UPDATE', 
+        [auctionId]
+      );
+      const auction = auctionRes.rows[0];
+
+      if (!auction) throw new Error("Auction not found");
+      
+      if (!['active', 'ongoing'].includes(auction.status)) {
+        throw new Error("Auction is not open for bidding");
+      }
+
+      const userRes = await client.query('SELECT balance FROM "user" WHERE user_id = $1', [userId]);
+      
+      if (userRes.rows[0].balance < amount) throw new Error("Insufficient balance");
+
+      if (auction.winner_id) {
+        await client.query(
+          'UPDATE "user" SET balance = balance + $1 WHERE user_id = $2',
+          [auction.current_price, auction.winner_id]
+        );
+      }
+
+      await client.query(
+        'UPDATE "user" SET balance = balance - $1 WHERE user_id = $2',
+        [amount, userId]
+      );
+
+      const bidRes = await client.query<BidData>(
+        `INSERT INTO "auction_bids" (auction_id, bidder_id, bid_amount, bid_time)
+         VALUES ($1, $2, $3, NOW())
+         RETURNING *`,
+        [auctionId, userId, amount]
+      );
+
+      const bidRow = bidRes.rows[0];
+      if (!bidRow) {
+        throw new Error("Failed to insert auction bids");
+      }
+
+      const updateAuction = `
+        UPDATE "auctions" 
+        SET current_price = $1, 
+            winner_id = $2,
+            status = 'ongoing',
+            end_time = NOW() + interval '15 seconds' 
+        WHERE auction_id = $3
+        RETURNING end_time
+      `;
+      const updatedAuctionRes = await client.query<{end_time: Date}>(updateAuction, [amount, userId, auctionId]);
+
+      const row = updatedAuctionRes.rows[0];
+      if (!row) {
+        throw new Error("Failed to update auction");
+      }
+
+      await client.query('COMMIT');
+      
+      return {
+        bid: bidRow,
+        newEndTime: row.end_time,
+      };
+
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
   },
 };
