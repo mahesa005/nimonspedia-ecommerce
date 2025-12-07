@@ -1,3 +1,5 @@
+import { ApiResponse } from "./response";
+
 export interface AuctionData {
   auction_id: number;
   product_id: number;
@@ -27,6 +29,7 @@ export interface AuctionDetailData extends AuctionData {
   
   store_id: number;
   store_name: string;
+  store_description: string;
   
   bidder_count: number;
 }
@@ -39,32 +42,10 @@ export interface PublicBid extends BidHistoryData {
   is_mine?: boolean;
 }
 
-export interface AuctionDetailResponse {
-  success: boolean;
-  data: {
-    auction: {
-      id: number;
-      current_price: number;
-      min_increment: number;
-      start_time: string;
-      status: 'scheduled' | 'active' | 'ongoing' | 'ended' | 'cancelled';
-      winner_id: number | null;
-      bidder_count: number;
-    };
-    product: {
-      id: number;
-      name: string;
-      description: string;
-      image: string;
-    };
-    store: {
-      id: number;
-      name: string;
-      description: string;
-    };
-    bids: PublicBid[];
-  };
-}
+export type AuctionDetailResponse = ApiResponse<{
+  auction: AuctionDetailData;
+  bids: PublicBid[];
+}>;
 
 
 export interface PlaceBidPayload {
