@@ -119,5 +119,29 @@ class AuthController {
             header('Location: /register');
         }
     }
+
+    public function validateSession(Request $request): void {
+        header('Content-Type: application/json');
+
+        if (Auth::check()) {
+            $user_id = Auth::id();
+            
+            echo json_encode([
+                'valid' => true,
+                'user' => [
+                    'user_id' => $user_id,
+                    'role' => $_SESSION['user']['role'] ?? 'BUYER',
+                    'name' => $_SESSION['user']['name'] ?? 'User'
+                ]
+            ]);
+        } else {
+            http_response_code(401);
+            echo json_encode([
+                'valid' => false, 
+                'message' => 'Session expired or invalid'
+            ]);
+        }
+        exit;
+    }
 }
 
