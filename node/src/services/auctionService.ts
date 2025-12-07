@@ -1,4 +1,4 @@
-import { AuctionDetailData, AuctionDetailResponse, BidData } from '../models/auctionModel';
+import { AuctionData, AuctionDetailData, AuctionDetailResponse, BidData } from '../models/auctionModel';
 import { AuctionRepository } from '../repositories/auctionRepository';
 
 export const AuctionService = {
@@ -27,4 +27,17 @@ export const AuctionService = {
 
     return await AuctionRepository.createBid(auctionId, userId, amount);
   },
+
+  async startAuction(auctionId: number): Promise<AuctionData | null> {
+    const auction = await AuctionRepository.startAuction(auctionId)
+    return auction
+  },
+
+  async finalizeAuction(auctionId: number): Promise<AuctionData | null> {
+    const closedAuction = await AuctionRepository.closeAuction(auctionId);
+    if (closedAuction && closedAuction.winner_id) {
+        console.log(`Auction ${auctionId} closed. Winner: ${closedAuction.winner_id}`);
+    }
+    return closedAuction;
+  }
 };

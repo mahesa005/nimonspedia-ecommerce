@@ -72,3 +72,12 @@ export interface BidErrorEvent {
   message: string;
   code?: string;
 }
+
+export interface OrderInsertResult {
+  order_id: number;
+}
+
+export interface OrderDetailsQuery {
+  store_id: number;
+  address: string | null;
+}

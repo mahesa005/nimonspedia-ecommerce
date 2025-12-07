@@ -1,5 +1,5 @@
 import pool from '../config/database';
-import { AuctionData, AuctionDetailData, BidData, BidHistoryData } from '../models/auctionModel';
+import { AuctionData, AuctionDetailData, BidData, BidHistoryData, OrderDetailsQuery, OrderInsertResult } from '../models/auctionModel';
 
 export const AuctionRepository = {
   async findDetailById(auctionId: number): Promise<AuctionDetailData | null> {
@@ -109,4 +109,91 @@ export const AuctionRepository = {
       client.release();
     }
   },
+
+  async startAuction(auctionId: number): Promise<AuctionData | null> {
+    const query = `
+      UPDATE "auctions"
+      SET status = 'active'
+      WHERE auction_id = $1 
+        AND status = 'scheduled'
+        AND start_time <= NOW()
+      RETURNING *
+    `;
+    const res = await pool.query<AuctionData>(query, [auctionId]);
+    const row = res.rows[0]
+    if (!row) throw new Error("Failed to start auction");
+    return row;
+  },
+
+  async closeAuction(auctionId: number): Promise<AuctionData | null> {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const closeQuery = `
+        UPDATE "auctions" 
+        SET status = 'ended' 
+        WHERE auction_id = $1 AND status IN ('active', 'ongoing')
+        RETURNING *
+      `;
+      const closeRes = await client.query<AuctionData>(closeQuery, [auctionId]);
+      const auction = closeRes.rows[0];
+
+      if (!auction) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      if (auction.winner_id) {
+        const detailsQuery = `
+          SELECT p.store_id, u.address 
+          FROM "product" p, "user" u 
+          WHERE p.product_id = $1 AND u.user_id = $2
+        `;
+        const detailsRes = await client.query<OrderDetailsQuery>(detailsQuery, [auction.product_id, auction.winner_id]);
+        const details = detailsRes.rows[0];
+
+        if (details) {
+          const orderQuery = `
+            INSERT INTO "order" (
+              buyer_id, store_id, total_price, shipping_address, status, created_at
+            ) VALUES ($1, $2, $3, $4, 'approved', NOW())
+            RETURNING order_id
+          `; 
+          
+          const orderRes = await client.query<OrderInsertResult>(orderQuery, [
+            auction.winner_id, 
+            details.store_id, 
+            auction.current_price, 
+            details.address
+          ]);
+          const orderId = orderRes.rows[0]?.order_id;
+          if (!orderId) throw new Error("Order insert failed");
+
+          const itemQuery = `
+            INSERT INTO "order_items" (
+              order_id, product_id, quantity, price_at_order, subtotal
+            ) VALUES ($1, $2, 1, $3, $4)
+          `;
+          await client.query(itemQuery, [
+            orderId, 
+            auction.product_id, 
+            auction.current_price, 
+            auction.current_price
+          ]);
+          
+          await client.query('UPDATE "product" SET stock = stock - 1 WHERE product_id = $1', [auction.product_id]);
+        }
+      }
+
+      await client.query('COMMIT');
+      return auction;
+
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  }
 };
