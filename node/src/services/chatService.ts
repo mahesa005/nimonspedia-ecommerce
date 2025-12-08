@@ -13,4 +13,18 @@ export const ChatService = {
     }
     return await ChatRepository.findMessages(storeId, buyerId);
   },
+
+  async sendMessage(data: SendMessageDTO): Promise<ChatMessage> {
+    const sanitizedContent = DOMPurify.sanitize(data.content);    
+    await ChatRepository.createRoom(data.store_id, data.buyer_id);
+    const message = await ChatRepository.createMessage({
+      ...data,
+      content: sanitizedContent
+    });
+    return message;
+  },
+  
+  async markRead(storeId: number, buyerId: number, userId: number) {
+     await ChatRepository.markMessagesRead(storeId, buyerId, userId);
+  }
 };
