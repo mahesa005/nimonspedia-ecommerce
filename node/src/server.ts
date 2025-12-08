@@ -7,6 +7,7 @@ import cors from 'cors';
 import { adminLoginController } from './controllers/adminAuthController';
 import { adminMeHandler } from './controllers/adminMeController';
 import { requireAdmin } from './middleware/requireAdmin';
+import { adminUserController } from './controllers/adminUserController';
 
 const app = express();
 const server = http.createServer(app);
@@ -38,6 +39,7 @@ app.get('/', (req: Request, res: Response) => {
 // or directly at localhost:3000/admin/...
 app.post('/admin/login', adminLoginController);
 app.get('/admin/me', requireAdmin, adminMeHandler);
+app.post('/admin/dashboard', requireAdmin, adminUserController)
 
 // WebSocket Logic
 io.on('connection', (socket: Socket) => {
