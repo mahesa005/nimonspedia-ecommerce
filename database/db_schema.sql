@@ -206,3 +206,12 @@ CREATE TABLE IF NOT EXISTS "user_feature_access" (
     updated_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES "user"(user_id)
 );
+
+ALTER TABLE "auctions"
+ADD COLUMN cancel_reason TEXT,
+ADD COLUMN cancelled_at TIMESTAMP;
+
+ALTER TABLE "auctions"
+ADD CONSTRAINT cancel_reason_required CHECK (
+    status != 'cancelled' OR cancel_reason IS NOT NULL
+);
