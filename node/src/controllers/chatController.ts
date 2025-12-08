@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ChatService } from '../services/chatService';
 import { GetChatsResponse, GetMessagesResponse, SendMessageDTO, SendMessageResponse } from '../models/chatModel';
+import { Server } from 'socket.io';
 
 export const getChatRooms = async (req: Request, res: Response<GetChatsResponse>) => {
   try {
@@ -69,6 +70,11 @@ export const sendMessage = async (req: Request, res: Response<SendMessageRespons
 
     const message = await ChatService.sendMessage(dto);
     
+    const io: Server = req.app.get('io');
+    const roomId = `chat_${store_id}_${buyer_id}`;
+    
+    io.to(roomId).emit('new_message', message);
+
     res.json({ 
       success: true, 
       data: message 
