@@ -13,6 +13,40 @@ export async function findUserByEmail(email: string): Promise<User | null> {
     return result.rows[0] as User;
 }
 
+export async function getUsers(params: {
+    page: number;
+    limit: number;
+    search?: string;
+}) {
+    const offset = (params.page - 1) * params.limit; // count offset
+    const searchParam = params.search ? `%${params.search}%` : null;
+    
+    const result = await pool.query(
+        `SELECT user_id, name, email, role, balance, created_at FROM "user" 
+        WHERE ($1::text IS NULL OR name ILIKE $1 OR email ILIKE $1)
+        ORDER BY created_at DESC
+        OFFSET $2
+        LIMIT $3`,
+        [searchParam, offset, params.limit]
+    );
+
+    const countRow = await pool.query(
+        `SELECT COUNT(*) AS total FROM "user"
+        WHERE ($1::text IS NULL OR name ILIKE $1 OR email ILIKE $1)`,
+        [searchParam]
+    );
+    const total = Number(countRow.rows[0].total);
+    const totalPages = Math.ceil(total / params.limit);
+
+    return {
+        users: result.rows,
+        pagination: {
+            page: params.page,
+            limit: params.limit,
+            total,
+            totalPages,
+        }
+    };
 export async function findUserById(id: number): Promise<User | null> {
     const result = await pool.query(
         `SELECT * FROM "user" WHERE user_id = $1 LIMIT 1`,

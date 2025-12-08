@@ -1,10 +1,13 @@
+// src/pages/admin/AdminLoginPage.tsx
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { adminLogin } from "../../api/adminApi";
+import { useAdminAuth } from "../../hooks/useAdminAuth";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const { login } = useAdminAuth();
+
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,11 +19,10 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const result = await adminLogin(email, password);
+      await login(email, password);
 
-      localStorage.setItem("admin_token", result.token);
-      localStorage.setItem("admin_info", JSON.stringify(result.admin));
-
+      // token + admin sudah disimpan via adminLoginAndStore di service
+      // + state di context juga sudah ke-update
       navigate("/admin");
     } catch (err: any) {
       setError(err.message || "Kredensial invalid");

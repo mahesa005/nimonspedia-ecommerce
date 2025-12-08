@@ -10,6 +10,7 @@ import auctionSocket from './sockets/auctionSocket';
 import { adminLoginController } from './controllers/adminAuthController';
 import { adminMeHandler } from './controllers/adminMeController';
 import { requireAdmin } from './middleware/requireAdmin';
+import { adminUserController } from './controllers/adminUserController';
 import { requireSocketAuth } from './middleware/requireSession';
 
 const app = express();
@@ -45,6 +46,7 @@ app.get('/', (req: Request, res: Response) => {
 // or directly at localhost:3000/admin/...
 app.post('/admin/login', adminLoginController);
 app.get('/admin/me', requireAdmin, adminMeHandler);
+app.post('/admin/dashboard', requireAdmin, adminUserController)
 
 // Auction API Routes
 app.use('/auctions', auctionRoutes);
