@@ -7,11 +7,11 @@ export const ChatService = {
     return await ChatRepository.findRoomsByUser(userId, role, searchQuery);
   },
 
-  async getRoomMessages(storeId: number, buyerId: number, userId: number, role: 'BUYER' | 'SELLER'): Promise<ChatMessage[]> {
+  async getRoomMessages(storeId: number, buyerId: number, userId: number, role: 'BUYER' | 'SELLER', cursor?: string): Promise<ChatMessage[]> {
     if (role === 'BUYER' && userId !== buyerId) {
       throw new Error('Forbidden: Unauthorized access to this chat');
     }
-    return await ChatRepository.findMessages(storeId, buyerId);
+    return await ChatRepository.findMessages(storeId, buyerId, 50, cursor);
   },
 
   async sendMessage(data: SendMessageDTO): Promise<ChatMessage> {

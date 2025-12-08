@@ -79,18 +79,28 @@ export const ChatRepository = {
       return res.rows;
     },
   
-  async findMessages(storeId: number, buyerId: number, limit = 50): Promise<ChatMessage[]> {
-    const query = `
+  async findMessages(storeId: number, buyerId: number, limit = 50, cursor?: string): Promise<ChatMessage[]> {
+    let query = `
       SELECT 
         message_id, store_id, buyer_id, sender_id, message_type, 
         content, product_id, is_read, created_at
       FROM chat_messages 
       WHERE store_id = $1 AND buyer_id = $2
-      ORDER BY created_at ASC
-      LIMIT $3
     `;
-    const res = await pool.query<ChatMessage>(query, [storeId, buyerId, limit]);
-    return res.rows;
+    const params: any[] = [storeId, buyerId];
+
+    if (cursor) {
+      query += ` AND created_at < $3`;
+      params.push(cursor);
+    }
+
+    query += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
+    params.push(limit);
+
+    const res = await pool.query<ChatMessage>(query, params);
+    
+    // Reverse the result so the frontend receives them Chronologically (Old -> New)
+    return res.rows.reverse();
   },
 
   async createRoom(storeId: number, buyerId: number): Promise<void> {

@@ -40,11 +40,14 @@ export const getRoomMessages = async (req: Request, res: Response<GetMessagesRes
       buyerId = parseInt(partnerIdHeader as string);
     }
 
+    const cursor = typeof req.query.cursor === 'string' ? req.query.cursor : undefined;
+
     const messages = await ChatService.getRoomMessages(
       storeId,
       buyerId,
       user.user_id,
-      user.role
+      user.role,
+      cursor
     );
 
     res.json({ success: true, data: messages });

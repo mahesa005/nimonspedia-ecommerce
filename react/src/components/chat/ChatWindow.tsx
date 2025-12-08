@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ChatMessage, ChatRoom } from '../../types/chat';
 import DOMPurify from 'dompurify';
 
@@ -10,23 +10,76 @@ interface Props {
   isPartnerTyping: boolean;
   onTyping: (isTyping: boolean) => void;
   onBack: () => void;
+  onLoadMore: () => Promise<void>;
+  hasMore: boolean;
 }
 
-export default function ChatWindow({ room, messages, currentUserId, onSendMessage, isPartnerTyping, onTyping, onBack }: Props) {
+export default function ChatWindow({ room, messages, currentUserId, onSendMessage, isPartnerTyping, onTyping, onBack, onLoadMore, hasMore }: Props) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const lastMessageIdRef = useRef<number | null>(null);
+
+  const isAtBottomRef = useRef(true);
   
-  // Mock Image Upload Placeholder
+  const [prevScrollHeight, setPrevScrollHeight] = useState(0);
+
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+    
+    const isBottom = scrollHeight - scrollTop - clientHeight < 100;
+    isAtBottomRef.current = isBottom;
+
+    if (scrollTop === 0 && hasMore && prevScrollHeight === 0) {
+      setPrevScrollHeight(scrollHeight);
+      onLoadMore();
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+
+    if (prevScrollHeight > 0 && containerRef.current.scrollHeight > prevScrollHeight) {
+      const diff = containerRef.current.scrollHeight - prevScrollHeight;
+      containerRef.current.scrollTop = diff;
+      setPrevScrollHeight(0);
+    } 
+  }, [messages, prevScrollHeight]);
+
+  useEffect(() => {
+    if (!messages.length) return;
+
+    const lastMsg = messages[messages.length - 1];
+    const isNewMessage = lastMsg.message_id !== lastMessageIdRef.current;
+    
+    lastMessageIdRef.current = lastMsg.message_id;
+
+    if (!isNewMessage || prevScrollHeight > 0) return;
+
+    const isMe = lastMsg.sender_id === currentUserId;
+
+    if (isMe || isAtBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, currentUserId, prevScrollHeight]); 
+
+  useEffect(() => {
+    if (messages.length > 0) {
+       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+       lastMessageIdRef.current = messages[messages.length - 1].message_id;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.store_id, room.buyer_id]);
+
   const handleImageUpload = () => {
     const url = prompt("Enter Image URL (Simulating upload):"); 
     if (url) {
       onSendMessage(url, 'image');
     }
   };
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isPartnerTyping]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +148,18 @@ export default function ChatWindow({ room, messages, currentUserId, onSendMessag
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div 
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-4 space-y-3"
+      >
+        {/* Loading Skeleton */}
+        {hasMore && (
+          <div className="flex justify-center py-4 space-y-2 flex-col items-center opacity-60">
+             <div className="w-32 h-2 bg-gray-300 rounded animate-pulse"></div>
+          </div>
+        )}
+
         {messages.map((msg) => {
           const isMe = msg.sender_id === currentUserId;
           return (

@@ -17,6 +17,8 @@ export default function ChatPage() {
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -66,6 +68,7 @@ export default function ChatPage() {
   const handleSelectRoom = async (room: ChatRoom) => {
     setActiveRoom(room);
     setMessages([]);
+    setHasMore(true);
     
     if (!user) return;
 
@@ -80,10 +83,46 @@ export default function ChatPage() {
         credentials: 'include'
       });
       const json = await res.json();
-      if (json.success) setMessages(json.data);
+      if (json.success) {
+        setMessages(json.data);
+        if (json.data.length < 50) setHasMore(false);
+      }
       
       socket.emit('join_chat', { storeId: room.store_id, buyerId: room.buyer_id });
     } catch (err) { console.error(err); }
+  };
+
+  const handleLoadMore = async () => {
+    if (!activeRoom || !user || !hasMore || isFetchingMore || messages.length === 0) return;
+
+    const oldestMessage = messages[0];
+    const cursor = oldestMessage.created_at;
+
+    setIsFetchingMore(true);
+
+    const roleString = (user.role as string || '').trim();
+    const isBuyer = roleString === 'BUYER';
+    const endpoint = isBuyer ? '/api/node/chats/buyer/messages' : '/api/node/chats/seller/messages';
+    const partnerId = isBuyer ? activeRoom.store_id : activeRoom.buyer_id;
+
+    try {
+      const res = await fetch(`${endpoint}?cursor=${cursor}`, {
+        headers: { 'X-Partner-ID': partnerId.toString() },
+        credentials: 'include'
+      });
+      const json = await res.json();
+
+      if (json.success) {
+        if (json.data.length < 50) setHasMore(false);
+        if (json.data.length > 0) {
+          setMessages(prev => [...json.data, ...prev]);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load more", err);
+    } finally {
+      setIsFetchingMore(false);
+    }
   };
 
   useEffect(() => {
@@ -200,6 +239,8 @@ export default function ChatPage() {
             isPartnerTyping={isTyping}
             onTyping={handleTyping}
             onBack={() => setActiveRoom(null)}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 text-gray-400">
