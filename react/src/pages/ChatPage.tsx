@@ -121,10 +121,12 @@ export default function ChatPage() {
       const msgDate = new Date(msg.created_at);
 
       const isOpen = activeRoom?.store_id === msg.store_id && activeRoom?.buyer_id === msg.buyer_id;
+
+      const isMe = msg.sender_id === user?.user_id;
       
-      if (isOpen) {
-        socket.emit('mark_read', { storeId: msg.store_id, buyerId: msg.buyer_id });
-        msg.is_read = true;
+      if (!isMe) {
+          socket.emit('mark_read', { storeId: msg.store_id, buyerId: msg.buyer_id });
+          msg.is_read = true;
       }
 
       setRooms(prevRooms => prevRooms.map(r => {
@@ -133,7 +135,7 @@ export default function ChatPage() {
               ...r, 
               last_message_content: msg.message_type === 'image' ? 'Sent an image' : msg.content, 
               last_message_at: msgDate,
-              unread_count: isOpen ? 0 : r.unread_count + 1 
+              unread_count: isMe ? r.unread_count : (isOpen ? 0 : r.unread_count + 1) 
             };
         }
         return r;
@@ -160,6 +162,17 @@ export default function ChatPage() {
       socket.off('messages_read');
     };
   }, [activeRoom]);
+
+    useEffect(() => {
+    if (rooms.length > 0) {
+        rooms.forEach(room => {
+        socket.emit('join_chat', { 
+            storeId: room.store_id, 
+            buyerId: room.buyer_id 
+        });
+        });
+    }
+    }, [rooms]);
 
   const handleSendMessage = (content: string, type: 'text' | 'image' = 'text') => {
     if (!activeRoom || !user) return;
