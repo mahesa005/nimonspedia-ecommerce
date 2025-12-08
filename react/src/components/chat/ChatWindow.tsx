@@ -63,7 +63,7 @@ export default function ChatWindow({ room, messages, currentUserId, onSendMessag
       );
     }
 
-    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.content) }} />;
+    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }) }} />;
   };
 
   return (
