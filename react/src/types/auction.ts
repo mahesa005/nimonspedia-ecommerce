@@ -55,6 +55,7 @@ export interface PlaceBidPayload {
 
 export interface NewBidEvent {
   bid_id: number;
+  bidder_id: number;
   auction_id: number;
   amount: number;
   bidder_name: string;
