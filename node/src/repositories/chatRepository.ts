@@ -2,7 +2,6 @@ import pool from '../config/database';
 import { ChatMessage, ChatRoom, SendMessageDTO } from '../models/chatModel';
 
 export const ChatRepository = {
-
   async findRoomsByUser(userId: number, role: 'BUYER' | 'SELLER', searchQuery?: string): Promise<ChatRoom[]> {
       let query = '';
       const params: any[] = [];
@@ -93,4 +92,68 @@ export const ChatRepository = {
     const res = await pool.query<ChatMessage>(query, [storeId, buyerId, limit]);
     return res.rows;
   },
+
+  async createRoom(storeId: number, buyerId: number): Promise<void> {
+    const query = `
+      INSERT INTO chat_rooms (store_id, buyer_id, last_message_at)
+      VALUES ($1, $2, NOW())
+      ON CONFLICT (store_id, buyer_id) DO NOTHING
+    `;
+    await pool.query(query, [storeId, buyerId]);
+  },
+
+  async createMessage(data: SendMessageDTO): Promise<ChatMessage> {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const insertQuery = `
+        INSERT INTO chat_messages 
+          (store_id, buyer_id, sender_id, message_type, content, product_id, is_read, created_at)
+        VALUES 
+          ($1, $2, $3, $4, $5, $6, false, NOW())
+        RETURNING *
+      `;
+      
+      const res = await client.query<ChatMessage>(insertQuery, [
+        data.store_id, 
+        data.buyer_id, 
+        data.sender_id, 
+        data.message_type, 
+        data.content, 
+        data.product_id || null
+      ]);
+      
+      const newMessage = res.rows[0];
+
+      if (!newMessage) {
+      throw new Error("Failed to insert chat message");
+      }
+
+      await client.query(`
+        UPDATE chat_rooms 
+        SET last_message_at = NOW() 
+        WHERE store_id = $1 AND buyer_id = $2
+      `, [data.store_id, data.buyer_id]);
+
+      await client.query('COMMIT');
+      return newMessage;
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  },
+
+  async markMessagesRead(storeId: number, buyerId: number, userId: number): Promise<void> {
+    const query = `
+      UPDATE chat_messages
+      SET is_read = true
+      WHERE store_id = $1 AND buyer_id = $2
+      AND sender_id != $3
+      AND is_read = false
+    `;
+    await pool.query(query, [storeId, buyerId, userId]);
+  }
 };
