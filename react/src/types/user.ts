@@ -1,4 +1,4 @@
-import { ApiResponse } from "./response";
+import type { ApiResponse } from "./response";
 
 // User model definition
 type user_role = 'ADMIN' | 'SELLER' | ' BUYER'
@@ -17,4 +17,4 @@ interface User {
 
 export type MeResponse = ApiResponse<User>
 
-export { User, user_role };
+export type { User, user_role };

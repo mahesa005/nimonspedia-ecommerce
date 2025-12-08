@@ -175,3 +175,5 @@ $router->add('GET', '/seller/export.csv',
     [ExportController::class, 'download'],
     [AuthMiddleware::class, RoleMiddleware::class]
 );
+
+$router->add('GET', '/api/auth/validate-session', [AuthController::class, 'validateSession']);

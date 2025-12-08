@@ -3,12 +3,14 @@ import { useEffect } from 'react';
 import { socket } from './socket';
 import AdminLoginPage from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AuctionDetail from './pages/AuctionDetail';
 
 // Placeholder Components
 const Chat = () => <h1 className="text-3xl font-bold text-blue-500">Chat Page</h1>;
 const AuctionList = () => <h1 className="text-3xl font-bold text-green-600">Auction List Page</h1>;
 const AuctionDetail = () => <h1 className="text-3xl font-bold text-blue-600">Auction Detail Page (ID: ?)</h1>;
 // const AdminDashboard = () => <h1 className="text-3xl font-bold text-red-600">Admin Dashboard</h1>;
+const AdminDashboard = () => <h1 className="text-3xl font-bold text-red-600">Admin Dashboard</h1>;
 const NotFound = () => <h1 className="text-xl text-gray-500">404 - Page Not Found</h1>;
 function App() {
   
