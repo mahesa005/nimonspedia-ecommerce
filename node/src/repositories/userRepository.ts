@@ -47,6 +47,8 @@ export async function getUsers(params: {
             totalPages,
         }
     };
+}
+
 export async function findUserById(id: number): Promise<User | null> {
     const result = await pool.query(
         `SELECT * FROM "user" WHERE user_id = $1 LIMIT 1`,
