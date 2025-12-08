@@ -1,3 +1,5 @@
+import { ApiResponse } from "./response";
+
 export interface ChatRoom {
   store_id: number;
   buyer_id: number;
@@ -28,3 +30,6 @@ export interface SendMessageDTO {
   content: string;
   product_id?: number;
 }
+
+export type GetChatsResponse = ApiResponse<ChatRoom[]>;
+export type GetMessagesResponse = ApiResponse<ChatMessage[]>;
