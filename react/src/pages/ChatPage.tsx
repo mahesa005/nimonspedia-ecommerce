@@ -161,7 +161,7 @@ export default function ChatPage() {
       socket.off('partner_typing');
       socket.off('messages_read');
     };
-  }, [activeRoom]);
+  }, [activeRoom, user?.user_id]);
 
     useEffect(() => {
     if (rooms.length > 0) {
