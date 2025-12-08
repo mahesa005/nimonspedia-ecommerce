@@ -1,5 +1,5 @@
 import { ChatRepository } from '../repositories/chatRepository';
-import DOMPurify from 'dompurify';
+import sanitizeHtml from 'sanitize-html';
 import { SendMessageDTO, ChatRoom, ChatMessage } from '../models/chatModel';
 
 export const ChatService = {
@@ -15,7 +15,7 @@ export const ChatService = {
   },
 
   async sendMessage(data: SendMessageDTO): Promise<ChatMessage> {
-    const sanitizedContent = DOMPurify.sanitize(data.content);    
+    const sanitizedContent = sanitizeHtml(data.content)  
     await ChatRepository.createRoom(data.store_id, data.buyer_id);
     const message = await ChatRepository.createMessage({
       ...data,
