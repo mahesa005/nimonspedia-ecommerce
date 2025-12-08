@@ -1,6 +1,6 @@
 import { useRequireAdmin } from "../../hooks/useRequireAdmin";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
-import AdminNavbar from "../../components/adminNavbar";
+import AdminNavbar from "../../components/admin/adminNavbar";
 import { useState, useEffect, useRef } from "react";
 import { fetchUsersAdmin, type UserData } from "../../api/adminDashboardApi";
 

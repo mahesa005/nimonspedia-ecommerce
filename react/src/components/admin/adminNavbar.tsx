@@ -1,4 +1,4 @@
-import { useAdminAuth } from "../hooks/useAdminAuth";
+import { useAdminAuth } from "../../hooks/useAdminAuth";
 import { useState, useRef, useEffect } from "react";
 
 export default function AdminNavbar() {
