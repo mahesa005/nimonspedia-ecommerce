@@ -4,9 +4,10 @@ interface TimerProps {
   targetDate: string | Date;
   onEnd?: () => void;
   label?: string;
+  serverOffset: number;
 }
 
-export default function AuctionTimer({ targetDate, onEnd, label }: TimerProps) {
+export default function AuctionTimer({ targetDate, onEnd, label, serverOffset }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const onEndCalled = useRef(false);
 
@@ -14,7 +15,7 @@ export default function AuctionTimer({ targetDate, onEnd, label }: TimerProps) {
     onEndCalled.current = false;
 
     const calculateTimeLeft = () => {
-      const now = Date.now();
+      const now = Date.now() + serverOffset;
       const end = new Date(targetDate).getTime();
       const distance = end - now;
 
@@ -39,7 +40,7 @@ export default function AuctionTimer({ targetDate, onEnd, label }: TimerProps) {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [targetDate, onEnd]);
+  }, [targetDate, onEnd, serverOffset]);
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);

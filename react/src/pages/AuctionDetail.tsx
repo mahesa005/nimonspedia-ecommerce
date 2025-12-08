@@ -31,6 +31,7 @@ export default function AuctionDetail() {
   const [showStopModal, setShowStopModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [serverOffset, setServerOffset] = useState(0);
 
   const dataRef = useRef(data);
   dataRef.current = data;
@@ -42,11 +43,19 @@ export default function AuctionDetail() {
     
     try {
       const res = await fetch(`/api/node/auctions/${id}`);
+      
+
+      const serverDateStr = res.headers.get('Date');
+      if (serverDateStr) {
+        const serverTime = new Date(serverDateStr).getTime();
+        const clientTime = Date.now();
+        setServerOffset(serverTime - clientTime);
+      }
+
       const json: AuctionDetailResponse = await res.json();
       
       if (json.success) {
         setData(json.data);
-        
         if (!socket.connected) socket.connect();
       } else {
         if (!isBackground) setError(json.message || 'Failed to load auction');
@@ -68,7 +77,7 @@ export default function AuctionDetail() {
   useEffect(() => {
     const intervalId = setInterval(() => {
       fetchAuctionData(true); 
-    }, 30000); 
+    }, 5000); 
 
     return () => clearInterval(intervalId);
   }, [fetchAuctionData]);
@@ -255,6 +264,7 @@ export default function AuctionDetail() {
                     targetDate={data.auction.start_time}
                     label="STARTS IN"
                     onEnd={handleScheduledTimerEnd}
+                    serverOffset={serverOffset}
                   />
                   <div className="mt-2 text-sm text-[#666] bg-[#f8f9fa] py-2 rounded">
                     Waiting for start time...
@@ -269,7 +279,7 @@ export default function AuctionDetail() {
               )}
 
               {data.auction.status === 'ongoing' && data.auction.end_time && (
-                <AuctionTimer targetDate={data.auction.end_time} label="ENDS IN" onEnd={() => {}} />
+                <AuctionTimer targetDate={data.auction.end_time} label="ENDS IN" onEnd={() => {}} serverOffset={serverOffset}/>
               )}
 
               {data.auction.status === 'ended' && (
