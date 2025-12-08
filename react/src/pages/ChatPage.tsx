@@ -18,7 +18,9 @@ export default function ChatPage() {
   const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const joinedRoomsRef = useRef<Set<string>>(new Set());
   
   const [searchParams] = useSearchParams();
   const targetStoreId = searchParams.get('store_id');
@@ -32,9 +34,7 @@ export default function ChatPage() {
           setUser(meJson.data);
           if (!socket.connected) socket.connect();
         }
-      } catch (err) {
-        console.error("Failed to init chat", err);
-      }
+      } catch (err) { console.error("Init failed", err); }
     };
     init();
     
@@ -45,16 +45,23 @@ export default function ChatPage() {
     try {
       const res = await fetch(`/api/node/chats?search=${search}`, { credentials: 'include' });
       const json = await res.json();
-      if (json.success) {
-        setRooms(json.data);
-      }
-    } catch (err) { console.error("Failed to fetch rooms", err); }
+      if (json.success) setRooms(json.data);
+    } catch (err) { console.error("Fetch rooms failed", err); }
   }, []);
 
+  useEffect(() => { if (user) fetchRooms(); }, [fetchRooms, user]);
+
   useEffect(() => {
-    console.log(user); 
-    fetchRooms(); 
-  }, [fetchRooms, user]);
+    if (rooms.length > 0) {
+      rooms.forEach(room => {
+        const roomKey = `${room.store_id}-${room.buyer_id}`;
+        if (!joinedRoomsRef.current.has(roomKey)) {
+            socket.emit('join_chat', { storeId: room.store_id, buyerId: room.buyer_id });
+            joinedRoomsRef.current.add(roomKey);
+        }
+      });
+    }
+  }, [rooms]);
 
   const handleSelectRoom = async (room: ChatRoom) => {
     setActiveRoom(room);
@@ -64,11 +71,7 @@ export default function ChatPage() {
 
     const roleString = (user.role as string || '').trim();
     const isBuyer = roleString === 'BUYER';
-
-    const endpoint = isBuyer 
-      ? '/api/node/chats/buyer/messages' 
-      : '/api/node/chats/seller/messages';
-
+    const endpoint = isBuyer ? '/api/node/chats/buyer/messages' : '/api/node/chats/seller/messages';
     const partnerId = isBuyer ? room.store_id : room.buyer_id;
 
     try {
@@ -76,12 +79,10 @@ export default function ChatPage() {
         headers: { 'X-Partner-ID': partnerId.toString() },
         credentials: 'include'
       });
-      
       const json = await res.json();
       if (json.success) setMessages(json.data);
-
-      socket.emit('join_chat', { storeId: room.store_id, buyerId: room.buyer_id });
       
+      socket.emit('join_chat', { storeId: room.store_id, buyerId: room.buyer_id });
     } catch (err) { console.error(err); }
   };
 
@@ -89,42 +90,31 @@ export default function ChatPage() {
     if (targetStoreId && rooms.length > 0 && !activeRoom) {
       const storeIdNum = parseInt(targetStoreId);
       const existingRoom = rooms.find(r => r.store_id === storeIdNum);
-      if (existingRoom) {
-        handleSelectRoom(existingRoom); 
-      } else {
-        console.log("Room not found in list, user needs to send message to start.");
-      }
+      if (existingRoom) handleSelectRoom(existingRoom);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetStoreId, rooms]); 
 
   useEffect(() => {
     if (activeRoom && user) {
-      socket.emit('mark_read', { 
-        storeId: activeRoom.store_id, 
-        buyerId: activeRoom.buyer_id 
-      });
-
-      setMessages(prev => prev.map(m => ({ ...m, is_read: true })));
+      socket.emit('mark_read', { storeId: activeRoom.store_id, buyerId: activeRoom.buyer_id });
       
-      setRooms(prev => prev.map(r => {
-        if (r.store_id === activeRoom.store_id && r.buyer_id === activeRoom.buyer_id) {
-          return { ...r, unread_count: 0 };
-        }
-        return r;
-      }));
+      setMessages(prev => prev.map(m => (!m.is_read && m.sender_id !== user.user_id) ? { ...m, is_read: true } : m));
+      
+      setRooms(prev => prev.map(r => 
+        (r.store_id === activeRoom.store_id && r.buyer_id === activeRoom.buyer_id) ? { ...r, unread_count: 0 } : r
+      ));
     }
   }, [activeRoom, user]);
 
   useEffect(() => {
     const handleNewMessage = (msg: ChatMessage) => {
       const msgDate = new Date(msg.created_at);
+      const isMe = msg.sender_id === user?.user_id;
 
       const isOpen = activeRoom?.store_id === msg.store_id && activeRoom?.buyer_id === msg.buyer_id;
 
-      const isMe = msg.sender_id === user?.user_id;
-      
-      if (!isMe) {
+      if (isOpen && !isMe) {
           socket.emit('mark_read', { storeId: msg.store_id, buyerId: msg.buyer_id });
           msg.is_read = true;
       }
@@ -134,7 +124,7 @@ export default function ChatPage() {
             return { 
               ...r, 
               last_message_content: msg.message_type === 'image' ? 'Sent an image' : msg.content, 
-              last_message_at: msgDate,
+              last_message_at: msgDate, 
               unread_count: isMe ? r.unread_count : (isOpen ? 0 : r.unread_count + 1) 
             };
         }
@@ -163,27 +153,14 @@ export default function ChatPage() {
     };
   }, [activeRoom, user?.user_id]);
 
-    useEffect(() => {
-    if (rooms.length > 0) {
-        rooms.forEach(room => {
-        socket.emit('join_chat', { 
-            storeId: room.store_id, 
-            buyerId: room.buyer_id 
-        });
-        });
-    }
-    }, [rooms]);
 
   const handleSendMessage = (content: string, type: 'text' | 'image' = 'text') => {
     if (!activeRoom || !user) return;
-    
     const payload = {
       storeId: activeRoom.store_id,
       buyerId: activeRoom.buyer_id,
-      content,
-      messageType: type
+      content, messageType: type
     };
-
     socket.emit('send_message', payload);
     handleTyping(false);
   };
@@ -192,17 +169,9 @@ export default function ChatPage() {
     if (!activeRoom || !user) return;
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
-    socket.emit('typing', { 
-      storeId: activeRoom.store_id, 
-      buyerId: activeRoom.buyer_id, 
-      isTyping: isTypingNow 
-    });
-
+    socket.emit('typing', { storeId: activeRoom.store_id, buyerId: activeRoom.buyer_id, isTyping: isTypingNow });
     if (isTypingNow) {
-      typingTimeoutRef.current = setTimeout(() => {
-        handleTyping(false);
-      }, 3000);
+      typingTimeoutRef.current = setTimeout(() => handleTyping(false), 3000);
     }
   };
 
@@ -212,11 +181,7 @@ export default function ChatPage() {
 
   return (
     <div className="h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] bg-gray-50 flex flex-col md:flex-row max-w-[1400px] mx-auto md:mt-4 md:border md:rounded-xl md:shadow-xl overflow-hidden relative">
-      
-      <div className={`
-        flex-col bg-white border-r border-gray-200 h-full w-full md:w-1/3 lg:w-1/4
-        ${activeRoom ? 'hidden md:flex' : 'flex'}
-      `}>
+      <div className={`flex-col bg-white border-r border-gray-200 h-full w-full md:w-1/3 lg:w-1/4 ${activeRoom ? 'hidden md:flex' : 'flex'}`}>
         <ChatSidebar 
           rooms={rooms} 
           activeRoom={activeRoom} 
@@ -225,11 +190,7 @@ export default function ChatPage() {
           currentUserRole={safeRole}
         />
       </div>
-      
-      <div className={`
-        flex-col bg-gray-50 h-full flex-1
-        ${!activeRoom ? 'hidden md:flex' : 'flex'}
-      `}>
+      <div className={`flex-col bg-gray-50 h-full flex-1 ${!activeRoom ? 'hidden md:flex' : 'flex'}`}>
         {activeRoom ? (
           <ChatWindow 
             room={activeRoom}
