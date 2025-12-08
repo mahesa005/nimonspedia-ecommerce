@@ -17,10 +17,7 @@ export async function adminUserController(
         }
         const users = await getPaginatedUsers({ page, limit, search });
 
-        return res.status(200).json({
-            message: "Daftar pengguna berhasil diambil",
-            data: users
-        });
+        return res.status(200).json({ users });
     } catch (err: any) {
         console.error("Error fetching users: ", err);
         return res.status(500).json({ message: "Internal server error" });

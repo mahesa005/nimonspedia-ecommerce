@@ -20,7 +20,7 @@ export async function getUsers(params: {
 }) {
     const offset = (params.page - 1) * params.limit; // count offset
     const result = await pool.query(
-        `SELECT user_id, name, email, role, created_at balance FROM "user" 
+        `SELECT user_id, name, email, role, balance, created_at FROM "user" 
         WHERE ($1 IS NULL OR name ILIKE $1 OR email ILIKE $1)
         ORDER BY created_at DESC
         OFFSET $2
@@ -33,7 +33,7 @@ export async function getUsers(params: {
     )
 
      const countRow = await pool.query(
-        `SELECT COUNT(*) AS total FROM users
+        `SELECT COUNT(*) AS total FROM "user"
         WHERE ($1 IS NULL OR name ILIKE $1 OR email ILIKE $1)`,
         [params.search ? `%${params.search}%` : null]
     );
