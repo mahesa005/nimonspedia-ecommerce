@@ -25,7 +25,7 @@ export const ChatRepository = {
             (SELECT COUNT(*)::int FROM chat_messages m 
              WHERE m.store_id = cr.store_id AND m.buyer_id = cr.buyer_id 
              AND m.is_read = false AND m.sender_id != $1) AS unread_count
-          FROM chat_rooms cr
+          FROM chat_room cr
           JOIN store s ON cr.store_id = s.store_id
           WHERE cr.buyer_id = $1
         `;
@@ -60,7 +60,7 @@ export const ChatRepository = {
             (SELECT COUNT(*)::int FROM chat_messages m 
              WHERE m.store_id = cr.store_id AND m.buyer_id = cr.buyer_id 
              AND m.is_read = false AND m.sender_id != $1) AS unread_count
-          FROM chat_rooms cr
+          FROM chat_room cr
           JOIN "user" u ON cr.buyer_id = u.user_id
           WHERE cr.store_id = $2
         `;
@@ -95,7 +95,7 @@ export const ChatRepository = {
 
   async createRoom(storeId: number, buyerId: number): Promise<void> {
     const query = `
-      INSERT INTO chat_rooms (store_id, buyer_id, last_message_at)
+      INSERT INTO chat_room (store_id, buyer_id, last_message_at)
       VALUES ($1, $2, NOW())
       ON CONFLICT (store_id, buyer_id) DO NOTHING
     `;
@@ -131,7 +131,7 @@ export const ChatRepository = {
       }
 
       await client.query(`
-        UPDATE chat_rooms 
+        UPDATE chat_room 
         SET last_message_at = NOW() 
         WHERE store_id = $1 AND buyer_id = $2
       `, [data.store_id, data.buyer_id]);
