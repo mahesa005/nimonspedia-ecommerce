@@ -1,7 +1,7 @@
 import { useRequireAdmin } from "../../hooks/useRequireAdmin";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
 import AdminNavbar from "../../components/adminNavbar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { fetchUsersAdmin, type UserData } from "../../api/adminDashboardApi";
 
 export default function AdminDashboard() {
@@ -11,13 +11,30 @@ export default function AdminDashboard() {
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 0 });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (token) {
-      console.log("Loading users with token:", token);
       loadUsers(1, 12);
     }
   }, [token]);
+
+  // Debounce search
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      loadUsers(1, pagination?.limit || 12, search);
+    }, 300);
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [search]);
 
   const loadUsers = async (page: number, limit: number, searchQuery?: string) => {
     if (!token) return;
@@ -33,11 +50,6 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
-
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    loadUsers(1, pagination?.limit || 12, search);
-  }; 
 
   const handleLimitChange = (newLimit: number) => {
     loadUsers(1, newLimit, search);
@@ -87,8 +99,11 @@ export default function AdminDashboard() {
 
           {/* Filters Section */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-            <form onSubmit={handleSearch} className="flex gap-4 flex-wrap items-end">
+            <div className="flex gap-4 flex-wrap items-end">
               <div className="flex-1 min-w-72">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Cari:
+                </label>
                 <input
                   type="text"
                   value={search}
@@ -97,12 +112,6 @@ export default function AdminDashboard() {
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#42b549] focus:ring-1 focus:ring-[#42b549]"
                 />
               </div>
-              <button
-                type="submit"
-                className="px-6 py-2.5 bg-[#42b549] text-white font-semibold text-sm rounded-lg hover:bg-[#329439] transition-colors duration-200"
-              >
-                Cari
-              </button>
               <a
                 href="/admin" 
                 className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 transition-colors duration-200"
@@ -115,7 +124,7 @@ export default function AdminDashboard() {
               >
                 Kelola Global Flags
               </button>
-            </form>
+            </div>
           </div>
 
           {/* Users Table Section */}
