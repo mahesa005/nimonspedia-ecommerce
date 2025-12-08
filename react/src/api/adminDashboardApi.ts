@@ -37,6 +37,15 @@ export async function fetchUsersAdmin(
         body: JSON.stringify({ page, limit, search })
     })
     
+    // Handle 401 - token expired/invalid
+    if (response.status === 401) {
+        // Clear auth and redirect to login
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminInfo');
+        window.location.href = '/admin/login';
+        throw new Error('Token kadaluarsa, silakan login kembali');
+    }
+    
     if (!response.ok) {
         throw new Error('Gagal mengambil data tabel "user"');
     }

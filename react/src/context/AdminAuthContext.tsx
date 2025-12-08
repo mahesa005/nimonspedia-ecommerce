@@ -16,6 +16,29 @@ import {
   refreshAdminFromServer,
 } from "../services/adminAuthService";
 
+// Helper function to check if JWT token is expired
+function isTokenExpired(token: string): boolean {
+  try {
+    // JWT format: header.payload.signature
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+    
+    // Decode payload (2nd part)
+    const payload = JSON.parse(atob(parts[1]));
+    
+    // Check exp claim (expiry time in seconds since epoch)
+    if (!payload.exp) return true;
+    
+    // Current time in seconds
+    const now = Math.floor(Date.now() / 1000);
+    
+    // Token expired if current time >= exp time
+    return now >= payload.exp;
+  } catch {
+    return true; // If decode fails, consider token invalid
+  }
+}
+
 interface AdminAuthContextValue {
   admin: AdminInfo | null;
   token: string | null;
@@ -42,6 +65,13 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     if (!storedToken) {
       setLoading(false);
       return; // user not logged in
+    }
+
+    // Check if token is expired
+    if (isTokenExpired(storedToken)) {
+      clearAdminAuth();
+      setLoading(false);
+      return;
     }
 
     setToken(storedToken); // save token for UI needs

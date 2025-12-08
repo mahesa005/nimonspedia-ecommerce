@@ -42,6 +42,15 @@ export async function fetchAdminMe(token: string): Promise<AdminInfo> { // Funct
             'Authorization': `Bearer ${token}`, // Include the token in the Authorization header
         },
     });
+    
+    // Handle 401 - token expired/invalid
+    if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminInfo');
+        window.location.href = '/admin/login';
+        throw new Error('Token kadaluarsa, silakan login kembali');
+    }
+    
     if (!response.ok) {
         throw new Error('Gagal mengambil info admin');
     }
