@@ -205,5 +205,19 @@ export const AuctionRepository = {
     } finally {
       client.release();
     }
+  },
+
+  async cancelAuction(auctionId: number, reason: string): Promise<AuctionData | null> {
+    const query = `
+      UPDATE "auctions"
+      SET status = 'cancelled',
+          cancel_reason = $1,
+          cancelled_at = NOW()
+      WHERE auction_id = $2
+        AND status IN ('scheduled', 'active', 'ongoing')
+      RETURNING *;
+    `;
+    const res = await pool.query<AuctionData>(query, [reason, auctionId]);
+    return res.rows[0] || null;
   }
 };

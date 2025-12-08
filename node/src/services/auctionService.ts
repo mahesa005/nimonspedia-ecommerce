@@ -39,5 +39,11 @@ export const AuctionService = {
         console.log(`Auction ${auctionId} closed. Winner: ${closedAuction.winner_id}`);
     }
     return closedAuction;
-  }
+  },
+
+  async cancelAuction(auctionId: number, reason: string): Promise<AuctionData | null> {
+    const auction = await AuctionRepository.cancelAuction(auctionId, reason);
+    if (!auction) throw new Error("Failed to cancel auction or auction not found");
+    return auction;
+  },
 };

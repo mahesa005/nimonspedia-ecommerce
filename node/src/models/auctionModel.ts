@@ -87,3 +87,5 @@ export interface OrderDetailsQuery {
   store_id: number;
   address: string | null;
 }
+
+export type AuctionResponse = ApiResponse<AuctionData | null>;
