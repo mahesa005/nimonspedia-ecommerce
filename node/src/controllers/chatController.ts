@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ChatService } from '../services/chatService';
-import { GetChatsResponse, GetMessagesResponse } from '../models/chatModel';
+import { GetChatsResponse, GetMessagesResponse, SendMessageDTO, SendMessageResponse } from '../models/chatModel';
 
 export const getChatRooms = async (req: Request, res: Response<GetChatsResponse>) => {
   try {
@@ -50,5 +50,35 @@ export const getRoomMessages = async (req: Request, res: Response<GetMessagesRes
 
   } catch (error: any) {
     res.status(500).json({ success: false, data: null, message: error.message });
+  }
+};
+
+export const sendMessage = async (req: Request, res: Response<SendMessageResponse>) => {
+  try {
+    const user = (req as any).user;
+    const { store_id, buyer_id, content, message_type, product_id } = req.body;
+
+    const dto: SendMessageDTO = {
+      store_id,
+      buyer_id,
+      sender_id: user.user_id,
+      message_type: message_type || 'text',
+      content,
+      product_id
+    };
+
+    const message = await ChatService.sendMessage(dto);
+    
+    res.json({ 
+      success: true, 
+      data: message 
+    });
+
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false, 
+      data: null, 
+      message: error.message 
+    });
   }
 };

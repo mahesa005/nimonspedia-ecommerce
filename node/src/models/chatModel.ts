@@ -33,3 +33,4 @@ export interface SendMessageDTO {
 
 export type GetChatsResponse = ApiResponse<ChatRoom[]>;
 export type GetMessagesResponse = ApiResponse<ChatMessage[]>;
+export type SendMessageResponse = ApiResponse<ChatMessage>;
