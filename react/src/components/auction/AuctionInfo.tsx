@@ -1,4 +1,5 @@
 import type { AuctionDetailData } from '../../types/auction';
+import DOMPurify from 'dompurify';
 
 export default function AuctionInfo({ data }: { data: AuctionDetailData }) {
   return (
@@ -106,7 +107,7 @@ export default function AuctionInfo({ data }: { data: AuctionDetailData }) {
         <h3 className="text-[1.3rem] font-bold text-[#333] mb-4">Description</h3>
         <div 
           className="text-[#666] leading-[1.7] text-[0.95rem] prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: data.description }} 
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(data.description) }} 
         />
       </div>
     </div>
