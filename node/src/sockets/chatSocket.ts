@@ -54,4 +54,22 @@ export default (io: Server, socket: Socket) => {
       isTyping 
     });
   });
+
+  socket.on('mark_read', async ({ storeId, buyerId }) => {
+    try {
+      const userId = socket.data.user.user_id;
+      
+      await ChatService.markRead(storeId, buyerId, userId);
+
+      const roomId = `chat_${storeId}_${buyerId}`;
+      socket.to(roomId).emit('messages_read', { 
+        readBy: userId,
+        storeId, 
+        buyerId 
+      });
+      
+    } catch (error) {
+      console.error('[SOCKET] Mark Read Error:', error);
+    }
+  });
 };
