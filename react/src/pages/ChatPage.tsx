@@ -56,19 +56,6 @@ export default function ChatPage() {
     fetchRooms(); 
   }, [fetchRooms, user]);
 
-  useEffect(() => {
-    if (targetStoreId && rooms.length > 0 && !activeRoom) {
-      const storeIdNum = parseInt(targetStoreId);
-      const existingRoom = rooms.find(r => r.store_id === storeIdNum);
-      if (existingRoom) {
-        handleSelectRoom(existingRoom); 
-      } else {
-        console.log("Room not found in list, user needs to send message to start.");
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetStoreId, rooms]); 
-
   const handleSelectRoom = async (room: ChatRoom) => {
     setActiveRoom(room);
     setMessages([]);
@@ -97,6 +84,19 @@ export default function ChatPage() {
       
     } catch (err) { console.error(err); }
   };
+
+  useEffect(() => {
+    if (targetStoreId && rooms.length > 0 && !activeRoom) {
+      const storeIdNum = parseInt(targetStoreId);
+      const existingRoom = rooms.find(r => r.store_id === storeIdNum);
+      if (existingRoom) {
+        handleSelectRoom(existingRoom); 
+      } else {
+        console.log("Room not found in list, user needs to send message to start.");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetStoreId, rooms]); 
 
   useEffect(() => {
     if (activeRoom && user) {
@@ -198,30 +198,42 @@ export default function ChatPage() {
   const safeRole = (user.role as string).trim() === 'BUYER' ? 'BUYER' : 'SELLER';
 
   return (
-    <div className="max-w-[1400px] mx-auto bg-white shadow-xl rounded-xl overflow-hidden flex h-[calc(100vh-80px)] mt-4 border border-gray-200">
-      <ChatSidebar 
-        rooms={rooms} 
-        activeRoom={activeRoom} 
-        onSelectRoom={handleSelectRoom}
-        onSearch={(q) => fetchRooms(q)}
-        currentUserRole={safeRole}
-      />
+    <div className="h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] bg-gray-50 flex flex-col md:flex-row max-w-[1400px] mx-auto md:mt-4 md:border md:rounded-xl md:shadow-xl overflow-hidden relative">
       
-      {activeRoom ? (
-        <ChatWindow 
-          room={activeRoom}
-          messages={messages}
-          currentUserId={user.user_id}
-          onSendMessage={handleSendMessage}
-          isPartnerTyping={isTyping}
-          onTyping={handleTyping}
+      <div className={`
+        flex-col bg-white border-r border-gray-200 h-full w-full md:w-1/3 lg:w-1/4
+        ${activeRoom ? 'hidden md:flex' : 'flex'}
+      `}>
+        <ChatSidebar 
+          rooms={rooms} 
+          activeRoom={activeRoom} 
+          onSelectRoom={handleSelectRoom}
+          onSearch={(q) => fetchRooms(q)}
+          currentUserRole={safeRole}
         />
-      ) : (
-        <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 text-gray-400">
-          <span className="text-6xl mb-4">💬</span>
-          <p className="text-lg font-medium">Select a conversation to start chatting</p>
-        </div>
-      )}
+      </div>
+      
+      <div className={`
+        flex-col bg-gray-50 h-full flex-1
+        ${!activeRoom ? 'hidden md:flex' : 'flex'}
+      `}>
+        {activeRoom ? (
+          <ChatWindow 
+            room={activeRoom}
+            messages={messages}
+            currentUserId={user.user_id}
+            onSendMessage={handleSendMessage}
+            isPartnerTyping={isTyping}
+            onTyping={handleTyping}
+            onBack={() => setActiveRoom(null)}
+          />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 text-gray-400">
+            <span className="text-6xl mb-4">💬</span>
+            <p className="text-lg font-medium">Select a conversation to start chatting</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
