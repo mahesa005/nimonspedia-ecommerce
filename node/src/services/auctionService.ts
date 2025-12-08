@@ -19,7 +19,7 @@ export const AuctionService = {
     const auction = await AuctionRepository.findDetailById(auctionId);
     if (!auction) throw new Error("Auction not found");
 
-    const minBid = parseInt(auction.current_price) + parseInt(auction.min_increment);
+    const minBid = auction.current_price + auction.min_increment;
     
     if (amount < minBid && auction.bidder_count > 0) {
       throw new Error(`Bid must be at least ${minBid}`);

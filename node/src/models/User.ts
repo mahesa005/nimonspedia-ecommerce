@@ -1,3 +1,5 @@
+import { ApiResponse } from "./response";
+
 // User model definition
 type user_role = 'ADMIN' | 'SELLER' | ' BUYER'
 
@@ -12,5 +14,7 @@ interface User {
     created_at: Date;
     updated_at: Date;
 }
+
+export type MeResponse = ApiResponse<User>
 
 export { User, user_role };

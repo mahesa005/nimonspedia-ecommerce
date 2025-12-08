@@ -12,3 +12,13 @@ export async function findUserByEmail(email: string): Promise<User | null> {
     if (result.rows.length == 0) return null;
     return result.rows[0] as User;
 }
+
+export async function findUserById(id: number): Promise<User | null> {
+    const result = await pool.query(
+        `SELECT * FROM "user" WHERE user_id = $1 LIMIT 1`,
+        [id]
+    );
+
+    if (result.rows.length === 0) return null;
+    return result.rows[0] as User;
+}

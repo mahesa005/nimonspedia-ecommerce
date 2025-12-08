@@ -4,6 +4,7 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import auctionRoutes from './routes/auctionRoutes';
+import userRoutes from './routes/userRoutes';
 import auctionSocket from './sockets/auctionSocket';
 
 import { adminLoginController } from './controllers/adminAuthController';
@@ -45,6 +46,7 @@ app.get('/admin/me', requireAdmin, adminMeHandler);
 
 // Auction API Routes
 app.use('/auctions', auctionRoutes);
+app.use('', userRoutes);
 
 // Websocket Middleware
 io.use(requireSocketAuth);

@@ -4,8 +4,8 @@ export interface AuctionData {
   auction_id: number;
   product_id: number;
   starting_price: number;
-  current_price: string;
-  min_increment: string;
+  current_price: number;
+  min_increment: number;
   quantity: number;
   start_time: Date;
   end_time: Date | null;
