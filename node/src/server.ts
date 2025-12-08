@@ -12,6 +12,8 @@ import { adminMeHandler } from './controllers/adminMeController';
 import { requireAdmin } from './middleware/requireAdmin';
 import { adminUserController } from './controllers/adminUserController';
 import { requireSocketAuth } from './middleware/requireSession';
+import chatRoutes from './routes/chatRoutes';
+import chatSocket from './sockets/chatSocket';
 
 const app = express();
 const server = http.createServer(app);
@@ -51,6 +53,7 @@ app.post('/admin/dashboard', requireAdmin, adminUserController)
 // Auction API Routes
 app.use('/auctions', auctionRoutes);
 app.use('', userRoutes);
+app.use('/chats', chatRoutes);
 
 // Websocket Middleware
 io.use(requireSocketAuth);
@@ -62,6 +65,7 @@ io.on('connection', (socket: Socket) => {
   console.log(`User connected: ${user.name} (ID: ${user.user_id})`);
   
   auctionSocket(io, socket);
+  chatSocket(io, socket);
 
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
