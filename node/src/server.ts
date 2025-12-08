@@ -11,6 +11,7 @@ import { adminLoginController } from './controllers/adminAuthController';
 import { adminMeHandler } from './controllers/adminMeController';
 import { requireAdmin } from './middleware/requireAdmin';
 import { requireSocketAuth } from './middleware/requireSession';
+import chatRoutes from './routes/chatRoutes';
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +50,7 @@ app.get('/admin/me', requireAdmin, adminMeHandler);
 // Auction API Routes
 app.use('/auctions', auctionRoutes);
 app.use('', userRoutes);
+app.use('/chats', chatRoutes);
 
 // Websocket Middleware
 io.use(requireSocketAuth);
