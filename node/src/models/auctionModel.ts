@@ -12,6 +12,8 @@ export interface AuctionData {
   status: 'scheduled' | 'active' | 'ongoing' | 'ended' | 'cancelled';
   winner_id: number | null;
   created_at: Date;
+  cancel_reason: string | null;
+  cancelled_at: Date | null;
 }
 
 export interface BidData {

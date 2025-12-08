@@ -29,6 +29,8 @@ const io = new Server(server, {
   path: '/socket.io'
 });
 
+app.set('io', io)
+
 // Typed Route
 app.get('/', (req: Request, res: Response) => {
   res.json({ 

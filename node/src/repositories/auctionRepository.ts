@@ -5,7 +5,7 @@ export const AuctionRepository = {
   async findDetailById(auctionId: number): Promise<AuctionDetailData | null> {
     const query = `
       SELECT 
-        a.auction_id, a.starting_price, a.current_price, a.min_increment, a.quantity, a.start_time, a.end_time, a.status, a.winner_id,
+        a.auction_id, a.starting_price, a.current_price, a.min_increment, a.quantity, a.start_time, a.end_time, a.status, a.winner_id, a.cancel_reason, a.cancelled_at,
         p.product_id, p.product_name, p.description, p.main_image_path,
         s.store_id, s.store_name,
         (SELECT COUNT(DISTINCT bidder_id) FROM "auction_bids" WHERE auction_id = a.auction_id) as bidder_count

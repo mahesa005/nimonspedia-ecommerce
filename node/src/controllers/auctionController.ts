@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuctionService } from '../services/auctionService';
 import { AuctionDetailResponse, AuctionResponse } from '../models/auctionModel';
+import { Server } from 'socket.io';
 
 export const getAuctionDetail = async (req: Request, res: Response<AuctionDetailResponse>) => {
   try {
@@ -42,6 +43,14 @@ export const cancelAuction = async (req: Request, res: Response<AuctionResponse>
       return res.status(404).json({ success: false, data: null, message: 'Auction not found or cannot be cancelled' });
     }
 
+    const io: Server = req.app.get('io');
+    
+    io.to(`auction_${auctionId}`).emit('auction_cancelled', {
+      auctionId,
+      reason: auction.cancel_reason,
+      status: 'cancelled'
+    });
+
     res.json({ success: true, data: auction, message: 'Auction cancelled successfully' });
 
   } catch (error: any) {
@@ -63,6 +72,14 @@ export const stopAuction = async (req: Request, res: Response<AuctionResponse>) 
     if (!auction) {
       return res.status(404).json({ success: false, data: null, message: 'Auction not found or cannot be stopped' });
     }
+
+    const io: Server = req.app.get('io');
+    
+    io.to(`auction_${auctionId}`).emit('auction_ended', {
+      auctionId,
+      winnerId: auction.winner_id,
+      finalPrice: Number(auction.current_price)
+    });
 
     res.json({ success: true, data: auction, message: 'Auction stopped successfully' });
 
