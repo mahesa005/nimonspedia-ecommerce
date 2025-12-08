@@ -13,10 +13,10 @@ export async function adminLoginController(req: Request, res: Response) {
             return res.status(400).json({ message: "Email dan password wajib diisi"})
         }
 
-        const result = await adminLogin(email, password) // Call service to perform login
-        
-        res.status(200).json({ 
-            message: "Login admin berhasil: ", data: result})
+        const result = await adminLogin(email, password); // Call service to perform login
+
+        // Return token and admin object directly
+        res.status(200).json(result);
     } catch (err: any) { // Set type of err to any so we can access err.message
         
         if (err.message === "email atau password tidak valid") {
