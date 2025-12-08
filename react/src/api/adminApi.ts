@@ -16,6 +16,7 @@ export async function adminLogin( // Function to handle admin login API call
     email: string,
     password: string
 ): Promise<AdminLoginResponse> {
+    console.log("adminApi.adminLogin called with:", { email });
     const response = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
         headers: {
@@ -26,7 +27,9 @@ export async function adminLogin( // Function to handle admin login API call
     if (!response.ok) {
         throw new Error('Gagal login admin');
     }
-    return response.json();
+    const data = await response.json();
+    console.log("adminApi.adminLogin response:", data);
+    return data;
 }
 
 // Function that fetches current admin info

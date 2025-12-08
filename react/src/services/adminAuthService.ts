@@ -12,11 +12,17 @@ export async function adminLoginAndStore(
     email: string,
     password: string
 ): Promise<AdminLoginResponse> {
+    console.log("adminAuthService.adminLoginAndStore called");
     const result = await adminLogin(email, password)
+    console.log("adminAuthService got result:", result);
 
     // Store token in local storage
     localStorage.setItem(ADMIN_TOKEN_KEY, result.token)
     localStorage.setItem(ADMIN_INFO_KEY, JSON.stringify(result.admin))
+    console.log("adminAuthService stored in localStorage:", {
+        token: result.token,
+        admin: result.admin
+    });
     
     return result;
 }

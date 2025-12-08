@@ -37,6 +37,7 @@ export async function adminLogin(
         email: user.email,
     })
 
+    console.log(user.role)
     return {
         token,
         admin: {

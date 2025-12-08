@@ -3,6 +3,8 @@ import {
   useContext,
   useState,
   useEffect,
+  useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import type { AdminInfo } from "../api/adminApi";
@@ -60,25 +62,28 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  async function login(email: string, password: string) {
+  const login = useCallback(async (email: string, password: string) => {
+    console.log("Context login called");
     const result = await adminLoginAndStore(email, password);
+    console.log("Login result:", result);
     setToken(result.token);
     setAdmin(result.admin);
-  }
+    console.log("State updated with token:", result.token, "admin:", result.admin);
+  }, []);
 
-  function logout() {
+  const logout = useCallback(() => {
     clearAdminAuth();
     setToken(null);
     setAdmin(null);
-  }
+  }, []);
 
-  const value: AdminAuthContextValue = { // returns accessible context value
+  const value = useMemo(() => ({
     admin,
     token,
     loading,
     login,
     logout,
-  };
+  }), [admin, token, loading, login, logout]);
 
   return (
     <AdminAuthContext.Provider value={value}>
