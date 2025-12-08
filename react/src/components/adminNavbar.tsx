@@ -8,7 +8,7 @@ export default function AdminNavbar() {
 
   const handleLogout = () => {
     logout();
-    window.location.href = "/login";
+    window.location.href = "/admin/login";
   };
 
   // Close dropdown when clicking outside
