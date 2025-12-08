@@ -19,23 +19,21 @@ export async function getUsers(params: {
     search?: string;
 }) {
     const offset = (params.page - 1) * params.limit; // count offset
+    const searchParam = params.search ? `%${params.search}%` : null;
+    
     const result = await pool.query(
         `SELECT user_id, name, email, role, balance, created_at FROM "user" 
-        WHERE ($1 IS NULL OR name ILIKE $1 OR email ILIKE $1)
+        WHERE ($1::text IS NULL OR name ILIKE $1 OR email ILIKE $1)
         ORDER BY created_at DESC
         OFFSET $2
         LIMIT $3`,
-        [
-            params.search ? `%${params.search}%`: null, 
-            offset, 
-            params.limit
-        ]
-    )
+        [searchParam, offset, params.limit]
+    );
 
-     const countRow = await pool.query(
+    const countRow = await pool.query(
         `SELECT COUNT(*) AS total FROM "user"
-        WHERE ($1 IS NULL OR name ILIKE $1 OR email ILIKE $1)`,
-        [params.search ? `%${params.search}%` : null]
+        WHERE ($1::text IS NULL OR name ILIKE $1 OR email ILIKE $1)`,
+        [searchParam]
     );
     const total = Number(countRow.rows[0].total);
     const totalPages = Math.ceil(total / params.limit);
@@ -48,6 +46,5 @@ export async function getUsers(params: {
             total,
             totalPages,
         }
-    }
-
+    };
 }

@@ -32,14 +32,14 @@ export async function fetchUsersAdmin(
         method: 'POST',
         headers: {
             'Content-Type': 'application/json', // Indicate that we're sending JSON data
-            Authorizatoin: `Bearer ${token}`
+            Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ page, limit, search })
     })
-
+    
     if (!response.ok) {
         throw new Error('Gagal mengambil data tabel "user"');
     }
-    const data = await response.json()
-    return data as UserPaginationResponse
+    const data = await response.json();
+    return data as UserPaginationResponse;
 }

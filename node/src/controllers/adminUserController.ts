@@ -15,9 +15,9 @@ export async function adminUserController(
         if (!page || !limit) {
             return res.status(400).json({ message: "Page dan limit wajib diisi" });
         }
-        const users = await getPaginatedUsers({ page, limit, search });
+        const result = await getPaginatedUsers({ page, limit, search });
 
-        return res.status(200).json({ users });
+        return res.status(200).json(result);
     } catch (err: any) {
         console.error("Error fetching users: ", err);
         return res.status(500).json({ message: "Internal server error" });

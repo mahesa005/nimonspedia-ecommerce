@@ -1,13 +1,56 @@
-// src/pages/admin/AdminDashboardPage.tsx
 import { useRequireAdmin } from "../../hooks/useRequireAdmin";
+import { useAdminAuth } from "../../hooks/useAdminAuth";
+import AdminNavbar from "../../components/adminNavbar";
+import { useState, useEffect } from "react";
+import { fetchUsersAdmin, type UserData } from "../../api/adminDashboardApi";
 
 export default function AdminDashboard() {
-  const { admin, loading } = useRequireAdmin();
+  const { admin, loading: authLoading } = useRequireAdmin();
+  const { token } = useAdminAuth();
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 0 });
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    if (token) {
+      console.log("Loading users with token:", token);
+      loadUsers(1, 12);
+    }
+  }, [token]);
+
+  const loadUsers = async (page: number, limit: number, searchQuery?: string) => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const data = await fetchUsersAdmin(page, limit, token, searchQuery);
+      setUsers(data.users || []);
+      setPagination(data.pagination);
+    } catch (err) {
+      console.error("Failed to load users:", err);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    loadUsers(1, pagination?.limit || 12, search);
+  }; 
+
+  const handleLimitChange = (newLimit: number) => {
+    loadUsers(1, newLimit, search);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    loadUsers(newPage, pagination?.limit || 12, search);
+  };
+
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        <div className="text-xl text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -16,18 +59,268 @@ export default function AdminDashboard() {
     return null;
   }
 
-  return (
-    <div className="min-h-screen flex bg-slate-100">
-      {/* sidebar, dll */}
-      <aside className="w-64 bg-slate-900 text-white p-4">
-        <div className="font-bold text-xl mb-4">Admin Panel</div>
-        <div className="text-xs text-slate-300">Logged in as {admin.name}</div>
-      </aside>
+  const roleColor = (role: string) => {
+    switch (role) {
+      case "ADMIN":
+        return "bg-red-100 text-red-800";
+      case "SELLER":
+        return "bg-blue-100 text-blue-800";
+      case "BUYER":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
-      <main className="flex-1 p-6">
-        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-        {/* nanti isi cards, stats, dsb */}
-      </main>
-    </div>
+  return (
+    <>
+      <AdminNavbar />
+      <div className="min-h-screen bg-gray-50 pt-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">Kelola Pengguna</h1>
+              <p className="text-gray-600">Kelola dan pantau semua pengguna sistem</p>
+            </div>
+          </div>
+
+          {/* Filters Section */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <form onSubmit={handleSearch} className="flex gap-4 flex-wrap items-end">
+              <div className="flex-1 min-w-72">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Nama atau Email Pengguna"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#42b549] focus:ring-1 focus:ring-[#42b549]"
+                />
+              </div>
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-[#42b549] text-white font-semibold text-sm rounded-lg hover:bg-[#329439] transition-colors duration-200"
+              >
+                Cari
+              </button>
+              <a
+                href="/admin" 
+                className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              >
+                Reset
+              </a>
+              <button
+                type="button"
+                className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 transition-colors duration-200 ml-auto"
+              >
+                Kelola Global Flags
+              </button>
+            </form>
+          </div>
+
+          {/* Users Table Section */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Daftar Pengguna</h2>
+              </div>
+              <span className="text-sm text-gray-600 font-semibold">
+                {pagination?.total || 0} pengguna
+              </span>
+            </div>
+
+            {loading ? (
+              <div className="p-12 text-center text-gray-600">
+                <div className="inline-block animate-spin">
+                  <svg
+                    className="w-8 h-8 text-[#42b549]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                </div>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="p-12 text-center text-gray-500">
+                <svg
+                  className="w-16 h-16 mx-auto mb-4 text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 7a4 4 0 11-8 0 4 4 0 018 0zM6 17c-1.657 0-3 .895-3 2v2h4V19c0-1.105-1.343-2-3-2z"
+                  />
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Tidak ada pengguna</h3>
+                <p>Belum ada pengguna yang sesuai dengan pencarian Anda</p>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          ID
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Nama
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Email
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Role
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Balance
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Terdaftar
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.isArray(users) && users.map((user) => (
+                        <tr key={user.user_id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#42b549]">
+                            #{user.user_id}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                            {user.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {user.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`px-3 py-1 text-xs font-bold rounded-full ${roleColor(
+                                user.role
+                              )}`}
+                            >
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                            Rp {user.balance.toLocaleString("id-ID")}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {new Date(user.created_at).toLocaleDateString("id-ID")}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <button className="px-4 py-2 bg-[#42b549] text-white font-semibold text-sm rounded-lg hover:bg-[#329439] transition-colors duration-200 inline-flex items-center gap-2">
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                              </svg>
+                              Kelola Flags
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="px-6 py-4 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-semibold text-gray-700">Tampilkan:</label>
+                      <select
+                        value={pagination?.limit || 12}
+                        onChange={(e) => handleLimitChange(Number(e.target.value))}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#42b549] focus:ring-1 focus:ring-[#42b549]"
+                      >
+                        <option value="4">4</option>
+                        <option value="8">8</option>
+                        <option value="12">12</option>
+                        <option value="16">16</option>
+                        <option value="20">20</option>
+                      </select>
+                    </div>
+
+                    <div className="text-sm text-gray-600 font-semibold text-center">
+                      Menampilkan{" "}
+                      {pagination ? (pagination.page - 1) * (pagination.limit || 12) + 1 : 0} hingga{" "}
+                      {pagination ? Math.min(
+                        pagination.page * (pagination.limit || 12),
+                        pagination.total
+                      ) : 0}{" "}
+                      dari {pagination?.total || 0}
+                    </div>
+
+                    <div className="flex gap-1 justify-center sm:justify-end flex-wrap">
+                      {pagination && pagination.page > 1 && (
+                        <button
+                          onClick={() => handlePageChange((pagination.page || 1) - 1)}
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          ← Prev
+                        </button>
+                      )}
+
+                      {pagination && Array.from({ length: pagination.totalPages || 1 }, (_, i) => i + 1).map(
+                        (page) => (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                              (pagination.page || 1) === page
+                                ? "bg-[#42b549] text-white"
+                                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      )}
+
+                      {pagination && (pagination.page || 1) < (pagination.totalPages || 1) && (
+                        <button
+                          onClick={() => handlePageChange((pagination.page || 1) + 1)}
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          Next →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
