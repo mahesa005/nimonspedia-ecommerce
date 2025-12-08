@@ -4,6 +4,7 @@ interface Props {
   currentPrice: number;
   minIncrement: number;
   status: string;
+  cancelReason: string | null;
   onPlaceBid: (amount: number) => void;
   userBalance: number
   isDisable: boolean;
@@ -12,7 +13,7 @@ interface Props {
   onStopAuction?: () => void;
 }
 
-export default function BidForm({ currentPrice, minIncrement, status, onPlaceBid, userBalance, isDisable, isSeller, onCancelAuction, onStopAuction }: Props) {
+export default function BidForm({ currentPrice, minIncrement, status, cancelReason, onPlaceBid, userBalance, isDisable, isSeller, onCancelAuction, onStopAuction }: Props) {
   const minBid = currentPrice + minIncrement;
   
   const [amount, setAmount] = useState(minBid);
@@ -28,6 +29,15 @@ export default function BidForm({ currentPrice, minIncrement, status, onPlaceBid
     e.preventDefault();
     onPlaceBid(amount);
   };
+
+  if (status === 'cancelled' && cancelReason) {
+    return (
+      <div className="p-3 bg-[#f8d7da] text-[#721c24] text-center font-bold rounded-lg border border-[#f5c6cb] space-y-2">
+        <p>Auction Cancelled</p>
+        {cancelReason && <p className="text-sm font-normal text-[#721c24]">Reason: {cancelReason}</p>}
+      </div>
+    );
+  }
 
   if (status === 'ended') {
     return <div className="p-3 bg-[#f8d7da] text-[#721c24] text-center font-bold rounded-lg border border-[#f5c6cb]">Auction Ended</div>;
