@@ -13,6 +13,7 @@ import type {
   PlaceBidPayload,
 } from '../types/auction';
 import type { User } from '../types/user';
+import Toast from '../components/ui/toast';
 
 const socket: Socket = io('http://localhost:8080', {
   path: '/socket.io',
@@ -32,6 +33,7 @@ export default function AuctionDetail() {
   const [cancelReason, setCancelReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [serverOffset, setServerOffset] = useState(0);
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   const dataRef = useRef(data);
   dataRef.current = data;
@@ -139,11 +141,11 @@ export default function AuctionDetail() {
           ? { ...prev, auction: { ...prev.auction, status: 'ended', winner_id: event.winnerId } }
           : null
       );
-      alert(`Auction Ended! Sold for Rp ${event.finalPrice.toLocaleString()}`);
+      setToast({ msg: `Auction Ended! Sold for Rp ${event.finalPrice.toLocaleString()}`, type: 'success' });
     };
 
     const handleBidError = (err: BidErrorEvent) => {
-      alert(`Error: ${err.message}`);
+      setToast({ msg: err.message, type: 'error' });
     };
 
     const handleAuctionCancelled = (event: { reason: string }) => {
@@ -192,7 +194,7 @@ export default function AuctionDetail() {
   };
 
   const handleCancelAuction = async () => {
-    if (!cancelReason.trim()) return alert('Please enter a reason');
+    if (!cancelReason.trim()) return setToast({ msg: 'Please enter a reason', type: 'error' });
     setActionLoading(true);
     try {
       const res = await fetch(`/api/node/auctions/${data?.auction.auction_id}/cancel`, {
@@ -203,15 +205,15 @@ export default function AuctionDetail() {
       });
       const json = await res.json();
       if (json.success) {
-        alert('Auction cancelled');
+        setToast({ msg: 'Auction cancelled', type: 'error' });
         fetchAuctionData();
         setShowCancelModal(false);
       } else {
-        alert(json.message || 'Failed to cancel auction');
+        setToast({ msg: json.message || 'Failed to cancel auction', type: 'error' });
       }
     } catch (err) {
       console.error(err);
-      alert('Network error');
+      setToast({ msg: 'Network error', type: 'error' });
     } finally {
       setActionLoading(false);
     }
@@ -226,15 +228,15 @@ export default function AuctionDetail() {
       });
       const json = await res.json();
       if (json.success) {
-        alert('Auction stopped');
+        setToast({ msg: 'Auction stopped', type: 'error' });
         fetchAuctionData();
         setShowStopModal(false);
       } else {
-        alert(json.message || 'Failed to stop auction');
+        setToast({ msg: json.message || 'Failed to stop auction', type: 'error' });
       }
     } catch (err) {
       console.error(err);
-      alert('Network error');
+      setToast({ msg: 'Network error', type: 'error' });
     } finally {
       setActionLoading(false);
     }
@@ -361,6 +363,14 @@ export default function AuctionDetail() {
           </div>
         </div>
       )}
+
+    {toast && (
+      <Toast 
+        message={toast.msg} 
+        type={toast.type} 
+        onClose={() => setToast(null)} 
+      />
+    )}
     </div>
   );
 }
