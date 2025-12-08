@@ -65,6 +65,7 @@ export default (io: Server, socket: Socket) => {
 
       const event: NewBidEvent = {
         bid_id: result.bid.bid_id,
+        bidder_id: result.bid.bidder_id,
         auction_id: auctionId,
         amount: Number(result.bid.bid_amount),
         bidder_name: result.bid.bidder_name ?? "Unknown",

@@ -18,18 +18,17 @@ export const AuctionRepository = {
     return result.rows[0] || null;
   },
 
-  async findBidsByAuctionId(auctionId: number, limit = 10): Promise<BidHistoryData[]> {
+  async findBidsByAuctionId(auctionId: number): Promise<BidHistoryData[]> {
     const query = `
       SELECT 
         b.bid_id, b.bid_amount, b.bid_time,
-        u.name as bidder_name, u.user_id
+        u.name as bidder_name, b.bidder_id
       FROM "auction_bids" b
       JOIN "user" u ON b.bidder_id = u.user_id
       WHERE b.auction_id = $1
       ORDER BY b.bid_amount DESC
-      LIMIT $2
     `;
-    const result = await pool.query<BidHistoryData>(query, [auctionId, limit]);
+    const result = await pool.query<BidHistoryData>(query, [auctionId]);
     return result.rows;
   },
 
