@@ -37,27 +37,41 @@ export default function AuctionDetail() {
 
   const canBid = user && data && isConnected && (data.auction.status === 'active' || data.auction.status === 'ongoing') && user.balance >= data.auction.current_price + data.auction.min_increment;
 
-  const fetchAuctionData = useCallback(async () => {
+  const fetchAuctionData = useCallback(async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
+    
     try {
       const res = await fetch(`/api/node/auctions/${id}`);
       const json: AuctionDetailResponse = await res.json();
+      
       if (json.success) {
         setData(json.data);
+        
         if (!socket.connected) socket.connect();
       } else {
-        setError(json.message || 'Failed to load auction');
+        if (!isBackground) setError(json.message || 'Failed to load auction');
       }
     } catch (err) {
       console.error(err);
-      setError('Network Error');
+      if (!isBackground) setError('Network Error');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [id]);
 
+  // Initial Load
   useEffect(() => {
-    fetchAuctionData();
+    fetchAuctionData(); 
   }, [fetchAuctionData, id]);
+
+  // Auto-Sync
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchAuctionData(true); 
+    }, 30000); 
+
+    return () => clearInterval(intervalId);
+  }, [fetchAuctionData]);
 
   useEffect(() => {
     const fetchUser = async () => {
