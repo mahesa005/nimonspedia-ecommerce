@@ -166,6 +166,11 @@ $router->add('POST', '/profile/password',
     [AuthMiddleware::class]
 );
 
+$router->add('POST', '/profile/preferences', 
+    [ProfileController::class, 'updatePreferences'], 
+    [AuthMiddleware::class]
+);
+
 $router->add('POST', '/seller/store/update', 
     [StoreController::class, 'handleUpdateStore'],
     [AuthMiddleware::class, RoleMiddleware::class]

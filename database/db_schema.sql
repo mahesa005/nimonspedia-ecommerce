@@ -207,6 +207,15 @@ CREATE TABLE IF NOT EXISTS "user_feature_access" (
     FOREIGN KEY (user_id) REFERENCES "user"(user_id)
 );
 
+CREATE TABLE IF NOT EXISTS "push_preferences" (
+    user_id INT PRIMARY KEY,
+    chat_enabled BOOLEAN DEFAULT TRUE,
+    auction_enabled BOOLEAN DEFAULT TRUE,
+    order_enabled BOOLEAN DEFAULT TRUE,
+    updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id)
+);
+
 ALTER TABLE "auctions"
 ADD COLUMN cancel_reason TEXT,
 ADD COLUMN cancelled_at TIMESTAMP;

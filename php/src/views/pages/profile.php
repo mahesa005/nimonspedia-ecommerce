@@ -1,7 +1,44 @@
 
 <div class="profile-page">
     <h1>Profil Saya</h1>
+    <div class="profile-box">
+        <h2>Pengaturan Notifikasi</h2>
+        <form id="form-notification-settings">
+            <div class="form-group checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="chat_enabled" id="chat_enabled" 
+                        <?= $preferences['chat_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Chat
+                </label>
+            </div>
 
+            <div class="form-group checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="auction_enabled" id="auction_enabled" 
+                        <?= $preferences['auction_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Lelang
+                </label>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="order_enabled" id="order_enabled" 
+                        <?= $preferences['order_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Pesanan
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-secondary" id="btn-save-notif">
+                    Simpan Pengaturan
+                </button>
+            </div>
+            <div id="notif-msg" class="form-message"></div>
+        </form>
+    </div>
     <div class="profile-box">
         <h2>Edit Profil</h2>
         <form id="form-update-profile">
