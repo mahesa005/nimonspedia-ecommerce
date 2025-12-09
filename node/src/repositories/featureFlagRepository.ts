@@ -17,13 +17,13 @@ export async function _updateFeatureFlag(params: {
   isEnabled: boolean
   reason?: string         // frontend kirim "" kalau enable
 }) {
-  const effectiveUserId = params.userId ?? 0
+  const effectiveUserId = params.userId  // Keep null as null, not convert to 0
   const reason = params.reason ?? ""
 
   // Check if record exists first
   const existing = await pool.query(
     `SELECT access_id FROM user_feature_access 
-     WHERE user_id = $1 AND feature_name = $2`,
+     WHERE user_id IS NOT DISTINCT FROM $1 AND feature_name = $2`,
     [effectiveUserId, params.featureName]
   )
 
@@ -33,7 +33,7 @@ export async function _updateFeatureFlag(params: {
     res = await pool.query(
       `UPDATE user_feature_access 
        SET is_enabled = $3, reason = NULLIF($4, ''), updated_at = NOW()
-       WHERE user_id = $1 AND feature_name = $2
+       WHERE user_id IS NOT DISTINCT FROM $1 AND feature_name = $2
        RETURNING user_id, feature_name, is_enabled, reason`,
       [effectiveUserId, params.featureName, params.isEnabled, reason]
     )
@@ -67,14 +67,14 @@ export async function _getEffectiveFeatureFlag(params: {
       SELECT user_id, feature_name, is_enabled, reason
       FROM user_feature_access
       WHERE feature_name = $1
-        AND user_id IN (0, $2)
+        AND (user_id IS NULL OR user_id = $2)
     `,
-    [featureName, userId ?? 0]
+    [featureName, userId]
   )
 
   const rows = res.rows
 
-  const globalRow = rows.find(r => r.user_id === 0) ?? null
+  const globalRow = rows.find(r => r.user_id === null) ?? null
   const userRow = rows.find(r => r.user_id === userId) ?? null
 
   // Global OFF, hard disable semua

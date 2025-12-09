@@ -5,8 +5,8 @@ import {
     type AdminLoginResponse,
 }   from "../api/adminApi"
 
-const ADMIN_TOKEN_KEY = "admin_token";
-const ADMIN_INFO_KEY = "admin_info";
+const ADMIN_TOKEN_KEY = "adminToken";
+const ADMIN_INFO_KEY = "adminInfo";
 
 export async function adminLoginAndStore(
     email: string,

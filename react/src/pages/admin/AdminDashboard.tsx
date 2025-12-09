@@ -2,7 +2,7 @@ import { useRequireAdmin } from "../../hooks/useRequireAdmin";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
 import AdminNavbar from "../../components/admin/adminNavbar";
 import { useState, useEffect, useRef } from "react";
-import { fetchUsersAdmin, type UserData } from "../../api/adminDashboardApi";
+import { fetchUsersAdmin, type UserData } from "../../api/adminApi";
 
 export default function AdminDashboard() {
   const { admin, loading: authLoading } = useRequireAdmin();
