@@ -20,19 +20,32 @@ export async function _updateFeatureFlag(params: {
   const effectiveUserId = params.userId ?? 0
   const reason = params.reason ?? ""
 
-  const res = await pool.query(
-    `
-      INSERT INTO user_feature_access (user_id, feature_name, is_enabled, reason)
-      VALUES ($1, $2, $3, NULLIF($4, ''))
-      ON CONFLICT (user_id, feature_name)
-      DO UPDATE SET
-        is_enabled = EXCLUDED.is_enabled,
-        reason     = EXCLUDED.reason,
-        updated_at = NOW()
-      RETURNING user_id, feature_name, is_enabled, reason;
-    `,
-    [effectiveUserId, params.featureName, params.isEnabled, reason]
+  // Check if record exists first
+  const existing = await pool.query(
+    `SELECT access_id FROM user_feature_access 
+     WHERE user_id = $1 AND feature_name = $2`,
+    [effectiveUserId, params.featureName]
   )
+
+  let res
+  if (existing.rows.length > 0) {
+    // UPDATE
+    res = await pool.query(
+      `UPDATE user_feature_access 
+       SET is_enabled = $3, reason = NULLIF($4, ''), updated_at = NOW()
+       WHERE user_id = $1 AND feature_name = $2
+       RETURNING user_id, feature_name, is_enabled, reason`,
+      [effectiveUserId, params.featureName, params.isEnabled, reason]
+    )
+  } else {
+    // INSERT
+    res = await pool.query(
+      `INSERT INTO user_feature_access (user_id, feature_name, is_enabled, reason)
+       VALUES ($1, $2, $3, NULLIF($4, ''))
+       RETURNING user_id, feature_name, is_enabled, reason`,
+      [effectiveUserId, params.featureName, params.isEnabled, reason]
+    )
+  }
 
   return res.rows[0]
 }
