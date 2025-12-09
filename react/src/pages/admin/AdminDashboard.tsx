@@ -153,7 +153,7 @@ export default function AdminDashboard() {
               <div className="relative" ref={roleDropdownRef}>
                 <button
                   onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                  className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2 whitespace-nowrap"
+                  className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200 flex items-center gap-2 whitespace-nowrap"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
                   <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg min-w-48 border border-gray-200 z-50">
                     <button
                       onClick={() => handleRoleFilterChange("")}
-                      className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors ${
+                      className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors cursor-pointer ${
                         roleFilter === ""
                           ? "bg-[#42b549] text-white"
                           : "text-gray-900 hover:bg-gray-50"
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                     </button>
                     <button
                       onClick={() => handleRoleFilterChange("ADMIN")}
-                      className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors border-t border-gray-200 ${
+                      className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors border-t border-gray-200 cursor-pointer ${
                         roleFilter === "ADMIN"
                           ? "bg-red-50 text-red-800"
                           : "text-gray-900 hover:bg-gray-50"
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
                     </button>
                     <button
                       onClick={() => handleRoleFilterChange("SELLER")}
-                      className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors border-t border-gray-200 ${
+                      className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors border-t border-gray-200 cursor-pointer ${
                         roleFilter === "SELLER"
                           ? "bg-blue-50 text-blue-800"
                           : "text-gray-900 hover:bg-gray-50"
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
                     </button>
                     <button
                       onClick={() => handleRoleFilterChange("BUYER")}
-                      className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors border-t border-gray-200 ${
+                      className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors border-t border-gray-200 cursor-pointer ${
                         roleFilter === "BUYER"
                           ? "bg-green-50 text-green-800"
                           : "text-gray-900 hover:bg-gray-50"
@@ -209,14 +209,14 @@ export default function AdminDashboard() {
 
               <button
                 onClick={handleResetFilters}
-                className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200"
               >
                 Reset
               </button>
               <button
                 onClick={() => setShowFlagsModal(true)}
                 type="button"
-                className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 transition-colors duration-200 ml-auto"
+                className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200 ml-auto"
               >
                 Kelola Global Flags
               </button>
@@ -332,7 +332,7 @@ export default function AdminDashboard() {
                                 setSelectedUserId(user.user_id);
                                 setShowFlagsModal(true);
                               }}
-                              className="px-4 py-2 bg-[#42b549] text-white font-semibold text-sm rounded-lg hover:bg-[#329439] transition-colors duration-200 inline-flex items-center gap-2">
+                              className="px-4 py-2 bg-[#42b549] text-white font-semibold text-sm rounded-lg cursor-pointer hover:bg-[#329439] transition-colors duration-200 inline-flex items-center gap-2">
                               <svg
                                 className="w-4 h-4"
                                 fill="none"
@@ -393,7 +393,7 @@ export default function AdminDashboard() {
                       {pagination && pagination.page > 1 && (
                         <button
                           onClick={() => handlePageChange((pagination.page || 1) - 1)}
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold cursor-pointer text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           ← Prev
                         </button>
@@ -404,7 +404,7 @@ export default function AdminDashboard() {
                           <button
                             key={page}
                             onClick={() => handlePageChange(page)}
-                            className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                            className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer ${
                               (pagination.page || 1) === page
                                 ? "bg-[#42b549] text-white"
                                 : "border border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -418,7 +418,7 @@ export default function AdminDashboard() {
                       {pagination && (pagination.page || 1) < (pagination.totalPages || 1) && (
                         <button
                           onClick={() => handlePageChange((pagination.page || 1) + 1)}
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold cursor-pointer text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           Next →
                         </button>

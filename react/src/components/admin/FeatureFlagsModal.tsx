@@ -56,6 +56,11 @@ export default function FeatureFlagsModal({
 
   const [updating, setUpdating] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [globalFlags, setGlobalFlags] = useState<Record<FeatureName, getFeatureFlagResponse | null>>({
+    auction_enabled: null,
+    checkout_enabled: null,
+    chat_enabled: null,
+  });
   const [confirmDialog, setConfirmDialog] = useState<{
     flagName: FeatureName | null;
     newStatus: boolean;
@@ -80,6 +85,18 @@ export default function FeatureFlagsModal({
     setFlags((prev) =>
       prev.map((f) => ({ ...f, loading: true, error: null }))
     );
+
+    // If viewing user scope, also fetch global flags for guard logic
+    if (userId !== null && userId !== undefined) {
+      for (const flag of flags) {
+        try {
+          const globalStatus = await getFeatureFlag(null, flag.name, token!);
+          setGlobalFlags((prev) => ({ ...prev, [flag.name]: globalStatus }));
+        } catch (err) {
+          // Silently fail for global flag fetch, continue with user flags
+        }
+      }
+    }
 
     for (const flag of flags) {
       try {
@@ -106,8 +123,8 @@ export default function FeatureFlagsModal({
   const handleFlagToggle = (flagName: FeatureName, newStatus: boolean) => {
     // Check if user is trying to enable a globally disabled flag
     if (userId !== null && userId !== undefined && newStatus) {
-      const globalFlag = flags.find((f) => f.name === flagName);
-      if (globalFlag?.status && !globalFlag.status.enabled) {
+      const globalFlagStatus = globalFlags[flagName];
+      if (globalFlagStatus && !globalFlagStatus.enabled) {
         addToast(
           `Tidak dapat mengaktifkan flag ini karena disabled secara global`,
           'error'
@@ -234,7 +251,7 @@ export default function FeatureFlagsModal({
             </div>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
+              className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
             >
               <svg
                 className="w-6 h-6"
@@ -311,7 +328,7 @@ export default function FeatureFlagsModal({
                       }
                     }}
                     disabled={flag.loading || updating}
-                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-semibold text-sm cursor-pointer rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Edit
                   </button>
@@ -324,7 +341,7 @@ export default function FeatureFlagsModal({
           <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 flex justify-end">
             <button
               onClick={onClose}
-              className="px-6 py-2.5 bg-gray-200 text-gray-900 font-semibold text-sm rounded-lg hover:bg-gray-300 transition-colors"
+              className="px-6 py-2.5 bg-gray-200 text-gray-900 font-semibold text-sm cursor-pointer rounded-lg hover:bg-gray-300 transition-colors"
             >
               Tutup
             </button>
@@ -380,14 +397,14 @@ export default function FeatureFlagsModal({
                       setDisableReason("");
                     }}
                     disabled={updating}
-                    className="px-4 py-2.5 bg-gray-200 text-gray-900 font-semibold text-sm rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                    className="px-4 py-2.5 bg-gray-200 text-gray-900 font-semibold cursor-pointer text-sm rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
                   >
                     Batal
                   </button>
                   <button
                     onClick={confirmFlagUpdate}
                     disabled={updating || (!confirmDialog.newStatus && !disableReason.trim())}
-                    className={`px-4 py-2.5 font-semibold text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    className={`px-4 py-2.5 font-semibold text-sm rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                       confirmDialog.newStatus
                         ? "bg-green-500 text-white hover:bg-green-600"
                         : "bg-red-500 text-white hover:bg-red-600"
