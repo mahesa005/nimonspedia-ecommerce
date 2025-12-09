@@ -27,6 +27,9 @@ services:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       JWT_SECRET: ${JWT_SECRET}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT}
     volumes:
       - ./node:/usr/src/app
       - /usr/src/app/node_modules
