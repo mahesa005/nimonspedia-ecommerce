@@ -130,8 +130,8 @@ class AuthController {
                 'valid' => true,
                 'user' => [
                     'user_id' => $user_id,
-                    'role' => $_SESSION['user']['role'] ?? 'BUYER',
-                    'name' => $_SESSION['user']['name'] ?? 'User'
+                    'role' => Session::get('role') ?? 'BUYER',
+                    'name' => Session::get('name') ?? 'User'
                 ]
             ]);
         } else {

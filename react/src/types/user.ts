@@ -1,7 +1,7 @@
 import type { ApiResponse } from "./response";
 
 // User model definition
-type user_role = 'ADMIN' | 'SELLER' | ' BUYER'
+type user_role = 'ADMIN' | 'SELLER' | 'BUYER'
 
 interface User {
     user_id: number;
