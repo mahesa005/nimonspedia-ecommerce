@@ -199,12 +199,12 @@ CREATE TABLE IF NOT EXISTS "push_subscriptions" (
 
 CREATE TABLE IF NOT EXISTS "user_feature_access" (
     access_id SERIAL PRIMARY KEY,
-    user_id INT, -- Null -> Global Flag
+    user_id INT NULL, -- Null -> Global Flag
     feature_name VARCHAR(50) NOT NULL CHECK (feature_name IN ('checkout_enabled', 'chat_enabled', 'auction_enabled')),
     is_enabled BOOLEAN DEFAULT TRUE,
     reason TEXT,
     updated_at TIMESTAMP DEFAULT NOW(),
-    FOREIGN KEY (user_id) REFERENCES "user"(user_id)
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE SET NULL
 );
 
 ALTER TABLE "auctions"
