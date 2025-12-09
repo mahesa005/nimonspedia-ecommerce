@@ -11,7 +11,7 @@ export interface EffectiveFlag {
 }
 
 // Insert / update 1 flag (global atau user) pakai UPSERT
-export async function updateFeatureFlag(params: {
+export async function _updateFeatureFlag(params: {
   userId: number | null   // null = global
   featureName: FeatureName
   isEnabled: boolean
@@ -43,8 +43,8 @@ export async function updateFeatureFlag(params: {
   2. Kalau global ON, user OFF -> enabled = false, scope = "user"
   3. Selain itu        -> enabled = true,  scope = "ok"
 */
-export async function getEffectiveFeatureFlag(params: {
-  userId: number
+export async function _getEffectiveFeatureFlag(params: {
+  userId: number | null
   featureName: FeatureName
 }): Promise<EffectiveFlag> {
   const { userId, featureName } = params
@@ -56,7 +56,7 @@ export async function getEffectiveFeatureFlag(params: {
       WHERE feature_name = $1
         AND user_id IN (0, $2)
     `,
-    [featureName, userId]
+    [featureName, userId ?? 0]
   )
 
   const rows = res.rows
