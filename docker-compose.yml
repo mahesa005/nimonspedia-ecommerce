@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      NOTIFICATION_TRIGGER_URL: ${NOTIFICATION_TRIGGER_URL}
     volumes:
       - ./php:/var/www/html
     depends_on:
