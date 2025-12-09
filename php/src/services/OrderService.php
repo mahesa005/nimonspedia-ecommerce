@@ -6,6 +6,8 @@ use App\Repositories\OrderItemRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\StoreRepository;
 
+require_once __DIR__ . '/../util/notification_helper.php';
+
 class OrderService {
     
     private OrderRepository $orderRepo;
@@ -59,7 +61,7 @@ class OrderService {
                     if ($order) {
                             $userId = $this->storeRepo->getUserIdByStoreId($order->store_id);
                             
-                            if ($store) {
+                            if ($userId) {
                                 sendPushNotification(
                                     $userId,
                                     "Pesanan Dibatalkan",
@@ -88,7 +90,7 @@ class OrderService {
                 if ($order) {
                         $userId = $this->storeRepo->getUserIdByStoreId($order->store_id);
                         
-                        if ($store) {
+                        if ($userId) {
                             sendPushNotification(
                                 $userId,
                                 "Pesanan Diterima",
