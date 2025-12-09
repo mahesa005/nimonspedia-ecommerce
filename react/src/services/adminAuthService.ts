@@ -1,9 +1,9 @@
 import {
     adminLogin,
     fetchAdminMe,
-    type AdminInfo,
-    type AdminLoginResponse,
 }   from "../api/adminApi"
+
+import type { AdminLoginResponse, AdminInfo } from "../types/admin";
 
 const ADMIN_TOKEN_KEY = "adminToken";
 const ADMIN_INFO_KEY = "adminInfo";

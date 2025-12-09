@@ -1,19 +1,17 @@
+import type { 
+    AdminInfo,
+    AdminLoginResponse,
+    UserPaginationResponse,
+    FeatureName,
+    getFeatureFlagResponse,
+    updateFeatureFlagResponse
+} from "../types/admin";
+
 const BASE_URL = '/api/node/admin'
 const ADMIN_TOKEN_KEY = "adminToken";
 const ADMIN_INFO_KEY = "adminInfo";
 
-export interface AdminInfo {
-    user_id: number;
-    email: string;
-    name: string;
-    role: "ADMIN";
-}
-
-export interface AdminLoginResponse {
-    token: string;
-    admin: AdminInfo;
-}
-
+// Admin login API
 export async function adminLogin( // Function to handle admin login API call
     email: string,
     password: string
@@ -61,28 +59,7 @@ export async function fetchAdminMe(token: string): Promise<AdminInfo> { // Funct
 }
 
 // Admin Dashboard APIs
-export interface UserData {
-    user_id: number
-    name: string
-    email: string
-    role: 'ADMIN' | 'SELLER' | 'BUYER'
-    balance: number
-    created_at: string
-}
-
-export interface Pagination {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-}
-
-export interface UserPaginationResponse {
-    users: UserData[]
-    pagination: Pagination
-}
-
-// Input page number, limit
+// Input page number, limit 
 export async function fetchUsersAdmin(
     page: number,
     limit: number,
@@ -112,28 +89,6 @@ export async function fetchUsersAdmin(
     }
     const data = await response.json();
     return data as UserPaginationResponse;
-}
-
-// feature flag APIs
-export type FeatureName = "checkout_enabled" | "chat_enabled" | "auction_enabled"
-export type FlagScope = "ok" | "user" | "global"
-
-export interface getFeatureFlagResponse {
-    enabled: boolean
-    scope: 'ok' | 'user' | 'global'
-    reason: string | null
-}
-
-export interface updateFeatureFlagResult {
-    user_id: number | null
-    feature_name: 'auction_enabled' | 'checkout_enabled' | 'chat_enabled'
-    is_enabled: boolean
-    reason: string | null
-}
-
-export interface updateFeatureFlagResponse {
-    message: string
-    result: updateFeatureFlagResult
 }
 
 export async function updateFeatureFlag(

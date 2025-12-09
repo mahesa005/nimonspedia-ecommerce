@@ -7,7 +7,7 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import type { AdminInfo } from "../api/adminApi";
+import type { AdminInfo } from "../types/admin";
 import {
   adminLoginAndStore,
   getStoredAdminInfo,

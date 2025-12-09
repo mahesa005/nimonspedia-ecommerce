@@ -1,8 +1,10 @@
 import { useRequireAdmin } from "../../hooks/useRequireAdmin";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
 import AdminNavbar from "../../components/admin/adminNavbar";
+import FeatureFlagsModal from "../../components/admin/FeatureFlagsModal";
 import { useState, useEffect, useRef } from "react";
-import { fetchUsersAdmin, type UserData } from "../../api/adminApi";
+import { fetchUsersAdmin} from "../../api/adminApi";
+import { type UserData } from "../../types/admin";
 
 export default function AdminDashboard() {
   const { admin, loading: authLoading } = useRequireAdmin();
@@ -13,6 +15,8 @@ export default function AdminDashboard() {
   const [roleFilter, setRoleFilter] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [showFlagsModal, setShowFlagsModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -210,6 +214,7 @@ export default function AdminDashboard() {
                 Reset
               </button>
               <button
+                onClick={() => setShowFlagsModal(true)}
                 type="button"
                 className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-semibold text-sm rounded-lg hover:bg-gray-50 transition-colors duration-200 ml-auto"
               >
@@ -322,7 +327,12 @@ export default function AdminDashboard() {
                             {new Date(user.created_at).toLocaleDateString("id-ID")}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <button className="px-4 py-2 bg-[#42b549] text-white font-semibold text-sm rounded-lg hover:bg-[#329439] transition-colors duration-200 inline-flex items-center gap-2">
+                            <button 
+                              onClick={() => {
+                                setSelectedUserId(user.user_id);
+                                setShowFlagsModal(true);
+                              }}
+                              className="px-4 py-2 bg-[#42b549] text-white font-semibold text-sm rounded-lg hover:bg-[#329439] transition-colors duration-200 inline-flex items-center gap-2">
                               <svg
                                 className="w-4 h-4"
                                 fill="none"
@@ -421,6 +431,17 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Feature Flags Modal */}
+      <FeatureFlagsModal
+        isOpen={showFlagsModal}
+        onClose={() => {
+          setShowFlagsModal(false);
+          setSelectedUserId(null);
+        }}
+        token={token}
+        userId={selectedUserId}
+      />
     </>
   );
 }
