@@ -14,6 +14,10 @@ import { adminUserController } from './controllers/adminUserController';
 import { requireSocketAuth } from './middleware/requireSession';
 import chatRoutes from './routes/chatRoutes';
 import chatSocket from './sockets/chatSocket';
+import notificationRoutes from './routes/notificationRoutes';
+import { configDotenv } from 'dotenv';
+
+configDotenv()
 
 const app = express();
 const server = http.createServer(app);
@@ -50,10 +54,11 @@ app.post('/admin/login', adminLoginController);
 app.get('/admin/me', requireAdmin, adminMeHandler);
 app.post('/admin/dashboard', requireAdmin, adminUserController)
 
-// Auction API Routes
+// API Routes
 app.use('/auctions', auctionRoutes);
 app.use('', userRoutes);
 app.use('/chats', chatRoutes);
+app.use('/notifications', notificationRoutes)
 
 // Websocket Middleware
 io.use(requireSocketAuth);
