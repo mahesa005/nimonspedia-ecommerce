@@ -8,6 +8,7 @@ import {
 } from '../models/auctionModel';
 
 const auctionTimers: Record<number, NodeJS.Timeout> = {};
+const warningTimers: Record<number, NodeJS.Timeout> = {};
 
 export default (io: Server, socket: Socket) => {
 
@@ -81,10 +82,18 @@ export default (io: Server, socket: Socket) => {
         console.log(`[TIMER] Clearing previous timer for auction ${auctionId}`);
         clearTimeout(auctionTimers[auctionId]);
       }
+      if (warningTimers[auctionId]) {
+        clearTimeout(warningTimers[auctionId]);
+      }
+
+      warningTimers[auctionId] = setTimeout(() => {
+        console.log(`[TIMER] Sending 5s warning for auction ${auctionId}`);
+        AuctionService.notifyEndingSoon(auctionId);
+      }, 10000);
 
       console.log(`[TIMER] Starting new 15-second timer for auction ${auctionId}`);
       auctionTimers[auctionId] = setTimeout(async () => {
-
+        if (warningTimers[auctionId]) clearTimeout(warningTimers[auctionId]);
         console.log(`[TIMER] Timer triggered, finalizing auction ${auctionId}`);
         const finalized = await AuctionService.finalizeAuction(auctionId);
         console.log(`[TIMER] Finalized result:`, finalized);
@@ -101,6 +110,7 @@ export default (io: Server, socket: Socket) => {
         }
 
         delete auctionTimers[auctionId];
+        delete warningTimers[auctionId];
       }, 15000);
 
     } catch (e: any) {

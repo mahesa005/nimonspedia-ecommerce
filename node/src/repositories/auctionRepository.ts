@@ -219,5 +219,15 @@ export const AuctionRepository = {
     `;
     const res = await pool.query<AuctionData>(query, [reason, auctionId]);
     return res.rows[0] || null;
-  }
+  },
+
+  async getUniqueBidders(auctionId: number): Promise<number[]> {
+    const query = `
+      SELECT DISTINCT bidder_id 
+      FROM "auction_bids" 
+      WHERE auction_id = $1
+    `;
+    const res = await pool.query(query, [auctionId]);
+    return res.rows.map(row => row.bidder_id);
+  },
 };

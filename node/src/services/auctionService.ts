@@ -65,4 +65,19 @@ export const AuctionService = {
     if (!auction) throw new Error("Failed to cancel auction or auction not found");
     return auction;
   },
+
+  async notifyEndingSoon(auctionId: number) {
+    const auction = await AuctionRepository.findDetailById(auctionId);
+    if (!auction) return;
+
+    const bidderIds = await AuctionRepository.getUniqueBidders(auctionId);
+
+    bidderIds.forEach(userId => {
+      NotificationService.sendToUser(userId, {
+        title: 'Ending Soon!',
+        body: `Auction "${auction.product_name}" is going to end in 5 seconds!`,
+        url: `/auction/${auctionId}`,
+      }).catch(err => console.error(`Failed to warn user ${userId}:`, err));
+    });
+  },
 };
