@@ -14,16 +14,22 @@ interface Props {
   hasMore: boolean;
 }
 
-export default function ChatWindow({ room, messages, currentUserId, onSendMessage, isPartnerTyping, onTyping, onBack, onLoadMore, hasMore }: Props) {
+export default function ChatWindow({room, messages, currentUserId, onSendMessage, isPartnerTyping, onTyping, onBack, onLoadMore, hasMore}: Props) {
   const [input, setInput] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const lastMessageIdRef = useRef<number | null>(null);
-
+  const lastMessageCountRef = useRef<number>(0);
   const isAtBottomRef = useRef(true);
   
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
+
+  const scrollToBottom = (behavior: 'smooth' | 'auto' = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  };
 
   const handleScroll = () => {
     if (!containerRef.current) return;
@@ -52,35 +58,69 @@ export default function ChatWindow({ room, messages, currentUserId, onSendMessag
   useEffect(() => {
     if (!messages.length) return;
 
-    const lastMsg = messages[messages.length - 1];
-    const isNewMessage = lastMsg.message_id !== lastMessageIdRef.current;
+    const currentMessageCount = messages.length;
+    const hasNewMessage = currentMessageCount > lastMessageCountRef.current;
     
-    lastMessageIdRef.current = lastMsg.message_id;
+    lastMessageCountRef.current = currentMessageCount;
 
-    if (!isNewMessage || prevScrollHeight > 0) return;
+    if (!hasNewMessage || prevScrollHeight > 0) return;
 
+    const lastMsg = messages[messages.length - 1];
     const isMe = lastMsg.sender_id === currentUserId;
 
-    if (isMe || isAtBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isMe) {
+      setTimeout(() => scrollToBottom('smooth'), 50);
+    } else {
+      setTimeout(() => scrollToBottom('smooth'), 50);
     }
   }, [messages, currentUserId, prevScrollHeight]); 
 
   useEffect(() => {
     if (messages.length > 0) {
-       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-       lastMessageIdRef.current = messages[messages.length - 1].message_id;
+       scrollToBottom('auto');
+       lastMessageCountRef.current = messages.length;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.store_id, room.buyer_id]);
 
-  const handleImageUpload = () => {
-    const url = prompt("Enter Image URL (Simulating upload):"); 
-    if (url) {
-      onSendMessage(url, 'image');
-    }
+  const handleTriggerUpload = () => {
+    fileInputRef.current?.click();
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("File is too large. Max size is 5MB.");
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch('/api/node/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      const json = await res.json();
+
+      if (json.success) {
+        onSendMessage(json.data.url, 'image');
+      } else {
+        alert("Upload Failed: " + (json.message || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -99,7 +139,8 @@ export default function ChatWindow({ room, messages, currentUserId, onSendMessag
         <img 
           src={msg.content} 
           alt="Sent Image" 
-          className="max-w-full rounded-lg border border-gray-200 mt-1" 
+          className="max-w-full rounded-lg border border-gray-200 mt-1 cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => window.open(msg.content, '_blank')}
           onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/200x200?text=Broken+Image'; }}
         />
       );
@@ -185,14 +226,22 @@ export default function ChatWindow({ room, messages, currentUserId, onSendMessag
       </div>
 
       <form onSubmit={handleSubmit} className="p-3 md:p-4 bg-white border-t border-gray-200 flex gap-2 items-end">
-        {/* PLACEHOLDER: Image Upload Button */}
+        <input 
+          type="file" 
+          accept="image/*" 
+          ref={fileInputRef} 
+          onChange={handleFileSelect} 
+          className="hidden" 
+        />
+        
         <button 
             type="button"
-            onClick={handleImageUpload}
-            className="p-3 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-full transition-colors"
+            onClick={handleTriggerUpload}
+            disabled={isUploading}
+            className={`p-3 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-full transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
             title="Send Image"
         >
-            📷
+            {isUploading ? '⏳' : '📷'}
         </button>
 
         <div className="flex-1 bg-gray-100 rounded-2xl flex items-center px-4 border border-transparent focus-within:border-green-500 focus-within:ring-1 focus-within:ring-green-500 transition-all">

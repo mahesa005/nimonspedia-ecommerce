@@ -182,3 +182,5 @@ $router->add('GET', '/seller/export.csv',
 );
 
 $router->add('GET', '/api/auth/validate-session', [AuthController::class, 'validateSession']);
+
+$router->add('GET', '/api/stores', [StoreController::class, 'getAllStores']);

@@ -7,6 +7,8 @@ use App\Repositories\UserRepository;
 use App\Models\Order;
 use Exception;
 
+require_once __DIR__ . '/../util/notification_helper.php';
+
 class OrderManagementService {
     private OrderRepository $orderRepo;
     private StoreRepository $storeRepo;
@@ -100,6 +102,14 @@ class OrderManagementService {
         if (!$success) {
             throw new Exception("Database error: Gagal menyetujui pesanan.");
         }
+
+        sendPushNotification(
+            $order->buyer_id,
+            "Pesanan Disetujui",
+            "Pesanan #{$order->order_id} telah disetujui oleh penjual.",
+            "/orders"
+        );
+
         return ['message' => "Pesanan #{$order->order_id} berhasil disetujui."];
     }
 
@@ -121,6 +131,13 @@ class OrderManagementService {
             throw new Exception("Database error: Gagal memperbarui status pesanan.");
         }
 
+        sendPushNotification(
+            $order->buyer_id,
+            "Pesanan Ditolak",
+            "Pesanan #{$order->order_id} ditolak. Alasan: {$reason}",
+            "/orders"
+        );
+
         return ['message' => "Pesanan #{$order->order_id} berhasil ditolak. Saldo buyer telah dikembalikan."];
     }
 
@@ -136,6 +153,14 @@ class OrderManagementService {
         if (!$success) {
             throw new Exception("Database error: Gagal mengatur pengiriman.");
         }
+
+        sendPushNotification(
+            $order->buyer_id,
+            "Pesanan Dikirim",
+            "Pesanan #{$order->order_id} sedang dalam perjalanan. Estimasi: {$delivery_time}",
+            "/orders"
+        );
+
         return ['message' => "Pesanan #{$order->order_id} telah diatur untuk pengiriman."];
     }
 }

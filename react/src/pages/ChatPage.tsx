@@ -6,6 +6,60 @@ import ChatWindow from '../components/chat/ChatWindow';
 import type { ChatRoom, ChatMessage } from '../types/chat';
 import type { User } from '../types/user';
 
+const ChatPageSkeleton = () => (
+  <div className="h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] bg-gray-50 flex flex-col md:flex-row max-w-[1400px] mx-auto md:mt-4 md:border md:rounded-xl md:shadow-xl overflow-hidden relative animate-pulse">
+    <div className="flex-col bg-white border-r border-gray-200 h-full w-full md:w-1/3 lg:w-1/4 flex">
+      <div className="p-4 border-b border-gray-100 shrink-0 space-y-4">
+        <div className="flex justify-between items-center">
+           <div className="h-6 bg-gray-200 rounded w-24"></div>
+           <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+        </div>
+        <div className="h-10 bg-gray-200 rounded-full w-full"></div>
+      </div>
+      <div className="flex-1 p-2 space-y-4 overflow-hidden">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="flex gap-3 p-2">
+            <div className="w-12 h-12 bg-gray-200 rounded-full shrink-0"></div>
+            <div className="flex-1 space-y-2 py-1">
+               <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+               <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="flex-col bg-gray-50 h-full flex-1 hidden md:flex">
+      <div className="bg-white p-4 border-b border-gray-200 h-16 flex items-center gap-4">
+         <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+         <div className="space-y-1">
+            <div className="h-4 bg-gray-200 rounded w-32"></div>
+            <div className="h-3 bg-gray-200 rounded w-16"></div>
+         </div>
+      </div>
+      
+      <div className="flex-1 p-6 space-y-6">
+         <div className="flex justify-start">
+            <div className="h-10 w-48 bg-gray-200 rounded-tr-xl rounded-br-xl rounded-bl-xl"></div>
+         </div>
+         <div className="flex justify-end">
+            <div className="h-16 w-64 bg-gray-300 rounded-tl-xl rounded-bl-xl rounded-br-xl"></div>
+         </div>
+         <div className="flex justify-start">
+            <div className="h-12 w-40 bg-gray-200 rounded-tr-xl rounded-br-xl rounded-bl-xl"></div>
+         </div>
+         <div className="flex justify-end">
+             <div className="h-8 w-32 bg-gray-300 rounded-tl-xl rounded-bl-xl rounded-br-xl"></div>
+         </div>
+      </div>
+
+      <div className="p-4 bg-white border-t border-gray-200">
+         <div className="h-12 bg-gray-200 rounded-full w-full"></div>
+      </div>
+    </div>
+  </div>
+);
+
 const socket: Socket = io('http://localhost:8080', {
   path: '/socket.io',
   withCredentials: true,
@@ -66,6 +120,14 @@ export default function ChatPage() {
   }, [rooms]);
 
   const handleSelectRoom = async (room: ChatRoom) => {
+    setRooms(prevRooms => {
+      const exists = prevRooms.some(r => r.store_id === room.store_id && r.buyer_id === room.buyer_id);
+      
+      if (!exists) {
+        return [room, ...prevRooms];
+      }
+      return prevRooms;
+    });
     setActiveRoom(room);
     setMessages([]);
     setHasMore(true);
@@ -158,17 +220,29 @@ export default function ChatPage() {
           msg.is_read = true;
       }
 
-      setRooms(prevRooms => prevRooms.map(r => {
-        if (r.store_id === msg.store_id && r.buyer_id === msg.buyer_id) {
-            return { 
-              ...r, 
-              last_message_content: msg.message_type === 'image' ? 'Sent an image' : msg.content, 
-              last_message_at: msgDate, 
-              unread_count: isMe ? r.unread_count : (isOpen ? 0 : r.unread_count + 1) 
-            };
-        }
-        return r;
-      }));
+      const getPreviewText = (m: ChatMessage) => {
+        if (m.message_type === 'image') return 'Sent an image';
+        if (m.message_type === 'item_preview') return 'Sent a product';
+        return m.content;
+      };
+
+      setRooms(prevRooms => {
+        const updatedRooms = prevRooms.map(r => {
+          if (r.store_id === msg.store_id && r.buyer_id === msg.buyer_id) {
+              return { 
+                ...r, 
+                last_message_content: getPreviewText(msg), 
+                last_message_at: msgDate, 
+                unread_count: isMe ? r.unread_count : (isOpen ? 0 : r.unread_count + 1) 
+              };
+          }
+          return r;
+        });
+
+        return updatedRooms.sort((a, b) => 
+          new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+        );
+      });
 
       if (isOpen) {
         setMessages(prev => [...prev, msg]);
@@ -214,7 +288,7 @@ export default function ChatPage() {
     }
   };
 
-  if (!user) return <div className="p-10 text-center">Loading Chat...</div>;
+  if (!user) return <ChatPageSkeleton />;
 
   const safeRole = (user.role as string).trim() === 'BUYER' ? 'BUYER' : 'SELLER';
 
@@ -227,6 +301,7 @@ export default function ChatPage() {
           onSelectRoom={handleSelectRoom}
           onSearch={(q) => fetchRooms(q)}
           currentUserRole={safeRole}
+          currentUserId={user.user_id}
         />
       </div>
       <div className={`flex-col bg-gray-50 h-full flex-1 ${!activeRoom ? 'hidden md:flex' : 'flex'}`}>

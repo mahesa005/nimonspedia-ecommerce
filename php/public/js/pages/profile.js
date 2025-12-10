@@ -1,19 +1,57 @@
+import { ensurePushSubscription } from '../modules/push_manager.js';
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    const profileForm = document.getElementById('form-update-profile');
-    if (profileForm) {
-        profileForm.addEventListener('submit', handleProfileUpdate);
+    const btnEnableNotif = document.getElementById('btn-enable-browser-notif');
+    const statusText = document.getElementById('notif-status-text');
+
+    function updateStatusUI() {
+        if (!statusText || !btnEnableNotif) return;
+
+        if (!('Notification' in window)) {
+            statusText.textContent = "Tidak didukung browser ini.";
+            statusText.style.color = "#999";
+            btnEnableNotif.style.display = 'none';
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            statusText.textContent = "✅ Diizinkan (Aktif)";
+            statusText.style.color = "#28a745";
+            btnEnableNotif.style.display = 'none';
+        } else if (Notification.permission === 'denied') {
+            statusText.textContent = "❌ Diblokir (Cek pengaturan browser)";
+            statusText.style.color = "#dc3545";
+            btnEnableNotif.style.display = 'none';
+        } else {
+            statusText.textContent = "⚠️ Belum Diizinkan";
+            statusText.style.color = "#ffc107";
+            btnEnableNotif.style.display = 'inline-block';
+            btnEnableNotif.textContent = "Aktifkan";
+            btnEnableNotif.disabled = false;
+        }
     }
 
-    const passwordForm = document.getElementById('form-change-password');
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', handlePasswordChange);
-    }
+    updateStatusUI();
 
-    const toggleIcons = document.querySelectorAll('.eye-icon');
-    toggleIcons.forEach(icon => {
-        icon.addEventListener('click', togglePasswordVisibility);
-    });
+    if (btnEnableNotif) {
+        btnEnableNotif.addEventListener('click', async () => {
+            btnEnableNotif.textContent = "Memproses...";
+            btnEnableNotif.disabled = true;
+
+            const success = await ensurePushSubscription();
+
+            if (success) {
+                alert("Notifikasi browser berhasil diaktifkan!");
+            } else if (Notification.permission === 'denied') {
+                alert("Gagal: Izin notifikasi diblokir. Silakan reset izin pada ikon gembok di address bar browser.");
+            } else {
+                alert("Gagal mengaktifkan notifikasi.");
+            }
+
+            updateStatusUI();
+        });
+    }
 
     const notifForm = document.getElementById('form-notification-settings');
     if (notifForm) {
@@ -29,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             msgDiv.textContent = '';
             msgDiv.className = 'form-message';
 
-            const formData = new FormData();
+            const formData = new FormData();            
             formData.append('chat_enabled', document.getElementById('chat_enabled').checked);
             formData.append('auction_enabled', document.getElementById('auction_enabled').checked);
             formData.append('order_enabled', document.getElementById('order_enabled').checked);
@@ -43,11 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast(result.message, 'success'); // Asumsi ada fungsi showToast
+                    showToastMessage(result.message, 'success');
                     msgDiv.textContent = result.message;
                     msgDiv.classList.add('success');
                 } else {
-                    showToast(result.message || 'Gagal menyimpan', 'error');
+                    showToastMessage(result.message || 'Gagal menyimpan', 'error');
                     msgDiv.textContent = result.message;
                     msgDiv.classList.add('error');
                 }
@@ -61,6 +99,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    const profileForm = document.getElementById('form-update-profile');
+    if (profileForm) {
+        profileForm.addEventListener('submit', handleProfileUpdate);
+    }
+
+    const passwordForm = document.getElementById('form-change-password');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', handlePasswordChange);
+    }
+
+    const toggleIcons = document.querySelectorAll('.eye-icon');
+    toggleIcons.forEach(icon => {
+        icon.addEventListener('click', togglePasswordVisibility);
+    });
 });
 
 function handleProfileUpdate(event) {
@@ -179,6 +232,7 @@ function setLoading(button, isLoading) {
 function showMessage(element, message, type) {
     element.textContent = message;
     element.className = 'form-message ' + type;
+    element.style.display = 'block';
 }
 
 function showToastMessage(message, type = 'info') {

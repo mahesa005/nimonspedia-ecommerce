@@ -104,4 +104,27 @@ class StoreController {
             exit;
         }
     }
+
+    public function getAllStores(Request $request): void {
+        header('Content-Type: application/json');
+
+        $search = $request->getDataBody('search', '');
+        error_log('TEST: ' . $search);
+
+        try {
+            $result = $this->store_service->getAllStores($search);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Info toko berhasil didapat!',
+                'data' => $result
+            ]);
+        } catch (Exception $e) {
+            http_response_code($e->getCode() === 401 ? 401 : 400);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+            exit;
+        }
+    }
 }

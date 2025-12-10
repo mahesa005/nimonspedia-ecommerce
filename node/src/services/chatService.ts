@@ -1,6 +1,7 @@
 import { ChatRepository } from '../repositories/chatRepository';
 import sanitizeHtml from 'sanitize-html';
 import { SendMessageDTO, ChatRoom, ChatMessage } from '../models/chatModel';
+import { NotificationService } from './notificationService';
 
 export const ChatService = {
   async getMyChatRooms(userId: number, role: 'BUYER' | 'SELLER', searchQuery?: string): Promise<ChatRoom[]> {
@@ -21,6 +22,18 @@ export const ChatService = {
       ...data,
       content: sanitizedContent
     });
+
+    try {
+        const receiverId = data.buyer_id === data.sender_id ? data.store_id : data.buyer_id;
+        await NotificationService.sendToUser(receiverId, {
+            title: `New message from ${data.sender_id}`,
+            body: `${data.content.substring(0, 50)}...`,
+            url: `/chat`
+        });
+    } catch (err) {
+        console.error("Notification failed:", err);
+    }
+    
     return message;
   },
   

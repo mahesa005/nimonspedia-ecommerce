@@ -7,6 +7,18 @@ export const ChatRepository = {
       const params: any[] = [];
   
       const searchPattern = searchQuery ? `%${searchQuery}%` : null;
+
+      const contentSubQuery = `
+        (SELECT 
+           CASE 
+             WHEN m.message_type = 'image' THEN 'Sent an image'
+             WHEN m.message_type = 'item_preview' THEN 'Sent a product'
+             ELSE m.content 
+           END
+         FROM chat_messages m 
+         WHERE m.store_id = cr.store_id AND m.buyer_id = cr.buyer_id 
+         ORDER BY m.created_at DESC LIMIT 1)
+      `;
   
       if (role === 'BUYER') {
         query = `
@@ -16,12 +28,7 @@ export const ChatRepository = {
             cr.last_message_at,
             s.store_name AS partner_name,
             s.store_logo_path AS partner_image,
-            COALESCE(
-              (SELECT content FROM chat_messages m 
-               WHERE m.store_id = cr.store_id AND m.buyer_id = cr.buyer_id 
-               ORDER BY m.created_at DESC LIMIT 1), 
-              ''
-            ) AS last_message_content,
+            COALESCE(${contentSubQuery}) AS last_message_content,
             (SELECT COUNT(*)::int FROM chat_messages m 
              WHERE m.store_id = cr.store_id AND m.buyer_id = cr.buyer_id 
              AND m.is_read = false AND m.sender_id != $1) AS unread_count
@@ -51,12 +58,7 @@ export const ChatRepository = {
             cr.last_message_at,
             u.name AS partner_name,
             NULL AS partner_image,
-            COALESCE(
-              (SELECT content FROM chat_messages m 
-               WHERE m.store_id = cr.store_id AND m.buyer_id = cr.buyer_id 
-               ORDER BY m.created_at DESC LIMIT 1), 
-              ''
-            ) AS last_message_content,
+            COALESCE(${contentSubQuery}) AS last_message_content,
             (SELECT COUNT(*)::int FROM chat_messages m 
              WHERE m.store_id = cr.store_id AND m.buyer_id = cr.buyer_id 
              AND m.is_read = false AND m.sender_id != $1) AS unread_count
