@@ -22,11 +22,14 @@ export default function ChatWindow({room, messages, currentUserId, onSendMessage
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const lastMessageIdRef = useRef<number | null>(null);
-
+  const lastMessageCountRef = useRef<number>(0);
   const isAtBottomRef = useRef(true);
   
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
+
+  const scrollToBottom = (behavior: 'smooth' | 'auto' = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  };
 
   const handleScroll = () => {
     if (!containerRef.current) return;
@@ -55,24 +58,27 @@ export default function ChatWindow({room, messages, currentUserId, onSendMessage
   useEffect(() => {
     if (!messages.length) return;
 
-    const lastMsg = messages[messages.length - 1];
-    const isNewMessage = lastMsg.message_id !== lastMessageIdRef.current;
+    const currentMessageCount = messages.length;
+    const hasNewMessage = currentMessageCount > lastMessageCountRef.current;
     
-    lastMessageIdRef.current = lastMsg.message_id;
+    lastMessageCountRef.current = currentMessageCount;
 
-    if (!isNewMessage || prevScrollHeight > 0) return;
+    if (!hasNewMessage || prevScrollHeight > 0) return;
 
+    const lastMsg = messages[messages.length - 1];
     const isMe = lastMsg.sender_id === currentUserId;
 
-    if (isMe || isAtBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isMe) {
+      setTimeout(() => scrollToBottom('smooth'), 50);
+    } else {
+      setTimeout(() => scrollToBottom('smooth'), 50);
     }
   }, [messages, currentUserId, prevScrollHeight]); 
 
   useEffect(() => {
     if (messages.length > 0) {
-       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-       lastMessageIdRef.current = messages[messages.length - 1].message_id;
+       scrollToBottom('auto');
+       lastMessageCountRef.current = messages.length;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.store_id, room.buyer_id]);
