@@ -66,6 +66,14 @@ export default function ChatPage() {
   }, [rooms]);
 
   const handleSelectRoom = async (room: ChatRoom) => {
+    setRooms(prevRooms => {
+      const exists = prevRooms.some(r => r.store_id === room.store_id && r.buyer_id === room.buyer_id);
+      
+      if (!exists) {
+        return [room, ...prevRooms];
+      }
+      return prevRooms;
+    });
     setActiveRoom(room);
     setMessages([]);
     setHasMore(true);
@@ -158,17 +166,29 @@ export default function ChatPage() {
           msg.is_read = true;
       }
 
-      setRooms(prevRooms => prevRooms.map(r => {
-        if (r.store_id === msg.store_id && r.buyer_id === msg.buyer_id) {
-            return { 
-              ...r, 
-              last_message_content: msg.message_type === 'image' ? 'Sent an image' : msg.content, 
-              last_message_at: msgDate, 
-              unread_count: isMe ? r.unread_count : (isOpen ? 0 : r.unread_count + 1) 
-            };
-        }
-        return r;
-      }));
+      const getPreviewText = (m: ChatMessage) => {
+        if (m.message_type === 'image') return 'Sent an image';
+        if (m.message_type === 'item_preview') return 'Sent a product';
+        return m.content;
+      };
+
+      setRooms(prevRooms => {
+        const updatedRooms = prevRooms.map(r => {
+          if (r.store_id === msg.store_id && r.buyer_id === msg.buyer_id) {
+              return { 
+                ...r, 
+                last_message_content: getPreviewText(msg), 
+                last_message_at: msgDate, 
+                unread_count: isMe ? r.unread_count : (isOpen ? 0 : r.unread_count + 1) 
+              };
+          }
+          return r;
+        });
+
+        return updatedRooms.sort((a, b) => 
+          new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+        );
+      });
 
       if (isOpen) {
         setMessages(prev => [...prev, msg]);
@@ -227,6 +247,7 @@ export default function ChatPage() {
           onSelectRoom={handleSelectRoom}
           onSearch={(q) => fetchRooms(q)}
           currentUserRole={safeRole}
+          currentUserId={user.user_id}
         />
       </div>
       <div className={`flex-col bg-gray-50 h-full flex-1 ${!activeRoom ? 'hidden md:flex' : 'flex'}`}>
