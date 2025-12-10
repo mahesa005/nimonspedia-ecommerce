@@ -14,6 +14,53 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleIcons.forEach(icon => {
         icon.addEventListener('click', togglePasswordVisibility);
     });
+
+    const notifForm = document.getElementById('form-notification-settings');
+    if (notifForm) {
+        notifForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btn-save-notif');
+            const msgDiv = document.getElementById('notif-msg');
+
+            // Disable button & loading state
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+            msgDiv.textContent = '';
+            msgDiv.className = 'form-message';
+
+            const formData = new FormData();
+            formData.append('chat_enabled', document.getElementById('chat_enabled').checked);
+            formData.append('auction_enabled', document.getElementById('auction_enabled').checked);
+            formData.append('order_enabled', document.getElementById('order_enabled').checked);
+
+            try {
+                const response = await fetch('/profile/preferences', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message, 'success'); // Asumsi ada fungsi showToast
+                    msgDiv.textContent = result.message;
+                    msgDiv.classList.add('success');
+                } else {
+                    showToast(result.message || 'Gagal menyimpan', 'error');
+                    msgDiv.textContent = result.message;
+                    msgDiv.classList.add('error');
+                }
+            } catch (error) {
+                console.error(error);
+                msgDiv.textContent = 'Terjadi kesalahan sistem';
+                msgDiv.classList.add('error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Simpan Pengaturan';
+            }
+        });
+    }
 });
 
 function handleProfileUpdate(event) {
@@ -28,7 +75,7 @@ function handleProfileUpdate(event) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/profile/update', true);
 
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             setLoading(button, false);
 
@@ -50,7 +97,7 @@ function handleProfileUpdate(event) {
         }
     };
 
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         setLoading(button, false);
         showToastMessage('Terjadi kesalahan jaringan.', 'error');
     };
@@ -66,7 +113,7 @@ function handlePasswordChange(event) {
 
     const newPass = form.new_password.value;
     const confirmPass = form.confirm_password.value;
-    
+
     // Validasi client-side
     if (newPass !== confirmPass) {
         showMessage(msgEl, 'Password baru dan konfirmasi tidak cocok.', 'error');
@@ -87,7 +134,7 @@ function handlePasswordChange(event) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/profile/password', true);
 
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             setLoading(button, false);
 
@@ -110,7 +157,7 @@ function handlePasswordChange(event) {
         }
     };
 
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         setLoading(button, false);
         showToastMessage('Terjadi kesalahan jaringan.', 'error');
     };

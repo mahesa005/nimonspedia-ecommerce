@@ -12,6 +12,7 @@ import { adminMeHandler } from './controllers/adminMeController';
 import { requireAdmin } from './middleware/requireAdmin';
 import { adminUserController } from './controllers/adminUserController';
 import { requireSocketAuth } from './middleware/requireSession';
+import { getFlagController, updateFlagController } from './controllers/featureFlagController';
 import chatRoutes from './routes/chatRoutes';
 import chatSocket from './sockets/chatSocket';
 import notificationRoutes from './routes/notificationRoutes';
@@ -52,7 +53,9 @@ app.get('/', (req: Request, res: Response) => {
 // or directly at localhost:3000/admin/...
 app.post('/admin/login', adminLoginController);
 app.get('/admin/me', requireAdmin, adminMeHandler);
-app.post('/admin/dashboard', requireAdmin, adminUserController)
+app.post('/admin/dashboard', requireAdmin, adminUserController);
+app.patch('/admin/feature-flags', requireAdmin, updateFlagController); // feature flag update route
+app.post('/admin/feature-flags/effective', requireAdmin, getFlagController); // feature flag get route
 
 // API Routes
 app.use('/auctions', auctionRoutes);

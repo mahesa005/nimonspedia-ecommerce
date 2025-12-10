@@ -1,6 +1,5 @@
 // userRepository for managing user data in the database
 import { User } from '../models/User';
-import {  } from '../config/database';
 import pool from '../config/database'
 
 export async function findUserByEmail(email: string): Promise<User | null> {
