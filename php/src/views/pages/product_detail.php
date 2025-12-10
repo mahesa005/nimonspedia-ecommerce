@@ -55,7 +55,7 @@ use App\Core\Auth;
                         </a>
                         
                         <?php if (Auth::check() && $user->user_id !== $store->user_id): ?>
-                            <a href="/app/chat?storeId=<?= $store->store_id ?>" 
+                            <a href="/chat?store_id=<?= $store->store_id ?>&store_name=<?= urlencode($store->store_name) ?>" 
                                class="btn-secondary"
                                style="font-size: 0.85rem; padding: 6px 12px; border: 1px solid #ddd; background-color: #f8f9fa; border-radius: 20px; text-decoration: none; color: #333; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                                Chat Penjual

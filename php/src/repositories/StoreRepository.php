@@ -12,6 +12,17 @@ class StoreRepository {
         $this->db = Database::getInstance();
     }
 
+    public function getAllStores(string $store_name): array {
+        if ($store_name == '') {
+            $stmt = $this->db->prepare("SELECT * FROM store");
+            $stmt->execute();
+        } else {
+            $stmt = $this->db->prepare("SELECT * FROM store WHERE store_name ILIKE :store_name");
+            $stmt->execute(['store_name' => $store_name]);
+        }
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getByUserId(int $userId): ?array { // get user id dari stores
         $stmt = $this->db->prepare("SELECT * FROM store WHERE user_id = :user_id");
         $stmt->execute(['user_id' => $userId]);
@@ -22,6 +33,13 @@ class StoreRepository {
     public function getStoreIdByUserId(int $userId): ?int { // get store id from user id
         $store = $this->getByUserId($userId);
         return $store ? (int)$store['store_id'] : null;
+    }
+
+    public function getUserIdByStoreId(int $storeId): ?int {
+        $stmt = $this->db->prepare("SELECT * FROM store WHERE store_id = :store_id");
+        $stmt->execute(['store_id' => $storeId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? (int)$result['user_id'] : null;
     }
 
     public function create(int $user_id, string $store_name, string $clean_description, ?string $logo_path): int {

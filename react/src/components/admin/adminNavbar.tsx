@@ -43,7 +43,7 @@ export default function AdminNavbar() {
       <nav className="fixed top-0 left-0 w-full h-16 bg-white flex items-center justify-between z-1000 border-b border-gray-200 px-8 box-border shadow-sm">
         <a
           href="/admin"
-          className="text-3xl font-extrabold text-[#42b549] no-underline transition-colors duration-300 hover:text-[#329439] flex-shrink-0"
+          className="text-3xl font-extrabold text-[#42b549] no-underline transition-colors duration-300 hover:text-[#329439] shrink-0"
         >
           Nimonspedia
         </a>
@@ -57,7 +57,7 @@ export default function AdminNavbar() {
               title={admin?.name || "Admin"}
             >
               {/* Avatar Circle */}
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#42b549] to-[#329439] text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#42b549] to-[#329439] text-white font-bold text-sm flex items-center justify-center shrink-0">
                 {getInitials(admin?.name)}
               </div>
 
@@ -75,7 +75,7 @@ export default function AdminNavbar() {
                 {/* Profile Info */}
                 <div className="px-4 py-4 border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#42b549] to-[#329439] text-white font-bold text-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#42b549] to-[#329439] text-white font-bold text-lg flex items-center justify-center shrink-0">
                       {getInitials(admin?.name)}
                     </div>
                     <div className="min-w-0">
@@ -92,7 +92,7 @@ export default function AdminNavbar() {
                 {/* Logout Button */}
                 <button
                   onClick={handleLogout}
-                  className="w-full px-4 py-3 text-left text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors duration-200 flex items-center gap-2"
+                  className="w-full px-4 py-3 text-left text-red-600 font-semibold cursor-pointer text-sm hover:bg-red-50 transition-colors duration-200 flex items-center gap-2"
                 >
                   <svg
                     className="w-4 h-4"

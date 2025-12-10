@@ -166,6 +166,11 @@ $router->add('POST', '/profile/password',
     [AuthMiddleware::class]
 );
 
+$router->add('POST', '/profile/preferences', 
+    [ProfileController::class, 'updatePreferences'], 
+    [AuthMiddleware::class]
+);
+
 $router->add('POST', '/seller/store/update', 
     [StoreController::class, 'handleUpdateStore'],
     [AuthMiddleware::class, RoleMiddleware::class]
@@ -177,3 +182,5 @@ $router->add('GET', '/seller/export.csv',
 );
 
 $router->add('GET', '/api/auth/validate-session', [AuthController::class, 'validateSession']);
+
+$router->add('GET', '/api/stores', [StoreController::class, 'getAllStores']);

@@ -1,14 +1,18 @@
 <?php
 namespace App\Services;
 
+use App\Core\Database;
 use App\Repositories\UserRepository;
 use Exception;
+use PDO;
 
 class ProfileService {
     private UserRepository $userRepo;
+    private PDO $db;
 
     public function __construct() {
         $this->userRepo = new UserRepository();
+        $this->db = Database::getInstance();
     }
 
     public function getProfile(int $buyer_id): ?\App\Models\User {
@@ -43,5 +47,47 @@ class ProfileService {
         
         $new_hashed_password = password_hash($new_pass, PASSWORD_DEFAULT);
         return $this->userRepo->updatePassword($buyer_id, $new_hashed_password);
+    }
+
+    public function getPreferences($userId) {
+        $stmt = $this->db->prepare("SELECT * FROM push_preferences WHERE user_id = :uid");
+        $stmt->execute([':uid' => $userId]);
+        $prefs = $stmt->fetch();
+
+        if (!$prefs) {
+            return [
+                'chat_enabled' => true,
+                'auction_enabled' => true,
+                'order_enabled' => true
+            ];
+        }
+        return $prefs;
+    }
+
+    public function updatePreferences($userId, $chat, $auction, $order) {
+        $current = $this->getPreferences($userId);
+        
+        $check = $this->db->prepare("SELECT 1 FROM push_preferences WHERE user_id = :uid");
+        $check->execute([':uid' => $userId]);
+        
+        if ($check->fetch()) {
+            $sql = "UPDATE push_preferences SET 
+                    chat_enabled = :chat, 
+                    auction_enabled = :auction, 
+                    order_enabled = :order, 
+                    updated_at = NOW() 
+                    WHERE user_id = :uid";
+        } else {
+            $sql = "INSERT INTO push_preferences (user_id, chat_enabled, auction_enabled, order_enabled) 
+                    VALUES (:uid, :chat, :auction, :order)";
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':uid' => $userId,
+            ':chat' => $chat ? 1 : 0,
+            ':auction' => $auction ? 1 : 0,
+            ':order' => $order ? 1 : 0
+        ]);
     }
 }
