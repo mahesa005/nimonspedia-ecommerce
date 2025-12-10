@@ -124,6 +124,8 @@ class ProductController {
                 return;
             }
 
+            $auction = $this->product_service->getActiveAuctionByProductId($product_id);
+
             $user = null;
             $cart_item_count = 0;
             $navbar_file = 'components/navbar_guest.php';
@@ -151,6 +153,8 @@ class ProductController {
             $this->view->setData('store', $product_data['store']);
             $this->view->setData('categories', $product_data['categories']);
 
+            $this->view->setData('auction', $auction);
+            
             $this->view->renderPage('pages/product_detail.php');
 
         } catch (Exception $e) {
