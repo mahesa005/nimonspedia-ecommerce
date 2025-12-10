@@ -16,6 +16,7 @@ use App\Core\Middleware\RoleMiddleware;
 use App\Core\Middleware\RedirectSellerMiddleware;
 use App\Controllers\OrderManagementController;
 use App\Controllers\ExportController;
+use App\Controllers\AuctionController;
 
 $router->add('GET', '/login',
     [AuthController::class, 'showLoginPage'],
@@ -184,3 +185,5 @@ $router->add('GET', '/seller/export.csv',
 $router->add('GET', '/api/auth/validate-session', [AuthController::class, 'validateSession']);
 
 $router->add('GET', '/api/stores', [StoreController::class, 'getAllStores']);
+
+$router->add('GET', '/api/auctions', [AuctionController::class, 'index']);
