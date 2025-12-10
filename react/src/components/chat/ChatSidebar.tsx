@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ChatRoom } from '../../types/chat';
 
 interface Props {
@@ -24,10 +24,20 @@ export default function ChatSidebar({rooms, activeRoom, onSelectRoom, onSearch, 
   const [availableStores, setAvailableStores] = useState<StoreResult[]>([]);
   const [isLoadingStores, setIsLoadingStores] = useState(false);
 
+  const isInitialOpenRef = useRef(false);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
     onSearch(value);
+  };
+
+  const handleOpenNewChat = () => {
+    setStoreSearch('');
+    setAvailableStores([]);
+    setIsLoadingStores(true);
+    isInitialOpenRef.current = true;
+    setIsModalOpen(true);
   };
 
   const fetchStores = async (query = '') => {
@@ -50,7 +60,13 @@ export default function ChatSidebar({rooms, activeRoom, onSelectRoom, onSearch, 
   useEffect(() => {
     if (!isModalOpen) return;
 
-    const timeout = setTimeout(() => fetchStores(storeSearch), 500);
+    const delay = isInitialOpenRef.current ? 0 : 500;
+    
+    const timeout = setTimeout(() => {
+      fetchStores(storeSearch);
+      isInitialOpenRef.current = false;
+    }, delay);
+
     return () => clearTimeout(timeout);
   }, [storeSearch, isModalOpen]);
 
@@ -80,7 +96,7 @@ export default function ChatSidebar({rooms, activeRoom, onSelectRoom, onSearch, 
           <div className="flex gap-2">
             {currentUserRole === 'BUYER' && (
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleOpenNewChat}
                 className="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-green-50 hover:text-green-600 transition-colors"
                 title="Start a New Chat"
               >
@@ -163,12 +179,10 @@ export default function ChatSidebar({rooms, activeRoom, onSelectRoom, onSearch, 
       {/* Store List Modal */}
       {isModalOpen && (
         <div className="absolute inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm h-[80%] rounded-xl shadow-2xl flex flex-col overflow-hidden border border-gray-100">
+          <div className="bg-white w-full max-w-sm h-[80%] rounded-xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-200">
             <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-gray-800">New Conversation</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                ✕
-              </button>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
             </div>
 
             <div className="p-3 border-b border-gray-100">
@@ -184,9 +198,16 @@ export default function ChatSidebar({rooms, activeRoom, onSelectRoom, onSearch, 
 
             <div className="flex-1 overflow-y-auto p-2">
               {isLoadingStores ? (
-                <div className="text-center py-8 text-gray-400">Loading stores...</div>
+                <div className="space-y-3 p-2">
+                   {[1,2,3,4].map(i => (
+                     <div key={i} className="flex items-center gap-3 animate-pulse">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                     </div>
+                   ))}
+                </div>
               ) : availableStores.length === 0 ? (
-                <div className="text-center py-8 text-gray-400 text-sm">No stores found</div>
+                <div className="text-center py-10 text-gray-400 text-sm">No stores found</div>
               ) : (
                 availableStores.map((store) => (
                   <div
@@ -194,7 +215,7 @@ export default function ChatSidebar({rooms, activeRoom, onSelectRoom, onSearch, 
                     onClick={() => selectNewStore(store)}
                     className="flex items-center gap-3 p-3 hover:bg-green-50 rounded-lg cursor-pointer transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-100">
                       {store.store_image ? (
                         <img src={store.store_image} className="w-full h-full object-cover" />
                       ) : (
@@ -203,10 +224,7 @@ export default function ChatSidebar({rooms, activeRoom, onSelectRoom, onSearch, 
                         </div>
                       )}
                     </div>
-
-                    <span className="font-medium text-gray-800 truncate">
-                      {store.store_name}
-                    </span>
+                    <span className="font-medium text-gray-800 truncate">{store.store_name}</span>
                   </div>
                 ))
               )}
