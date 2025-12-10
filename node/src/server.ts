@@ -17,6 +17,8 @@ import chatRoutes from './routes/chatRoutes';
 import chatSocket from './sockets/chatSocket';
 import notificationRoutes from './routes/notificationRoutes';
 import { configDotenv } from 'dotenv';
+import path from 'path';
+import uploadRoutes from './routes/uploadRoutes';
 
 configDotenv()
 
@@ -62,6 +64,8 @@ app.use('/auctions', auctionRoutes);
 app.use('', userRoutes);
 app.use('/chats', chatRoutes);
 app.use('/notifications', notificationRoutes)
+app.use('/uploads', uploadRoutes);
+app.use('/upload', uploadRoutes);
 
 // Websocket Middleware
 io.use(requireSocketAuth);
