@@ -124,6 +124,8 @@ export default function ChatPage() {
   }, [rooms]);
 
   const handleSelectRoom = async (room: ChatRoom) => {
+    //debug
+    console.log('handleSelectRoom chat with:', room);
     setRooms(prevRooms => {
       const exists = prevRooms.some(r => r.store_id === room.store_id && r.buyer_id === room.buyer_id);
 
@@ -192,13 +194,19 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
+    console.log('Auto-select effect running. State:', {
+      targetStoreId, isRoomsLoaded, hasUser: !!user, activeRoom: !!activeRoom, roomsCount: rooms.length
+    });
+
     if (targetStoreId && isRoomsLoaded && user && !activeRoom) {
       const storeIdNum = parseInt(targetStoreId);
       const existingRoom = rooms.find(r => r.store_id === storeIdNum);
 
       if (existingRoom) {
+        console.log('Found existing room, selecting:', existingRoom);
         handleSelectRoom(existingRoom);
       } else {
+        console.log('Room not found, creating temp room for store:', storeIdNum);
         // Create temporary room
         const tempRoom: ChatRoom = {
           store_id: storeIdNum,
