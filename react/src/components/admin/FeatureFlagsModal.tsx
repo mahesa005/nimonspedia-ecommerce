@@ -142,9 +142,9 @@ export default function FeatureFlagsModal({
     setToasts((prev) => [{ message, type, id }, ...prev]);
   };
 
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  // const removeToast = (id: string) => {
+  //   setToasts((prev) => prev.filter((t) => t.id !== id));
+  // };
 
   const confirmFlagUpdate = async () => {
     if (!confirmDialog || !token) return;
