@@ -25,6 +25,9 @@ if ($current_store) {
                 <a href="/seller/dashboard" class="navbar-link">Dashboard</a>
                 <a href="/seller/products" class="navbar-link">Produk</a>
                 <a href="/seller/orders" class="navbar-link">Pesanan</a>
+                
+                <a href="/auction" class="navbar-link">Lelang</a>
+                <a href="/chat" class="navbar-link">Chat</a>
             </div>
 
             <div class="navbar-actions">
