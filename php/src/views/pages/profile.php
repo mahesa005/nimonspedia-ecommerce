@@ -3,6 +3,17 @@
     <h1>Profil Saya</h1>
     <div class="profile-box">
         <h2>Pengaturan Notifikasi</h2>
+        
+        <div class="notification-status-box" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong style="display:block; color: #333;">Status Izin Browser</strong>
+                <span id="notif-status-text" style="font-size: 14px; color: #666;">Memeriksa...</span>
+            </div>
+            <button type="button" id="btn-enable-browser-notif" class="btn btn-sm btn-primary" style="display: none;">
+                Aktifkan
+            </button>
+        </div>
+        
         <form id="form-notification-settings">
             <div class="form-group checkbox-group">
                 <label class="checkbox-container">
@@ -135,3 +146,4 @@
     </div>
 
 </div>
+<script type="module" src="/js/pages/profile.js"></script>

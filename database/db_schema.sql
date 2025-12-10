@@ -190,7 +190,7 @@ CREATE TABLE IF NOT EXISTS "chat_messages" (
 CREATE TABLE IF NOT EXISTS "push_subscriptions" (
     subscription_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
-    endpoint TEXT NOT NULL,
+    endpoint TEXT UNIQUE NOT NULL,
     p256dh_key VARCHAR(255) NOT NULL,
     auth_key VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
