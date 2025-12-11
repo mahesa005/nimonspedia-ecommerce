@@ -329,8 +329,8 @@ export const AuctionRepository = {
   }) {
     const query = `
       INSERT INTO "auctions"
-      (product_id, starting_price, current_price, min_increment, quantity, start_time, end_time, status, created_at, updated_at)
-      VALUES ($1, $2, $2, $3, $4, $5, $6, 'scheduled', NOW(), NOW())
+      (product_id, starting_price, current_price, min_increment, quantity, start_time, end_time, status, created_at)
+      VALUES ($1, $2, $2, $3, $4, $5, $6, 'scheduled', NOW())
       RETURNING *
       `,
       values = [
