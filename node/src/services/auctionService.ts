@@ -5,7 +5,7 @@ import { NotificationService } from './notificationService';
 export const AuctionService = {
   async getAuctionPageData(auctionId: number): Promise<AuctionDetailResponse['data'] | null> {
     const auctionData = await AuctionRepository.findDetailById(auctionId);
-    
+
     if (!auctionData) return null;
 
     const bids = await AuctionRepository.findBidsByAuctionId(auctionId);
@@ -16,12 +16,12 @@ export const AuctionService = {
     };
   },
 
-  async placeBid(auctionId: number, userId: number, amount: number): Promise<{bid: PublicBid, newEndTime: Date}> {
+  async placeBid(auctionId: number, userId: number, amount: number): Promise<{ bid: PublicBid, newEndTime: Date }> {
     const auction = await AuctionRepository.findDetailById(auctionId);
     if (!auction) throw new Error("Auction not found");
 
     const minBid = auction.current_price + auction.min_increment;
-    
+
     if (amount < minBid && auction.bidder_count > 0) {
       throw new Error(`Bid must be at least ${minBid}`);
     }
@@ -49,13 +49,13 @@ export const AuctionService = {
   async finalizeAuction(auctionId: number): Promise<AuctionData | null> {
     const closedAuction = await AuctionRepository.closeAuction(auctionId);
     if (closedAuction && closedAuction.winner_id) {
-        console.log(`Auction ${auctionId} closed. Winner: ${closedAuction.winner_id}`);
+      console.log(`Auction ${auctionId} closed. Winner: ${closedAuction.winner_id}`);
 
-        NotificationService.sendToUser(closedAuction.winner_id, {
-          title: `You've won the auction!`,
-          body: `You've won the auction with the price: Rp ${Number(closedAuction.current_price).toLocaleString()}.`,
-          url: `/orders`,
-        }).catch(err => console.error("Win notification failed:", err));
+      NotificationService.sendToUser(closedAuction.winner_id, {
+        title: `You've won the auction!`,
+        body: `You've won the auction with the price: Rp ${Number(closedAuction.current_price).toLocaleString()}.`,
+        url: `/orders`,
+      }).catch(err => console.error("Win notification failed:", err));
     }
     return closedAuction;
   },
@@ -79,5 +79,23 @@ export const AuctionService = {
         url: `/auction/${auctionId}`,
       }).catch(err => console.error(`Failed to warn user ${userId}:`, err));
     });
+  },
+  async getAuctions(page: number, limit: number, search: string, status: string): Promise<any> {
+    const offset = Math.max(0, (page - 1) * limit);
+    const sort = (status === 'scheduled') ? 'starting_soon' : 'ending_soon';
+
+    const auctions = await AuctionRepository.findPaginated(limit, offset, search, status, sort);
+    const totalCount = await AuctionRepository.countAll(search, status);
+    const totalPages = (limit > 0) ? Math.ceil(totalCount / limit) : 0;
+
+    return {
+      data: auctions,
+      meta: {
+        current_page: page,
+        total_pages: totalPages,
+        total_items: totalCount,
+        limit: limit
+      }
+    };
   },
 };

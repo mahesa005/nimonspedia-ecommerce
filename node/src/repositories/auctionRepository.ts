@@ -169,12 +169,12 @@ export const AuctionRepository = {
               buyer_id, store_id, total_price, shipping_address, status, created_at
             ) VALUES ($1, $2, $3, $4, 'approved', NOW())
             RETURNING order_id
-          `; 
-          
+          `;
+
           const orderRes = await client.query<OrderInsertResult>(orderQuery, [
-            auction.winner_id, 
-            details.store_id, 
-            auction.current_price, 
+            auction.winner_id,
+            details.store_id,
+            auction.current_price,
             details.address
           ]);
           const orderId = orderRes.rows[0]?.order_id;
@@ -186,12 +186,12 @@ export const AuctionRepository = {
             ) VALUES ($1, $2, 1, $3, $4)
           `;
           await client.query(itemQuery, [
-            orderId, 
-            auction.product_id, 
-            auction.current_price, 
+            orderId,
+            auction.product_id,
+            auction.current_price,
             auction.current_price
           ]);
-          
+
           await client.query('UPDATE "product" SET stock = stock - 1 WHERE product_id = $1', [auction.product_id]);
         }
       }
@@ -229,5 +229,77 @@ export const AuctionRepository = {
     `;
     const res = await pool.query(query, [auctionId]);
     return res.rows.map(row => row.bidder_id);
+  },
+  async findPaginated(limit: number, offset: number, search: string, status: string, sort: string): Promise<any[]> {
+    const params: any[] = [limit, offset];
+    let whereClause = "WHERE 1=1";
+    let paramIndex = 3;
+
+    if (status === 'scheduled') {
+      whereClause += " AND a.status = 'scheduled'";
+    } else {
+      whereClause += " AND a.status IN ('active', 'ongoing')";
+    }
+
+    if (search) {
+      whereClause += ` AND (p.product_name ILIKE $${paramIndex} OR s.store_name ILIKE $${paramIndex})`;
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    let orderBy = "ORDER BY a.created_at DESC";
+    if (sort === 'ending_soon') {
+      orderBy = "ORDER BY a.end_time ASC";
+    } else if (sort === 'starting_soon') {
+      orderBy = "ORDER BY a.start_time ASC";
+    }
+
+    const query = `
+        SELECT 
+            a.*,
+            p.product_name,
+            p.main_image_path,
+            s.store_name,
+            s.store_id,
+            (SELECT COUNT(*) FROM "auction_bids" ab WHERE ab.auction_id = a.auction_id) as bidder_count
+        FROM "auctions" a
+        JOIN "product" p ON a.product_id = p.product_id
+        JOIN "store" s ON p.store_id = s.store_id
+        ${whereClause}
+        ${orderBy}
+        LIMIT $1 OFFSET $2
+    `;
+
+    const result = await pool.query(query, params);
+    return result.rows;
+  },
+
+  async countAll(search: string, status: string): Promise<number> {
+    const params: any[] = [];
+    let whereClause = "WHERE 1=1";
+    let paramIndex = 1;
+
+    if (status === 'scheduled') {
+      whereClause += " AND a.status = 'scheduled'";
+    } else {
+      whereClause += " AND a.status IN ('active', 'ongoing')";
+    }
+
+    if (search) {
+      whereClause += ` AND (p.product_name ILIKE $${paramIndex} OR s.store_name ILIKE $${paramIndex})`;
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    const query = `
+        SELECT COUNT(*) as count
+        FROM "auctions" a
+        JOIN "product" p ON a.product_id = p.product_id
+        JOIN "store" s ON p.store_id = s.store_id
+        ${whereClause}
+    `;
+
+    const result = await pool.query(query, params);
+    return parseInt(result.rows[0].count);
   },
 };
