@@ -230,4 +230,47 @@ export const AuctionRepository = {
     const res = await pool.query(query, [auctionId]);
     return res.rows.map(row => row.bidder_id);
   },
+
+  async findActiveAuctionByProduct(
+    productId: number
+  ): Promise<AuctionData | null> {
+    const query =`
+    SELECT * FROM "auctions"
+    WHERE product_id = $1
+      AND status IN ('active', 'ongoing')
+      ORDER BY start_time ASC
+      LIMIT 1
+    `;
+    const res = await pool.query<AuctionData>(query, [productId]);
+    return res.rows[0] ?? null;
+  },
+    
+
+  async createAuction(params: {
+    productId: number
+    startingPrice: number
+    minIncrement: number
+    quantity: number
+    startTime: string
+    endTime: string
+  
+  }) {
+    const query = `
+      INSERT INTO "auctions"
+      (product_id, starting_price, current_price, min_increment, quantity, start_time, end_time, status, created_at, updated_at)
+      VALUES ($1, $2, $2, $3, $4, $5, $6, 'scheduled', NOW(), NOW())
+      RETURNING *
+      `,
+      values = [
+        params.productId,
+        params.startingPrice,
+        params.minIncrement,
+        params.quantity,
+        params.startTime,
+        params.endTime
+      ];
+    const res = await pool.query<AuctionData>(query, values);
+    return res.rows[0] ?? null;
+  }
+
 };

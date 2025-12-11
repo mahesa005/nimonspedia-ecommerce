@@ -110,3 +110,219 @@ confirmDeleteBtn.addEventListener('click', function() {
     const body = JSON.stringify({ product_id: productToDelete });
     xhr.send(body);
 });
+
+// ===== AUCTION MODAL =====
+const auctionModal = document.getElementById('auctionModal');
+const auctionForm = document.getElementById('auction-form');
+const auctionSubmitBtn = document.getElementById('auction-submit-btn');
+const auctionCancelBtn = document.getElementById('auction-cancel-btn');
+const auctionCloseBtn = document.getElementById('auction-close-btn');
+const startAuctionButtons = document.querySelectorAll('.btn-start-auction');
+
+let selectedProduct = null;
+
+// Helper: Get JWT token from localStorage (Node API auth)
+function getAuthToken() {
+  return localStorage.getItem('token') || '';
+}
+
+// Helper: Set field error message
+function setFieldError(fieldName, message) {
+  const errorElement = document.querySelector(`[data-error-for="${fieldName}"]`);
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.style.display = message ? 'block' : 'none';
+  }
+}
+
+// Helper: Clear all field errors
+function clearFieldErrors() {
+  document.querySelectorAll('.field-error').forEach(el => {
+    el.textContent = '';
+    el.style.display = 'none';
+  });
+}
+
+// Helper: Show global error
+function setGlobalError(message) {
+  const globalError = document.getElementById('auction-global-error');
+  if (globalError) {
+    globalError.textContent = message;
+    globalError.style.display = message ? 'block' : 'none';
+  }
+}
+
+// Helper: Clear global error
+function clearGlobalError() {
+  setGlobalError('');
+}
+
+// Open auction modal
+startAuctionButtons.forEach(btn => {
+  btn.addEventListener('click', function() {
+    const productId = parseInt(this.dataset.productId);
+    const productName = this.dataset.productName;
+    const stock = parseInt(this.dataset.stock);
+
+    selectedProduct = { id: productId, name: productName, stock: stock };
+
+    // Populate modal with product data
+    document.getElementById('auction-product-name').textContent = productName;
+    document.getElementById('auction-product-id').textContent = productId;
+    document.getElementById('auction-product-id-input').value = productId;
+    document.getElementById('auction-stock-label').textContent = stock;
+
+    // Set min/max for quantity
+    const quantityInput = document.getElementById('auction-quantity');
+    quantityInput.max = stock;
+    quantityInput.value = '';
+
+    // Clear form
+    auctionForm.reset();
+    clearFieldErrors();
+    clearGlobalError();
+
+    // Set default start time to now
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('auction-start-time').min = now.toISOString().slice(0, 16);
+
+    // Show modal
+    auctionModal.classList.add('show');
+    auctionModal.setAttribute('aria-hidden', 'false');
+  });
+});
+
+// Close auction modal
+function closeAuctionModal() {
+  auctionModal.classList.remove('show');
+  auctionModal.setAttribute('aria-hidden', 'true');
+  selectedProduct = null;
+  auctionForm.reset();
+  clearFieldErrors();
+  clearGlobalError();
+}
+
+auctionCancelBtn.addEventListener('click', closeAuctionModal);
+auctionCloseBtn.addEventListener('click', closeAuctionModal);
+
+// Close modal on backdrop click
+auctionModal.addEventListener('click', function(e) {
+  if (e.target === auctionModal) {
+    closeAuctionModal();
+  }
+});
+
+// Validate form fields
+function validateAuctionForm() {
+  clearFieldErrors();
+  clearGlobalError();
+  
+  const productId = parseInt(document.getElementById('auction-product-id-input').value);
+  const startTime = document.getElementById('auction-start-time').value;
+  const quantity = parseInt(document.getElementById('auction-quantity').value);
+  const minIncrement = parseInt(document.getElementById('auction-min-increment').value);
+  const startingPrice = parseInt(document.getElementById('auction-starting-price').value);
+
+  let isValid = true;
+
+  // Validate start time (not in past)
+  if (!startTime) {
+    setFieldError('startTime', 'Jam mulai lelang harus diisi');
+    isValid = false;
+  } else {
+    const startDateTime = new Date(startTime);
+    if (startDateTime < new Date()) {
+      setFieldError('startTime', 'Jam mulai tidak boleh di masa lalu');
+      isValid = false;
+    }
+  }
+
+  // Validate quantity
+  if (!quantity || quantity <= 0) {
+    setFieldError('quantity', 'Kuantitas harus lebih dari 0');
+    isValid = false;
+  } else if (quantity > selectedProduct.stock) {
+    setFieldError('quantity', `Kuantitas tidak boleh lebih dari stok (${selectedProduct.stock})`);
+    isValid = false;
+  }
+
+  // Validate min increment
+  if (!minIncrement || minIncrement <= 0) {
+    setFieldError('minIncrement', 'Minimum increment harus lebih dari 0');
+    isValid = false;
+  }
+
+  // Validate starting price
+  if (!startingPrice || startingPrice <= 0) {
+    setFieldError('startingPrice', 'Harga awal harus lebih dari 0');
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+// Submit auction form
+auctionSubmitBtn.addEventListener('click', async function() {
+  if (!validateAuctionForm()) {
+    return;
+  }
+
+  if (!selectedProduct) {
+    setGlobalError('Product tidak ditemukan');
+    return;
+  }
+
+  auctionSubmitBtn.disabled = true;
+  auctionSubmitBtn.textContent = 'Loading...';
+
+  const formData = {
+    productId: selectedProduct.id,
+    startingPrice: parseInt(document.getElementById('auction-starting-price').value),
+    minIncrement: parseInt(document.getElementById('auction-min-increment').value),
+    quantity: parseInt(document.getElementById('auction-quantity').value),
+    startTime: document.getElementById('auction-start-time').value + ':00Z',
+    endTime: new Date(new Date(document.getElementById('auction-start-time').value).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z'
+  };
+
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      setGlobalError('Session expired. Please login again.');
+      auctionSubmitBtn.disabled = false;
+      auctionSubmitBtn.textContent = 'Mulai Lelang';
+      return;
+    }
+
+    const response = await fetch('/api/node/auctions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(formData)
+    });
+
+    auctionSubmitBtn.disabled = false;
+    auctionSubmitBtn.textContent = 'Mulai Lelang';
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      showToast('Lelang berhasil dibuat!', 'success');
+      closeAuctionModal();
+      // Reload the page to see updated auction status
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      const errorMsg = data.message || 'Failed to create auction';
+      setGlobalError(errorMsg);
+      console.error('API Error:', data);
+    }
+  } catch (error) {
+    auctionSubmitBtn.disabled = false;
+    auctionSubmitBtn.textContent = 'Mulai Lelang';
+    console.error('Request failed:', error);
+    setGlobalError('Terjadi kesalahan jaringan. Silakan coba lagi.');
+  }
+});
+
