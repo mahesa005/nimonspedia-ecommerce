@@ -26,39 +26,37 @@ class Router {
                 continue;
             }
             
-            // Match pattern (supports {id})
             if (preg_match($route['pattern'], $uri, $matches)) {
-                // Run middleware
                 foreach ($route['middleware'] as $middlewareClass) {
                     $middleware = new $middlewareClass();
-                    
                     if (!$middleware->handle()) {
                         return;
                     }
                 }
                 
-                // MODIF utk bisa buka edit product
-                // Extract route parameters (e.g., id)
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
                 
-                // Call controller
                 if (is_callable($route['action'])) {
-                    call_user_func($route['action'], ...$params);
+                    call_user_func($route['action'], ...array_values($params));
                     return;
-                } else {
-                    error_log("Router Error: Invalid action format for URI '{$route['uri']}'. Expected [Class::class, 'method'] or callable.");
                 }
                 
-                [$class, $function] = $route['action'];
-                $controllerInstance = new $class();
-                
-                // Pass request AND route params (like $id)
-                if (!empty($params)) {
-                    $controllerInstance->$function($request, ...array_values($params));
-                } else {
-                    $controllerInstance->$function($request);
+                if (is_array($route['action']) && count($route['action']) === 2) {
+                    [$class, $function] = $route['action'];
+                    
+                    if (class_exists($class) && method_exists($class, $function)) {
+                        $controllerInstance = new $class();
+                        if (!empty($params)) {
+                            $controllerInstance->$function($request, ...array_values($params));
+                        } else {
+                            $controllerInstance->$function($request);
+                        }
+                        return;
+                    }
                 }
-                return;
+
+                error_log("Router Error: Invalid action format for URI '{$route['uri']}'.");
+                break;
             }
         }
         
