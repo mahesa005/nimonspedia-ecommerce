@@ -98,6 +98,7 @@ export const AuctionService = {
         limit: limit
       }
     };
+  },
 
   async createAuctionForProduct(params: {
     sellerId: number;

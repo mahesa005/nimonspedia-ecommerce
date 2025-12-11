@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import { cancelAuction, getAuctionDetail, stopAuction, getAuctions } from '../controllers/auctionController';
-import { cancelAuction, getAuctionDetail, stopAuction, createAuctionFromProduct } from '../controllers/auctionController';
+import { cancelAuction, getAuctionDetail, stopAuction, createAuctionFromProduct, getAuctions } from '../controllers/auctionController';
 import { verifySellerAuction } from '../middleware/verifySeller';
 import { requireAuth } from '../middleware/requireSession';
 

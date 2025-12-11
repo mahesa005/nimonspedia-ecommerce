@@ -302,7 +302,6 @@ export const AuctionRepository = {
     const result = await pool.query(query, params);
     return parseInt(result.rows[0].count);
   },
-};
 
   async findActiveAuctionByProduct(
     productId: number
