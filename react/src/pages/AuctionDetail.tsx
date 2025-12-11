@@ -12,8 +12,10 @@ import type {
   BidErrorEvent,
   PlaceBidPayload,
 } from '../types/auction';
-import type { User } from '../types/user';
 import Toast from '../components/ui/toast';
+import BuyerNavbar from '../components/ui/BuyerNavbar';
+import SellerNavbar from '../components/ui/SellerNavbar';
+import { useNavbarData } from '../hooks/useNavbarData';
 
 const socket: Socket = io('http://localhost:8080', {
   path: '/socket.io',
@@ -23,8 +25,8 @@ const socket: Socket = io('http://localhost:8080', {
 
 export default function AuctionDetail() {
   const { id } = useParams<{ id: string }>();
+  const { user, store, cartCount, loading: navbarLoading, handleLogout, updateLocalBalance } = useNavbarData();
   const [data, setData] = useState<AuctionDetailResponse['data'] | null>(null);
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isConnected, setIsConnected] = useState(false);
@@ -40,12 +42,17 @@ export default function AuctionDetail() {
 
   const canBid = user && data && isConnected && (data.auction.status === 'active' || data.auction.status === 'ongoing') && user.balance >= data.auction.current_price + data.auction.min_increment;
 
+  useEffect(() => {
+    if (user && !socket.connected) {
+      socket.connect();
+    }
+  }, [user]);
+
   const fetchAuctionData = useCallback(async (isBackground = false) => {
     if (!isBackground) setLoading(true);
     
     try {
       const res = await fetch(`/api/node/auctions/${id}`);
-      
 
       const serverDateStr = res.headers.get('Date');
       if (serverDateStr) {
@@ -58,7 +65,6 @@ export default function AuctionDetail() {
       
       if (json.success) {
         setData(json.data);
-        if (!socket.connected) socket.connect();
       } else {
         if (!isBackground) setError(json.message || 'Failed to load auction');
       }
@@ -84,18 +90,6 @@ export default function AuctionDetail() {
     return () => clearInterval(intervalId);
   }, [fetchAuctionData]);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch('/api/node/me', { credentials: 'include' });
-        const json = await res.json();
-        if (json.success) setUser(json.data);
-      } catch (err) {
-        console.error('Error fetching user:', err);
-      }
-    };
-    fetchUser();
-  }, []);
 
   useEffect(() => {
     const handleConnect = () => {
@@ -242,72 +236,91 @@ export default function AuctionDetail() {
     }
   };
 
-  if (loading) return <div className="p-10 text-center text-[#666]">Loading...</div>;
+  if (navbarLoading || loading) return <div className="p-10 text-center text-[#666]">Loading...</div>;
   if (error) return <div className="p-10 text-center text-[#dc3545] font-bold">{error}</div>;
-  if (!data) return null;
+  if (!data || !user) return null;
 
   return (
-    <div className="max-w-[1200px] mx-auto p-4 md:py-8 font-sans text-[#333]">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-white p-6 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] mb-8">
-        <div className="lg:col-span-7 space-y-8">
-          <AuctionInfo data={data.auction} />
-        </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-[#333]">
+      
+      {user.role === 'SELLER' ? (
+        <SellerNavbar 
+          storeBalance={store?.balance || 0} 
+          onLogout={handleLogout}
+        />
+      ) : (
+        <BuyerNavbar 
+          userBalance={user.balance} 
+          cartItemCount={cartCount} 
+          onLogout={handleLogout}
+          onBalanceUpdate={updateLocalBalance} 
+        />
+      )}
 
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white p-6 rounded-lg border border-[#e0e0e0] shadow-[0_4px_10px_rgba(0,0,0,0.05)]">
-            <h2 className="text-lg font-bold text-[#333] mb-4 border-b border-[#f0f0f0] pb-2">
-              Auction Status
-            </h2>
-
-            <div className="text-center mb-6">
-              {data.auction.status === 'scheduled' && (
-                <>
-                  <AuctionTimer
-                    targetDate={data.auction.start_time}
-                    label="STARTS IN"
-                    onEnd={handleScheduledTimerEnd}
-                    serverOffset={serverOffset}
-                  />
-                  <div className="mt-2 text-sm text-[#666] bg-[#f8f9fa] py-2 rounded">
-                    Waiting for start time...
-                  </div>
-                </>
-              )}
-
-              {data.auction.status === 'active' && (
-                <div className="text-xl text-[#007bff] font-bold animate-pulse bg-[#e3f2fd] py-4 rounded-lg">
-                  Auction Open! Waiting for First Bid...
-                </div>
-              )}
-
-              {data.auction.status === 'ongoing' && data.auction.end_time && (
-                <AuctionTimer targetDate={data.auction.end_time} label="ENDS IN" onEnd={() => {}} serverOffset={serverOffset}/>
-              )}
-
-              {data.auction.status === 'ended' && (
-                <div className="text-2xl font-bold text-[#dc3545] bg-[#ffebee] py-4 rounded-lg">
-                  END. Winner: User ID {data.auction.winner_id}
-                </div>
-              )}
+      <main className="flex-1 pt-24 px-4 pb-8">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-white p-6 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] mb-8">
+            <div className="lg:col-span-7 space-y-8">
+              <AuctionInfo data={data.auction} />
             </div>
 
-            <BidForm
-              currentPrice={data.auction.current_price}
-              minIncrement={data.auction.min_increment}
-              status={data.auction.status}
-              cancelReason={data.auction.cancel_reason}
-              onPlaceBid={handlePlaceBid}
-              userBalance={user?.balance || 0}
-              isDisable={!canBid}
-              isSeller={user?.role === 'SELLER'}
-              onCancelAuction={() => setShowCancelModal(true)}
-              onStopAuction={() => setShowStopModal(true)}
-            />
-          </div>
+            <div className="lg:col-span-5 space-y-6">
+              <div className="bg-white p-6 rounded-lg border border-[#e0e0e0] shadow-[0_4px_10px_rgba(0,0,0,0.05)]">
+                <h2 className="text-lg font-bold text-[#333] mb-4 border-b border-[#f0f0f0] pb-2">
+                  Auction Status
+                </h2>
 
-          <BidHistory bids={data.bids} userId={user?.user_id} />
+                <div className="text-center mb-6">
+                  {data.auction.status === 'scheduled' && (
+                    <>
+                      <AuctionTimer
+                        targetDate={data.auction.start_time}
+                        label="STARTS IN"
+                        onEnd={handleScheduledTimerEnd}
+                        serverOffset={serverOffset}
+                      />
+                      <div className="mt-2 text-sm text-[#666] bg-[#f8f9fa] py-2 rounded">
+                        Waiting for start time...
+                      </div>
+                    </>
+                  )}
+
+                  {data.auction.status === 'active' && (
+                    <div className="text-xl text-[#007bff] font-bold animate-pulse bg-[#e3f2fd] py-4 rounded-lg">
+                      Auction Open! Waiting for First Bid...
+                    </div>
+                  )}
+
+                  {data.auction.status === 'ongoing' && data.auction.end_time && (
+                    <AuctionTimer targetDate={data.auction.end_time} label="ENDS IN" onEnd={() => {}} serverOffset={serverOffset}/>
+                  )}
+
+                  {data.auction.status === 'ended' && (
+                    <div className="text-2xl font-bold text-[#dc3545] bg-[#ffebee] py-4 rounded-lg">
+                      END. Winner: User ID {data.auction.winner_id}
+                    </div>
+                  )}
+                </div>
+
+                <BidForm
+                  currentPrice={data.auction.current_price}
+                  minIncrement={data.auction.min_increment}
+                  status={data.auction.status}
+                  cancelReason={data.auction.cancel_reason}
+                  onPlaceBid={handlePlaceBid}
+                  userBalance={user?.balance || 0}
+                  isDisable={!canBid}
+                  isSeller={user?.role === 'SELLER'}
+                  onCancelAuction={() => setShowCancelModal(true)}
+                  onStopAuction={() => setShowStopModal(true)}
+                />
+              </div>
+
+              <BidHistory bids={data.bids} userId={user?.user_id} />
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
 
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -364,13 +377,13 @@ export default function AuctionDetail() {
         </div>
       )}
 
-    {toast && (
-      <Toast 
-        message={toast.msg} 
-        type={toast.type} 
-        onClose={() => setToast(null)} 
-      />
-    )}
+      {toast && (
+        <Toast 
+          message={toast.msg} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
     </div>
   );
 }
