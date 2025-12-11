@@ -101,5 +101,138 @@ export const getAuctions = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
+export const createAuctionFromProduct = async (
+  req: Request,
+  res: Response<AuctionResponse>
+) => {
+  try {
+    const {
+      productId,
+      startingPrice,
+      minIncrement,
+      quantity,
+      startTime,
+      endTime,
+    } = req.body as {
+      productId?: number;
+      startingPrice?: number;
+      minIncrement?: number;
+      quantity?: number;
+      startTime?: string;
+      endTime?: string;
+    };
+
+    // Ambil sellerId dari session / auth
+    const sellerId =
+      (req as any).user?.user_id;
+
+    if (!sellerId) {
+      return res
+        .status(401)
+        .json({ success: false, data: null, message: 'Unauthorized' });
+    }
+
+    // Validasi basic di controller
+    if (!productId || isNaN(productId)) {
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: 'productId is required and must be a number',
+      });
+    }
+
+    if (!startingPrice || startingPrice <= 0) {
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: 'startingPrice must be greater than 0',
+      });
+    }
+
+    if (!minIncrement || minIncrement <= 0) {
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: 'minIncrement must be greater than 0',
+      });
+    }
+
+    if (!quantity || quantity <= 0) {
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: 'quantity must be greater than 0',
+      });
+    }
+
+    if (!startTime || !endTime) {
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: 'startTime and endTime are required',
+      });
+    }
+
+    const auction = await AuctionService.createAuctionForProduct({
+      sellerId,
+      productId,
+      startingPrice,
+      minIncrement,
+      quantity,
+      startTime,
+      endTime,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: auction,
+      message: 'Auction created successfully',
+    });
+  } catch (error: any) {
+    console.error('Error creating auction:', error);
+
+    if (error instanceof Error) {
+      if (error.message === 'PRODUCT_NOT_FOUND') {
+        return res.status(404).json({
+          success: false,
+          data: null,
+          message: 'Product not found',
+        });
+      }
+      if (error.message === 'FORBIDDEN') {
+        return res.status(403).json({
+          success: false,
+          data: null,
+          message: 'You are not allowed to create auction for this product',
+        });
+      }
+      if (error.message === 'INVALID_QUANTITY') {
+        return res.status(400).json({
+          success: false,
+          data: null,
+          message: 'Quantity exceeds product stock or invalid',
+        });
+      }
+      if (error.message === 'AUCTION_ALREADY_EXISTS') {
+        return res.status(400).json({
+          success: false,
+          data: null,
+          message: 'There is already an active auction for this product',
+        });
+      }
+      if (error.message === 'CREATE_FAILED') {
+        return res.status(500).json({
+          success: false,
+          data: null,
+          message: 'Failed to create auction',
+        });
+      }
+    }
+
+    return res.status(500).json({
+      success: false,
+      data: null,
+      message: 'Internal Server Error',
+    });
   }
 };

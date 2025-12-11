@@ -1,6 +1,7 @@
 import { AuctionData, AuctionDetailData, AuctionDetailResponse, BidData, PublicBid } from '../models/auctionModel';
 import { AuctionRepository } from '../repositories/auctionRepository';
 import { NotificationService } from './notificationService';
+import { ProductRepository } from '../repositories/productRepository';
 
 export const AuctionService = {
   async getAuctionPageData(auctionId: number): Promise<AuctionDetailResponse['data'] | null> {
@@ -97,5 +98,55 @@ export const AuctionService = {
         limit: limit
       }
     };
+
+  async createAuctionForProduct(params: {
+    sellerId: number;
+    productId: number;
+    startingPrice: number;
+    minIncrement: number;
+    quantity: number;
+    startTime: string;
+    endTime: string;
+  }): Promise<AuctionData> {
+    const {
+      sellerId,
+      productId,
+      startingPrice,
+      minIncrement,
+      quantity,
+      startTime,
+      endTime,
+    } = params;
+
+    const product = await ProductRepository.findByIdWithOwner(productId);
+    if (!product) {
+      throw new Error('Product tidak ditemukan');
+    }
+    if (product.owner_id !== sellerId) {
+      throw new Error('Tidak memiliki akses'); 
+    }
+    if (quantity <= 0 || quantity > product.stock) {
+      throw new Error('Jumlah tidak valid');
+    }
+
+    const existing = await AuctionRepository.findActiveAuctionByProduct(productId);
+    if (existing) {
+      throw new Error('Sudah ada lelang aktif untuk produk ini');
+    }
+
+    const auction = await AuctionRepository.createAuction({
+      productId,
+      startingPrice,
+      minIncrement,
+      quantity,
+      startTime,
+      endTime,
+    });
+
+    if (!auction) {
+      throw new Error('Gagal membuat lelang');
+    }
+
+    return auction;
   },
 };

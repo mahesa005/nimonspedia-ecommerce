@@ -91,3 +91,8 @@ export interface OrderDetailsQuery {
 }
 
 export type AuctionResponse = ApiResponse<AuctionData | null>;
+
+export interface CreateAuctionInput {
+  sellerId: number;
+  
+}

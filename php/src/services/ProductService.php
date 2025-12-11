@@ -204,6 +204,14 @@ class ProductService {
             ];
         }
 
+        // Check if product has active auction
+        if ($this->hasActiveAuction($productId)) {
+            return [
+                'success' => false,
+                'message' => 'Produk ini sedang diikutkan dalam lelang dan tidak dapat diubah'
+            ];
+        }
+
         try {
             // Normalize data
             $normalizedData = [
@@ -272,6 +280,14 @@ class ProductService {
             return [
                 'success' => false,
                 'message' => 'Product not found or does not belong to your store'
+            ];
+        }
+
+        // Check if product has active auction
+        if ($this->hasActiveAuction($productId)) {
+            return [
+                'success' => false,
+                'message' => 'Produk ini sedang diikutkan dalam lelang dan tidak dapat dihapus'
             ];
         }
 
@@ -486,15 +502,35 @@ class ProductService {
 
     //cek barangnya dilelang atau ga
     public function getActiveAuctionByProductId($productId) {
-        // Status yang dianggap "ada lelang" ketika scheduled atau active
-        $sql = "SELECT * FROM auctions 
-                WHERE product_id = :pid 
-                AND status IN ('scheduled', 'active') 
-                LIMIT 1";
-        
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':pid' => $productId]);
-        
-        return $stmt->fetch();
+        try {
+            // Status yang dianggap "ada lelang" ketika scheduled atau active
+            $sql = "SELECT * FROM auctions 
+                    WHERE product_id = :pid 
+                    AND status IN ('scheduled', 'active', 'ongoing') 
+                    LIMIT 1";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':pid' => $productId]);
+            
+            return $stmt->fetch();
+        } catch (Exception $e) {
+            // Log error but return false (no auction found)
+            error_log("Error querying auctions table: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if product has an active auction
+     */
+    private function hasActiveAuction(int $productId): bool {
+        try {
+            $auction = $this->getActiveAuctionByProductId($productId);
+            return $auction !== false;
+        } catch (Exception $e) {
+            // Log error but don't crash - auctions table might not exist or DB issue
+            error_log("Error checking active auction for product {$productId}: " . $e->getMessage());
+            return false;
+        }
     }
 }
