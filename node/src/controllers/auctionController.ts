@@ -8,19 +8,19 @@ export const getAuctionDetail = async (req: Request, res: Response<AuctionDetail
     const auctionId = parseInt(req.params.id || '');
 
     if (isNaN(auctionId)) {
-      return res.status(400).json({ success: false, data: null,  message: 'Invalid Auction ID'});
+      return res.status(400).json({ success: false, data: null, message: 'Invalid Auction ID' });
     }
 
     const data = await AuctionService.getAuctionPageData(auctionId);
 
     if (!data) {
-      return res.status(404).json({ success: false, data: null,  message: 'Auction not found' });
+      return res.status(404).json({ success: false, data: null, message: 'Auction not found' });
     }
 
     res.json({ success: true, data });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, data: null,  message: 'Internal Server Error' });
+    res.status(500).json({ success: false, data: null, message: 'Internal Server Error' });
   }
 };
 
@@ -44,7 +44,7 @@ export const cancelAuction = async (req: Request, res: Response<AuctionResponse>
     }
 
     const io: Server = req.app.get('io');
-    
+
     io.to(`auction_${auctionId}`).emit('auction_cancelled', {
       auctionId,
       reason: auction.cancel_reason,
@@ -74,7 +74,7 @@ export const stopAuction = async (req: Request, res: Response<AuctionResponse>) 
     }
 
     const io: Server = req.app.get('io');
-    
+
     io.to(`auction_${auctionId}`).emit('auction_ended', {
       auctionId,
       winnerId: auction.winner_id,
@@ -89,6 +89,18 @@ export const stopAuction = async (req: Request, res: Response<AuctionResponse>) 
   }
 };
 
+export const getAuctions = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string || '1');
+    const limit = parseInt(req.query.limit as string || '12');
+    const search = (req.query.search as string) || '';
+    const status = (req.query.status as string) || 'active';
+
+    const result = await AuctionService.getAuctions(page, limit, search, status);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
 export const createAuctionFromProduct = async (
   req: Request,
   res: Response<AuctionResponse>

@@ -29,7 +29,7 @@ export const ChatService = {
             title: `New message from ${data.sender_id}`,
             body: `${data.content.substring(0, 50)}...`,
             url: `/chat`
-        });
+        }, 'chat');
     } catch (err) {
         console.error("Notification failed:", err);
     }

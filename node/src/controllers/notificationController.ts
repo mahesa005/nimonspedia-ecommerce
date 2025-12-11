@@ -21,7 +21,7 @@ export const triggerNotification = async (req: Request, res: Response) => {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
-    const { userId, title, body, url } = req.body;
+    const { userId, title, body, url, type } = req.body;
 
     if (!userId || !title || !body) {
       return res.status(400).json({ success: false, message: 'Missing fields' });
@@ -31,7 +31,7 @@ export const triggerNotification = async (req: Request, res: Response) => {
       title,
       body,
       url: url,
-    });
+    }, type || 'unknown');
 
     res.json({ success: true, message: 'Notification queued' });
   } catch (error) {
