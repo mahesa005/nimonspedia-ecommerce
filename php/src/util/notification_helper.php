@@ -9,6 +9,7 @@ function sendPushNotification($userId, $title, $body, $url = '/orders', $type = 
         'title'  => $title,
         'body'   => $body,
         'url'    => $url,
+        'type'   => $type,
     ];
 
     $ch = curl_init($nodeUrl);

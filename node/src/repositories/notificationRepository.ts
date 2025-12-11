@@ -6,6 +6,7 @@ export const NotificationRepository = {
     const query = `
       INSERT INTO push_subscriptions (user_id, endpoint, p256dh_key, auth_key)
       VALUES ($1, $2, $3, $4)
+      ON CONFLICT (endpoint) DO NOTHING
     `;
     await pool.query(query, [userId, sub.endpoint, sub.keys.p256dh, sub.keys.auth]);
   },
@@ -18,5 +19,11 @@ export const NotificationRepository = {
   
   async deleteSubscription(endpoint: string) {
     await pool.query('DELETE FROM push_subscriptions WHERE endpoint = $1', [endpoint]);
+  },
+  
+  async getUserPreferences(userId: number) {
+    const query = `SELECT * FROM push_preferences WHERE user_id = $1`;
+    const res = await pool.query(query, [userId]);
+    return res.rows[0]; 
   }
 };

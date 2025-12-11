@@ -35,7 +35,7 @@ export const AuctionService = {
         title: `You've beeen outbid | Auction ${auction.auction_id}`,
         body: `Someone just outbid you at "${auction.product_name}". Current highest bid: Rp ${amount.toLocaleString()}`,
         url: `/auction/${auctionId}`,
-      }).catch(err => console.error("Outbid notification failed:", err));
+      }, 'auction').catch(err => console.error("Outbid notification failed:", err));
     }
 
     return result;
@@ -55,7 +55,7 @@ export const AuctionService = {
           title: `You've won the auction!`,
           body: `You've won the auction with the price: Rp ${Number(closedAuction.current_price).toLocaleString()}.`,
           url: `/orders`,
-        }).catch(err => console.error("Win notification failed:", err));
+        }, 'auction').catch(err => console.error("Win notification failed:", err));
     }
     return closedAuction;
   },
@@ -77,7 +77,7 @@ export const AuctionService = {
         title: 'Ending Soon!',
         body: `Auction "${auction.product_name}" is going to end in 5 seconds!`,
         url: `/auction/${auctionId}`,
-      }).catch(err => console.error(`Failed to warn user ${userId}:`, err));
+      }, 'auction').catch(err => console.error(`Failed to warn user ${userId}:`, err));
     });
   },
 };
