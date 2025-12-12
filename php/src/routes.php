@@ -72,6 +72,8 @@ $router->add('GET', '/',
 
 $router->add('GET', '/api/get-products', [ProductController::class, 'apiGetProducts']);
 
+$router->add('GET', '/api/get-products-only', [ProductController::class, 'apiGetProductsOnly']);
+
 $router->add('POST', '/api/buyer/balance/topup', 
     [BuyerProfileController::class, 'handleTopUp'],
     [AuthMiddleware::class]
