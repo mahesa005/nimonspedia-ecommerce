@@ -78,7 +78,7 @@ use App\Core\Auth;
                             Rp<?php echo number_format($auction['current_price'] ?? $auction['starting_price'], 0, ',', '.'); ?>
                         </div>
                         
-                        <a href="/app/auction/<?= $auction['auction_id'] ?>" 
+                        <a href="/auction/<?= $auction['auction_id'] ?>" 
                            class="add-to-cart-btn" 
                            style="background-color: #d32f2f; text-decoration: none; text-align: center; display: flex; justify-content: center;">
                             Ikut Lelang Sekarang ->

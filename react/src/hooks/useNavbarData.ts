@@ -12,7 +12,6 @@ interface NavbarData {
   };
   loading: boolean;
   refreshData: () => Promise<void>;
-  handleLogout: () => void;
   updateLocalBalance: (newBalance: number) => void;
 }
 
@@ -51,15 +50,11 @@ export const useNavbarData = (): NavbarData => {
     fetchData();
   }, [fetchData]);
 
-  const handleLogout = () => {
-    window.location.href = '/logout';
-  };
-
   const updateLocalBalance = (newBalance: number) => {
     if (user) {
       setUser({ ...user, balance: newBalance });
     }
   };
 
-  return { user, store, cartCount, flags, loading, refreshData: fetchData, handleLogout, updateLocalBalance };
+  return { user, store, cartCount, flags, loading, refreshData: fetchData, updateLocalBalance };
 };

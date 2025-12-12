@@ -8,9 +8,9 @@ $store_balance_formatted = '0';
 if ($current_store) {
     $store_balance_formatted = number_format($current_store["balance"], 0, ',', '.');
 }
-?>
 
 $chatStatus = FeatureService::getStatus('chat_enabled');
+?>
 
 <header>
     <link rel="stylesheet" href="/css/components/navbar_seller.css">

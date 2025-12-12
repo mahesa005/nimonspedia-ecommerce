@@ -60,7 +60,7 @@ const socket: Socket = io('http://localhost:8080', {
 });
 
 export default function ChatPage() {
-  const { user, store, cartCount, flags, loading, handleLogout, updateLocalBalance } = useNavbarData();
+  const { user, store, cartCount, flags, loading, updateLocalBalance } = useNavbarData();
 
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
@@ -273,14 +273,12 @@ export default function ChatPage() {
       {isSeller ? (
         <SellerNavbar 
           storeBalance={store ? store.balance : 0} 
-          onLogout={handleLogout} 
           flags={flags}
         />
       ) : (
         <BuyerNavbar 
           userBalance={user.balance} 
           cartItemCount={cartCount} 
-          onLogout={handleLogout} 
           onBalanceUpdate={updateLocalBalance}
           flags={flags}
         />

@@ -1,20 +1,31 @@
 import { Server, Socket } from 'socket.io';
 import { AuctionService } from '../services/auctionService';
-import { 
-  PlaceBidPayload,
-  NewBidEvent,
-  AuctionEndedEvent,
-  AuctionStartedEvent
-} from '../models/auctionModel';
+import { PlaceBidPayload, NewBidEvent, AuctionEndedEvent, AuctionStartedEvent } from '../models/auctionModel';
 
 const auctionTimers: Record<number, NodeJS.Timeout> = {};
 const warningTimers: Record<number, NodeJS.Timeout> = {};
+
+const broadcastAuctionStart = async (io: Server, auction: any) => {
+    if (!auction) return;
+    
+    const fullData = await AuctionService.getAuctionPageData(auction.auction_id);
+    if (fullData) {
+        io.to('market').emit('market_auction_started', {
+            ...fullData.auction,
+            bidder_count: fullData.auction.bidder_count ?? 0
+        });
+    }
+
+    const event: AuctionStartedEvent = { status: 'active', message: "Auction is now OPEN!" };
+    io.to(`auction_${auction.auction_id}`).emit('auction_started', event);
+};
 
 export default (io: Server, socket: Socket) => {
 
   console.log(`[SOCKET] New client connected: ${socket.id}`);
 
-  // JOIN ROOM
+  socket.join('market');
+
   socket.on('join_auction', ({ auctionId }: { auctionId: number }) => {
     console.log(`[JOIN] socket ${socket.id} joining auction_${auctionId}`);
     socket.join(`auction_${auctionId}`);
@@ -23,46 +34,32 @@ export default (io: Server, socket: Socket) => {
 
   // START AUCTION
   socket.on('start_auction', async ({ auctionId }: { auctionId: number }) => {
-    console.log(`[START] Received start_auction for auctionId=${auctionId}`);
+    console.log(`[START] Request start_auction for auctionId=${auctionId}`);
 
     try {
-      const auction = await AuctionService.startAuction(auctionId);
-      console.log(`[START] AuctionService.startAuction result:`, auction);
+      const result = await AuctionService.startAuction(auctionId);
 
-      if (auction) {
-        const event: AuctionStartedEvent = {
-          status: 'active',
-          message: "Auction is now OPEN! Waiting for first bid."
-        };
-
-        console.log(`[START] Emitting 'auction_started' to room auction_${auctionId}`);
-        io.to(`auction_${auctionId}`).emit('auction_started', event);
+      if (result.message === 'ADDED_TO_QUEUE') {
+        socket.emit('error', 'Auction queued. Another auction is currently active.');
+        return;
       }
-    } catch (e: any) {
-      console.error(`[START] Error:`, e.message);
-      socket.emit('error', e.message);
+
+      if (result.auction) {
+        console.log(`[START] Auction started manually: ${auctionId}`);
+        await broadcastAuctionStart(io, result.auction);
+      }
+    } catch (e: any) { 
+        console.error(e.message);
+        socket.emit('error', e.message);
     }
   });
 
-  // PLACE BID
   socket.on('place_bid', async ({ auctionId, amount }: PlaceBidPayload) => {
-    console.log(`[BID] Received place_bid auctionId=${auctionId}, amount=${amount}, from socket ${socket.id}`);
-
     try {
       const user = socket.data.user;
-      
-      if (!user || !user.user_id) {
-        throw new Error("Unauthorized: User not identified");
-      }
+      if (!user || !user.user_id) throw new Error("Unauthorized");
 
-      const userId = user.user_id;
-      console.log(`[BID] Using userId=${userId}`);
-
-      const result = await AuctionService.placeBid(auctionId, userId, amount);
-      console.log(`[BID] AuctionService.placeBid result:`, result);
-
-      const room = `auction_${auctionId}`;
-      console.log(`[BID] Emitting to room=${room}. Current rooms:`, socket.rooms);
+      const result = await AuctionService.placeBid(auctionId, user.user_id, amount);
 
       const event: NewBidEvent = {
         bid_id: result.bid.bid_id,
@@ -71,42 +68,34 @@ export default (io: Server, socket: Socket) => {
         amount: Number(result.bid.bid_amount),
         bidder_name: result.bid.bidder_name ?? "Unknown",
         time: new Date(result.bid.bid_time).toISOString(),
-        new_end_time: result.newEndTime.toISOString()
+        new_end_time: result.newEndTime.toISOString(),
+        bidder_count: result.bidderCount
       };
 
-      console.log(`[BID] Emitting 'new_bid':`, event);
-      io.to(room).emit('new_bid', event);
+      io.to(`auction_${auctionId}`).emit('new_bid', event);
 
-      // RESET TIMER
-      if (auctionTimers[auctionId]) {
-        console.log(`[TIMER] Clearing previous timer for auction ${auctionId}`);
-        clearTimeout(auctionTimers[auctionId]);
-      }
-      if (warningTimers[auctionId]) {
-        clearTimeout(warningTimers[auctionId]);
-      }
+      if (auctionTimers[auctionId]) clearTimeout(auctionTimers[auctionId]);
+      if (warningTimers[auctionId]) clearTimeout(warningTimers[auctionId]);
 
-      warningTimers[auctionId] = setTimeout(() => {
-        console.log(`[TIMER] Sending 5s warning for auction ${auctionId}`);
-        AuctionService.notifyEndingSoon(auctionId);
-      }, 10000);
-
-      console.log(`[TIMER] Starting new 15-second timer for auction ${auctionId}`);
+      warningTimers[auctionId] = setTimeout(() => AuctionService.notifyEndingSoon(auctionId), 10000);
+      
       auctionTimers[auctionId] = setTimeout(async () => {
         if (warningTimers[auctionId]) clearTimeout(warningTimers[auctionId]);
         console.log(`[TIMER] Timer triggered, finalizing auction ${auctionId}`);
-        const finalized = await AuctionService.finalizeAuction(auctionId);
-        console.log(`[TIMER] Finalized result:`, finalized);
-
-        if (finalized) {
-          const endEvent: AuctionEndedEvent = {
-            auctionId,
-            winnerId: finalized.winner_id,
-            finalPrice: Number(finalized.current_price)
-          };
-
-          console.log(`[TIMER] Emitting 'auction_ended':`, endEvent);
-          io.to(room).emit('auction_ended', endEvent);
+        
+        const { closed, next } = await AuctionService.finalizeAuction(auctionId);
+        
+        if (closed) {
+          io.to(`auction_${auctionId}`).emit('auction_ended', {
+            auctionId, 
+            winnerId: closed.winner_id, 
+            finalPrice: Number(closed.current_price)
+          });
+        }
+        
+        if (next) {
+            console.log(`[TIMER] Next auction auto-started: ${next.auction_id}`);
+            await broadcastAuctionStart(io, next);
         }
 
         delete auctionTimers[auctionId];
@@ -114,7 +103,6 @@ export default (io: Server, socket: Socket) => {
       }, 15000);
 
     } catch (e: any) {
-      console.error(`[BID_ERROR]`, e.message);
       socket.emit('bid_error', { message: e.message });
     }
   });

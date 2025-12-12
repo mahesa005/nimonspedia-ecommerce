@@ -224,3 +224,26 @@ ALTER TABLE "auctions"
 ADD CONSTRAINT cancel_reason_required CHECK (
     status != 'cancelled' OR cancel_reason IS NOT NULL
 );
+
+ALTER TABLE "auctions" ADD COLUMN "bidder_count" INT DEFAULT 0;
+
+UPDATE "auctions" a
+SET "bidder_count" = (
+    SELECT COUNT(DISTINCT bidder_id)
+    FROM "auction_bids" ab
+    WHERE ab.auction_id = a.auction_id
+);
+
+
+-- Index untuk filter foreign key
+CREATE INDEX idx_product_store_id ON product(store_id);
+CREATE INDEX idx_category_item_composite ON category_item(category_id, product_id);
+
+-- Index untuk sorting dan filtering range harga
+CREATE INDEX idx_product_price ON product(price);
+CREATE INDEX idx_product_created_at ON product(created_at DESC);
+
+-- Partial Index
+CREATE INDEX idx_product_active_search 
+ON product(product_name) 
+WHERE deleted_at IS NULL;

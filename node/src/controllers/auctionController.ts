@@ -67,9 +67,9 @@ export const stopAuction = async (req: Request, res: Response<AuctionResponse>) 
       return res.status(400).json({ success: false, data: null, message: 'Invalid Auction ID' });
     }
 
-    const auction = await AuctionService.finalizeAuction(auctionId);
+    const { closed, next } = await AuctionService.finalizeAuction(auctionId);
 
-    if (!auction) {
+    if (!closed) {
       return res.status(404).json({ success: false, data: null, message: 'Auction not found or cannot be stopped' });
     }
 
@@ -77,11 +77,26 @@ export const stopAuction = async (req: Request, res: Response<AuctionResponse>) 
 
     io.to(`auction_${auctionId}`).emit('auction_ended', {
       auctionId,
-      winnerId: auction.winner_id,
-      finalPrice: Number(auction.current_price)
+      winnerId: closed.winner_id,
+      finalPrice: Number(closed.current_price)
     });
 
-    res.json({ success: true, data: auction, message: 'Auction stopped successfully' });
+    if (next) {
+      const fullNextData = await AuctionService.getAuctionPageData(next.auction_id);
+      if (fullNextData) {
+        io.to('market').emit('market_auction_started', {
+          ...fullNextData.auction,
+          bidder_count: fullNextData.auction.bidder_count ?? 0
+        });
+      }
+
+      io.to(`auction_${next.auction_id}`).emit('auction_started', { 
+        status: 'active', 
+        message: "Auction is now OPEN!" 
+      });
+    }
+
+    res.json({ success: true, data: closed, message: 'Auction stopped successfully' })
 
   } catch (error: any) {
     console.error(error);

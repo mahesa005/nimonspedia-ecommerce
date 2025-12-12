@@ -1,7 +1,19 @@
+import { ensurePushSubscription } from '../modules/push_manager.js';
+
 document.addEventListener('DOMContentLoaded', function() {
     initMetricAnimations();
     initEditStoreButton();
     initExportPopover();
+    initNotificationSettings();
+    
+    // Initialize push notifications subscription
+    ensurePushSubscription().then(success => {
+        if (success) {
+            console.log('Push notifications enabled');
+        } else {
+            console.warn('Push notifications not available');
+        }
+    });
 
     function initMetricAnimations() {
         const metrics = document.querySelectorAll('.metric');
@@ -215,6 +227,111 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (cancel) {
             cancel.addEventListener('click', (e) => { e.preventDefault(); closePop(); });
+        }
+    }
+
+    function initNotificationSettings() {
+        const btnEnableNotif = document.getElementById('btn-enable-browser-notif');
+        const statusText = document.getElementById('notif-status-text');
+
+        function updateStatusUI() {
+            if (!statusText || !btnEnableNotif) return;
+
+            if (!('Notification' in window)) {
+                statusText.textContent = "Tidak didukung browser.";
+                statusText.style.color = "#999";
+                btnEnableNotif.style.display = 'none';
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                statusText.textContent = "Diizinkan (Aktif)";
+                statusText.style.color = "var(--tp-green-dark)";
+                btnEnableNotif.style.display = 'none';
+            } else if (Notification.permission === 'denied') {
+                statusText.textContent = "Diblokir (Cek browser)";
+                statusText.style.color = "var(--danger)";
+                btnEnableNotif.style.display = 'none';
+            } else {
+                statusText.textContent = "Belum Diizinkan";
+                statusText.style.color = "#f57c00"; // Orange
+                btnEnableNotif.style.display = 'inline-flex';
+                btnEnableNotif.disabled = false;
+            }
+        }
+
+        updateStatusUI();
+
+        if (btnEnableNotif) {
+            btnEnableNotif.addEventListener('click', async () => {
+                btnEnableNotif.textContent = "Processing...";
+                btnEnableNotif.disabled = true;
+
+                const success = await ensurePushSubscription();
+
+                if (success) {
+                    if (typeof window.showToast === 'function') window.showToast("Notifikasi browser aktif!", "success");
+                    else alert("Notifikasi browser aktif!");
+                } else if (Notification.permission === 'denied') {
+                    alert("Gagal: Izin notifikasi diblokir browser.");
+                }
+
+                updateStatusUI();
+            });
+        }
+
+        const notifForm = document.getElementById('form-notification-settings');
+        if (notifForm) {
+            notifForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const btn = document.getElementById('btn-save-notif');
+                const msgDiv = document.getElementById('notif-msg');
+                const originalText = btn.textContent;
+
+                btn.disabled = true;
+                btn.textContent = 'Menyimpan...';
+                msgDiv.style.display = 'none';
+                msgDiv.className = 'form-message';
+
+                const payload = {
+                    chat_enabled: document.getElementById('chat_enabled').checked,
+                    auction_enabled: document.getElementById('auction_enabled').checked,
+                    order_enabled: document.getElementById('order_enabled').checked
+                };
+
+                try {
+                    const response = await fetch('/seller/preferences/update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    console.log('Preferences update response:', result);
+
+                    if (result.success) {
+                        msgDiv.textContent = result.message;
+                        msgDiv.classList.add('success');
+                        msgDiv.classList.remove('error');
+                        msgDiv.style.display = 'block';
+                        if (typeof window.showToast === 'function') {
+                            window.showToast(result.message, 'success');
+                        }
+                    } else {
+                        throw new Error(result.message || 'Gagal menyimpan pengaturan');
+                    }
+                } catch (error) {
+                    console.error('Preferences update error:', error);
+                    msgDiv.textContent = error.message || 'Gagal menyimpan pengaturan.';
+                    msgDiv.classList.add('error');
+                    msgDiv.classList.remove('success');
+                    msgDiv.style.display = 'block';
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+            });
         }
     }
 });

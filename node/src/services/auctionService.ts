@@ -17,7 +17,7 @@ export const AuctionService = {
     };
   },
 
-  async placeBid(auctionId: number, userId: number, amount: number): Promise<{ bid: PublicBid, newEndTime: Date }> {
+  async placeBid(auctionId: number, userId: number, amount: number): Promise<{ bid: PublicBid, newEndTime: Date, bidderCount: number }> {
     const auction = await AuctionRepository.findDetailById(auctionId);
     if (!auction) throw new Error("Auction not found");
 
@@ -42,12 +42,24 @@ export const AuctionService = {
     return result;
   },
 
-  async startAuction(auctionId: number): Promise<AuctionData | null> {
-    const auction = await AuctionRepository.startAuction(auctionId)
-    return auction
+  async startAuction(auctionId: number): Promise<{ auction: AuctionData | null, message: string }> {
+    const auctionData = await AuctionRepository.findById(auctionId);
+
+    if (!auctionData) {
+      return { auction: null, message: 'AUCTION_NOT_FOUND' };
+    }
+
+    const isBusy = await AuctionRepository.hasActiveAuction(auctionData.store_id);
+
+    if (isBusy) {
+      return { auction: null, message: 'ADDED_TO_QUEUE' };
+    }
+    
+    const auction = await AuctionRepository.startAuction(auctionId);
+    return { auction, message: 'STARTED' };
   },
 
-  async finalizeAuction(auctionId: number): Promise<AuctionData | null> {
+  async finalizeAuction(auctionId: number): Promise<{ closed: AuctionData | null, next: AuctionData | null }> {
     const closedAuction = await AuctionRepository.closeAuction(auctionId);
     if (closedAuction && closedAuction.winner_id) {
       console.log(`Auction ${auctionId} closed. Winner: ${closedAuction.winner_id}`);
@@ -58,7 +70,16 @@ export const AuctionService = {
           url: `/orders`,
         }, 'auction').catch(err => console.error("Win notification failed:", err));
     }
-    return closedAuction;
+
+    let nextAuction = null;
+    if (closedAuction) {
+        const nextReady = await AuctionRepository.findNextReadyAuction();
+        if (nextReady) {
+            console.log(`[QUEUE] Auto-starting next auction: ${nextReady.auction_id}`);
+            nextAuction = await AuctionRepository.startAuction(nextReady.auction_id);
+        }
+    }
+    return { closed: closedAuction, next: nextAuction };
   },
 
   async cancelAuction(auctionId: number, reason: string): Promise<AuctionData | null> {

@@ -21,9 +21,11 @@ export default function Toast({ message, type, onClose }: ToastProps) {
   };
 
   return (
-    <div className={`${bgColors[type]} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-right-full duration-300`}>
-      <span className="font-bold text-sm">{message}</span>
-      <button onClick={onClose} className="opacity-80 hover:opacity-100 font-bold">×</button>
+    <div className="fixed top-4 right-4 z-99999">
+      <div className={`${bgColors[type]} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-right-full duration-300`}>
+        <span className="font-bold text-sm">{message}</span>
+        <button onClick={onClose} className="opacity-80 hover:opacity-100 font-bold">×</button>
+      </div>
     </div>
   );
 }

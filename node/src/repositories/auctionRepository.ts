@@ -5,7 +5,7 @@ export const AuctionRepository = {
   async findDetailById(auctionId: number): Promise<AuctionDetailData | null> {
     const query = `
       SELECT 
-        a.auction_id, a.starting_price, a.current_price, a.min_increment, a.quantity, a.start_time, a.end_time, a.status, a.winner_id, a.cancel_reason, a.cancelled_at,
+        a.auction_id, a.starting_price, a.current_price, a.min_increment, a.quantity, a.start_time, a.end_time, a.status, a.winner_id, a.cancel_reason, a.cancelled_at, a.bidder_count,
         p.product_id, p.product_name, p.description, p.main_image_path,
         s.store_id, s.store_name,
         (SELECT COUNT(DISTINCT bidder_id) FROM "auction_bids" WHERE auction_id = a.auction_id) as bidder_count
@@ -32,7 +32,7 @@ export const AuctionRepository = {
     return result.rows;
   },
 
-  async createBid(auctionId: number, userId: number, amount: number): Promise<{ bid: PublicBid; newEndTime: Date; }> {
+  async createBid(auctionId: number, userId: number, amount: number): Promise<{ bid: PublicBid; newEndTime: Date; bidderCount: number }> {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
@@ -53,63 +53,59 @@ export const AuctionRepository = {
         `SELECT balance FROM "user" WHERE user_id = $1`,
         [userId]
       );
-
-      if (!userRes.rows[0] || userRes.rows[0].balance < amount) {
+      if (!userRes.rows[0] || Number(userRes.rows[0].balance) < amount) {
         throw new Error("Insufficient balance");
       }
 
-      if (auction.winner_id) {
-        await client.query(
-          `UPDATE "user" SET balance = balance + $1 WHERE user_id = $2`,
-          [auction.current_price, auction.winner_id]
-        );
-      }
-
-      await client.query(
-        `UPDATE "user" SET balance = balance - $1 WHERE user_id = $2`,
-        [amount, userId]
+      const existingBidCheck = await client.query(
+        `SELECT 1 FROM "auction_bids" WHERE auction_id = $1 AND bidder_id = $2 LIMIT 1`,
+        [auctionId, userId]
       );
+      const isNewBidder = existingBidCheck.rowCount === 0;
+
+      if (auction.winner_id) {
+        await client.query(`UPDATE "user" SET balance = balance + $1 WHERE user_id = $2`, [auction.current_price, auction.winner_id]);
+      }
+      await client.query(`UPDATE "user" SET balance = balance - $1 WHERE user_id = $2`, [amount, userId]);
 
       const bidRes = await client.query<PublicBid>(
         `
         INSERT INTO "auction_bids" (auction_id, bidder_id, bid_amount, bid_time)
         VALUES ($1, $2, $3, NOW())
         RETURNING 
-          bid_id,
-          auction_id,
-          bidder_id,
-          bid_amount,
-          bid_time,
+          bid_id, auction_id, bidder_id, bid_amount, bid_time,
           (SELECT name FROM "user" WHERE user_id = $2) AS bidder_name
         `,
         [auctionId, userId, amount]
       );
-
       const bidRow = bidRes.rows[0];
-      if (!bidRow) throw new Error("Failed to insert bid");
+      if (!bidRow) throw new Error("Failed to create bid");
 
-      const updatedAuctionRes = await client.query<{ end_time: Date }>(
+      const incrementVal = isNewBidder ? 1 : 0;
+      
+      const updatedAuctionRes = await client.query<{ end_time: Date; bidder_count: number }>(
         `
         UPDATE "auctions"
         SET 
           current_price = $1,
           winner_id = $2,
           status = 'ongoing',
-          end_time = NOW() + interval '15 seconds'
-        WHERE auction_id = $3
-        RETURNING end_time
+          end_time = NOW() + interval '15 seconds',
+          bidder_count = bidder_count + $3
+        WHERE auction_id = $4
+        RETURNING end_time, bidder_count
         `,
-        [amount, userId, auctionId]
+        [amount, userId, incrementVal, auctionId]
       );
-
       const updated = updatedAuctionRes.rows[0];
-      if (!updated) throw new Error("Failed to update auction");
+      if (!updated) throw new Error('')
 
       await client.query("COMMIT");
 
       return {
         bid: bidRow,
-        newEndTime: updated.end_time
+        newEndTime: updated.end_time,
+        bidderCount: updated.bidder_count
       };
 
     } catch (err) {
@@ -343,6 +339,42 @@ export const AuctionRepository = {
       ];
     const res = await pool.query<AuctionData>(query, values);
     return res.rows[0] ?? null;
-  }
+  },
 
+  async hasActiveAuction(store_id: number): Promise<boolean> {
+    const query = `
+      SELECT 1 
+      FROM "auctions" a
+      JOIN "product" p ON a.product_id = p.product_id
+      WHERE p.store_id = $1 
+      AND a.status IN ('active', 'ongoing')
+      LIMIT 1
+    `;
+    
+    const res = await pool.query(query, [store_id]);
+    return res.rowCount !== null && res.rowCount > 0;
+  },
+
+  async findNextReadyAuction(): Promise<AuctionData | null> {
+    const query = `
+      SELECT * FROM "auctions" 
+      WHERE status = 'scheduled' 
+      ORDER BY start_time ASC 
+      LIMIT 1
+    `;
+    const res = await pool.query<AuctionData>(query);
+    return res.rows[0] || null;
+  },
+
+  async findById(auctionId: number): Promise<any> {
+    const query = `
+      SELECT a.*, p.store_id 
+      FROM "auctions" a
+      JOIN "product" p ON a.product_id = p.product_id
+      WHERE a.auction_id = $1
+    `;
+    
+    const res = await pool.query(query, [auctionId]);
+    return res.rows.length > 0 ? res.rows[0] : null;
+  },
 };
