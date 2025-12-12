@@ -1,35 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-export const useCountdown = (targetDate: string | Date) => {
-    const countDownDate = new Date(targetDate).getTime();
+interface UseCountdownProps {
+  targetDate: string | Date;
+  serverOffset?: number;
+  onEnd?: () => void;
+  interval?: number;
+}
 
-    const [countDown, setCountDown] = useState(
-        countDownDate - new Date().getTime()
-    );
+export const useCountdown = ({targetDate, serverOffset = 0, onEnd, interval = 1000}: UseCountdownProps) => {
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCountDown(countDownDate - new Date().getTime());
-        }, 1000);
+  const calculateTimeLeft = useCallback(() => {
+    const now = Date.now() + serverOffset;
+    const end = new Date(targetDate).getTime();
+    const distance = end - now;
+    return distance > 0 ? distance : 0;
+  }, [targetDate, serverOffset]);
 
-        return () => clearInterval(interval);
-    }, [countDownDate]);
+  const [timeLeft, setTimeLeft] = useState<number>(calculateTimeLeft());
 
-    return getReturnValues(countDown);
-};
+  useEffect(() => {
+    setTimeLeft(calculateTimeLeft());
 
-const getReturnValues = (countDown: number) => {
-    // menghitung time left
-    const days = Math.floor(countDown / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-        (countDown % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-    );
-    const minutes = Math.floor((countDown % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((countDown % (1000 * 60)) / 1000);
+    const timer = setInterval(() => {
+      const newTime = calculateTimeLeft();
+      setTimeLeft(newTime);
 
-    if (countDown < 0) {
-        return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
-    }
+      if (newTime <= 0) {
+        clearInterval(timer);
+        if (onEnd) onEnd();
+      }
+    }, interval);
 
-    return { days, hours, minutes, seconds, isExpired: false };
+    return () => clearInterval(timer);
+  }, [calculateTimeLeft, interval, onEnd]);
+
+  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+  return { timeLeft, days, hours, minutes, seconds, isExpired: timeLeft <= 0 };
 };
