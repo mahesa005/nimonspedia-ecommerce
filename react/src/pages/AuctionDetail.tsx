@@ -16,6 +16,7 @@ import Toast from '../components/ui/toast';
 import BuyerNavbar from '../components/ui/BuyerNavbar';
 import SellerNavbar from '../components/ui/SellerNavbar';
 import { useNavbarData } from '../hooks/useNavbarData';
+import FeatureMiddleware from '../components/common/FeatureMiddleware';
 
 const socket: Socket = io('http://localhost:8080', {
   path: '/socket.io',
@@ -236,11 +237,26 @@ export default function AuctionDetail() {
     }
   };
 
-  if (navbarLoading || loading) return <div className="p-10 text-center text-[#666]">Loading...</div>;
+  const AuctionSkeleton = (
+    <div className="min-h-screen bg-gray-50 pt-24 px-4 pb-8">
+      <div className="max-w-[1200px] mx-auto animate-pulse">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-white p-6 rounded-lg shadow h-[500px]">
+           <div className="lg:col-span-7 bg-gray-200 rounded"></div>
+           <div className="lg:col-span-5 space-y-6">
+              <div className="bg-gray-200 h-40 rounded"></div>
+              <div className="bg-gray-200 h-60 rounded"></div>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (navbarLoading || loading) return AuctionSkeleton;
   if (error) return <div className="p-10 text-center text-[#dc3545] font-bold">{error}</div>;
   if (!data || !user) return null;
 
   return (
+    <FeatureMiddleware flag="auction_enabled" skeleton={AuctionSkeleton}>
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-[#333]">
       
       {user.role === 'SELLER' ? (
@@ -267,7 +283,7 @@ export default function AuctionDetail() {
             <div className="lg:col-span-5 space-y-6">
               <div className="bg-white p-6 rounded-lg border border-[#e0e0e0] shadow-[0_4px_10px_rgba(0,0,0,0.05)]">
                 <h2 className="text-lg font-bold text-[#333] mb-4 border-b border-[#f0f0f0] pb-2">
-                  Auction Status
+                  Status Lelang
                 </h2>
 
                 <div className="text-center mb-6">
@@ -275,29 +291,29 @@ export default function AuctionDetail() {
                     <>
                       <AuctionTimer
                         targetDate={data.auction.start_time}
-                        label="STARTS IN"
+                        label="MULAI DALAM"
                         onEnd={handleScheduledTimerEnd}
                         serverOffset={serverOffset}
                       />
                       <div className="mt-2 text-sm text-[#666] bg-[#f8f9fa] py-2 rounded">
-                        Waiting for start time...
+                        Menunggu waktu mulai...
                       </div>
                     </>
                   )}
 
                   {data.auction.status === 'active' && (
                     <div className="text-xl text-[#007bff] font-bold animate-pulse bg-[#e3f2fd] py-4 rounded-lg">
-                      Auction Open! Waiting for First Bid...
+                      Lelang dibuka! Menunggu Bid pertama...
                     </div>
                   )}
 
                   {data.auction.status === 'ongoing' && data.auction.end_time && (
-                    <AuctionTimer targetDate={data.auction.end_time} label="ENDS IN" onEnd={() => {}} serverOffset={serverOffset}/>
+                    <AuctionTimer targetDate={data.auction.end_time} label="SELESAI DALAM" onEnd={() => {}} serverOffset={serverOffset}/>
                   )}
 
                   {data.auction.status === 'ended' && (
                     <div className="text-2xl font-bold text-[#dc3545] bg-[#ffebee] py-4 rounded-lg">
-                      END. Winner: User ID {data.auction.winner_id}
+                      LELANG SELESAI. Pemenang: User ID {data.auction.winner_id}
                     </div>
                   )}
                 </div>
@@ -385,5 +401,6 @@ export default function AuctionDetail() {
         />
       )}
     </div>
+    </FeatureMiddleware>
   );
 }
