@@ -63,6 +63,7 @@ export interface NewBidEvent {
   bidder_name: string;
   time: string;
   new_end_time: string;
+  bidder_count: number;
 }
 
 export interface AuctionStartedEvent {

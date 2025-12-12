@@ -66,9 +66,18 @@ const AuctionCard = ({ auction, serverOffset = 0 }: AuctionCardProps) => {
             </div>
 
             <div className="p-4 flex flex-col flex-1">
-                <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                    <span className="w-4 h-4 rounded-full bg-gray-200 inline-block"></span>
-                    {auction.store_name}
+                <div className="flex justify-between items-center mb-2">
+                    <div className="text-xs text-gray-500 flex items-center gap-1 overflow-hidden">
+                        <span className="w-4 h-4 rounded-full bg-gray-200 inline-block shrink-0"></span>
+                        <span className="truncate max-w-[100px]" title={auction.store_name}>
+                            {auction.store_name}
+                        </span>
+                    </div>
+                    <div className="text-xs font-medium text-gray-600 flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                        <span>👥</span> 
+                        {auction.bidder_count} 
+                        <span className="hidden sm:inline"> Bidder{auction.bidder_count !== 1 ? 's' : ''}</span>
+                    </div>
                 </div>
                 
                 <h3 

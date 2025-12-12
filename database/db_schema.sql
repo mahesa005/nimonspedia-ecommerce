@@ -224,3 +224,12 @@ ALTER TABLE "auctions"
 ADD CONSTRAINT cancel_reason_required CHECK (
     status != 'cancelled' OR cancel_reason IS NOT NULL
 );
+
+ALTER TABLE "auctions" ADD COLUMN "bidder_count" INT DEFAULT 0;
+
+UPDATE "auctions" a
+SET "bidder_count" = (
+    SELECT COUNT(DISTINCT bidder_id)
+    FROM "auction_bids" ab
+    WHERE ab.auction_id = a.auction_id
+);

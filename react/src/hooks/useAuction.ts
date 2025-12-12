@@ -90,10 +90,25 @@ export const useAuction = (props: UseAuctionProps) => {
 
       if (json.success) {
         if (props.mode === 'LIST') {
-          setListData(json.data);
+          const cleanedList = json.data.map((item: any) => ({
+            ...item,
+            current_price: Number(item.current_price),
+            starting_price: Number(item.starting_price),
+            bidder_count: Number(item.bidder_count)
+          }));
+          setListData(cleanedList);
           setMeta(json.meta);
         } else {
-          setDetailData(json.data);
+          const cleanedDetail = {
+              ...json.data,
+              auction: {
+                  ...json.data.auction,
+                  current_price: Number(json.data.auction.current_price),
+                  starting_price: Number(json.data.auction.starting_price),
+                  min_increment: Number(json.data.auction.min_increment)
+              }
+          };
+          setDetailData(cleanedDetail);
         }
       } else {
         if (!isBackground) setError(json.message || 'Failed to load data');
@@ -134,7 +149,7 @@ export const useAuction = (props: UseAuctionProps) => {
                 return {
                     ...item,
                     current_price: event.amount,
-                    bidder_count: item.bidder_count + 1,
+                    bidder_count: event.bidder_count ?? (item.bidder_count),
                     end_time: event.new_end_time,
                     status: 'ongoing'
                 };

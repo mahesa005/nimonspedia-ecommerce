@@ -71,7 +71,8 @@ export default (io: Server, socket: Socket) => {
         amount: Number(result.bid.bid_amount),
         bidder_name: result.bid.bidder_name ?? "Unknown",
         time: new Date(result.bid.bid_time).toISOString(),
-        new_end_time: result.newEndTime.toISOString()
+        new_end_time: result.newEndTime.toISOString(),
+        bidder_count: result.bidderCount,
       };
 
       console.log(`[BID] Emitting 'new_bid':`, event);
