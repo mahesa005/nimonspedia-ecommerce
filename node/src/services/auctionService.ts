@@ -17,7 +17,7 @@ export const AuctionService = {
     };
   },
 
-  async placeBid(auctionId: number, userId: number, amount: number): Promise<{ bid: PublicBid, newEndTime: Date }> {
+  async placeBid(auctionId: number, userId: number, amount: number): Promise<{ bid: PublicBid, newEndTime: Date, bidderCount: number }> {
     const auction = await AuctionRepository.findDetailById(auctionId);
     if (!auction) throw new Error("Auction not found");
 
