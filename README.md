@@ -78,7 +78,7 @@ Ikuti langkah-langkah ini untuk menyiapkan proyek:
 
 Setelah instalasi selesai, ikuti langkah-langkah ini untuk menjalankan aplikasi:
 
-1. Bangun dan jalankan semua layanan (Nginx, PHP, PostgreSQL) dalam mode *detached* (latar belakang):
+1. Membangun dan jalankan semua layanan (Nginx, PHP, PostgreSQL) dalam mode *detached* (latar belakang):
 
     ```bash
     docker compose up -d --build
@@ -160,6 +160,12 @@ Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasika
 
 * **Halaman TopUp**
   ![Halaman TopUp](image/pages/topup.png "Halaman TopUp")
+
+* **Halaman Auction**
+  ![Halaman Auction](image/pages/auction_list.jpg "Halaman Auction")
+
+* **Halaman Chat**
+  ![Halaman Chat](image/pages/chat.jpg "Halaman Chat")
 
 ### Halaman Seller
 
