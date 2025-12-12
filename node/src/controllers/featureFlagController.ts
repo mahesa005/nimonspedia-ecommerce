@@ -51,3 +51,25 @@ export async function getFlagController(
         return res.status(500).json({ message: "Internal server error"});
     }
 }
+
+export async function checkMyFlagController(req: Request, res: Response) {
+    try {
+        const user = (req as any).user;
+        const { featureName } = req.body as { featureName: FeatureName };
+
+        if (!featureName) {
+            return res.status(400).json({ message: "Feature name required" });
+        }
+
+        const result = await getEffectiveFeatureFlag({
+            userId: user ? user.user_id : null,
+            featureName: featureName
+        });
+
+        res.json({ success: true, data: result });
+
+    } catch (err) {
+        console.error("Check Flag Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+}
