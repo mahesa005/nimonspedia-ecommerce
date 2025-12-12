@@ -195,22 +195,59 @@ Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasika
 * **13523140 - Mahesa Fadhillah Andre**
 * **13523152 - Muhammad Kinan Arkansyaddad**
 
-(Silakan isi detail pembagian tugas di bawah ini)
+### Milestone 1
 
-### Server-side
+#### Server-side (PHP)
 
-* **Login :** ...
-* **Register :** ...
-* **Auction Logic :** ...
-* **Chat:** ...
+* **Core & Arsitektur:** 13523152
+* **Login & Register:** 13523152
+* **Home/Product Discovery:** 13523152
+* **Detail Product & Store:** 13523152
+* **Shopping Cart (Buyer):** 13523134
+* **Checkout (Buyer):** 13523152
+* **Order History (Buyer):** 13523134
+* **Profile (Buyer):** 13523134
+* **Dashboard & Product Mgmt (Seller):** 13523140
+* **Order Management (Seller):** 13523140
+* **Data Export (Seller):** 13523140
 
-### Client-side
+#### Client-side (HTML/CSS/JS)
 
-* **Login :** ...
-* **Register :** ...
-* **Auction Pages :** ...
-* **Chat Pages :** ...
-* **Admin Dashboard :** ...
+* **Core & Arsitektur:** 13523152
+* **Login & Register:** 13523152
+* **Home/Product Discovery:** 13523152
+* **Detail Product & Store:** 13523152
+* **Shopping Cart (Buyer):** 13523134
+* **Checkout (Buyer):** 13523152
+* **Order History (Buyer):** 13523134
+* **Profile (Buyer):** 13523134
+* **Dashboard & Product Mgmt (Seller):** 13523140
+* **Order Management (Seller):** 13523140
+* **Data Export (Seller):** 13523140
+
+### Milestone 2
+
+#### Server-side (Node.js & Express)
+
+* **Authentication Service (JWT):** 13523152
+* **Auction Service (Socket.io):** 13523134
+* **Chat Service (Socket.io):** 13523152
+* **Notification Service:** 13523152
+* **Admin Middleware:** 13523140
+
+#### Client-side (React SPA)
+
+* **Auction List:** 13523134
+* **Auction Detail:** 13523152
+* **Chat Room:** 13523152
+* **Admin Dashboard:** 13523140
+* **Global Notifications (Context/UI):** 13523152
+
+#### Update 
+
+* **Update Detail Product:** 13523134
+* **Update Product Management:** 13523140
+* **Update Profile:** 13523134
 
 ---
 
