@@ -1,15 +1,18 @@
 <?php
 namespace App\Services;
 
+use App\Core\Database;
 use App\Repositories\ProductRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\StoreRepository;
 use Exception;
+use PDO;
 
 class ProductService {
     private ProductRepository $productRepo;
     private CategoryRepository $categoryRepo;
     private StoreRepository $storeRepo;
+    private PDO $db;
 
     // Use relative path like AuthService
     private const UPLOAD_DIR = '/uploads/products/';
@@ -21,6 +24,7 @@ class ProductService {
         $this->productRepo = new ProductRepository();
         $this->categoryRepo = new CategoryRepository();
         $this->storeRepo = new StoreRepository();
+        $this->db = Database::getInstance();
 
         // Create directory in public folder
         $public_path = __DIR__ . '/../../public' . self::UPLOAD_DIR;
@@ -200,6 +204,14 @@ class ProductService {
             ];
         }
 
+        // Check if product has active auction
+        if ($this->hasActiveAuction($productId)) {
+            return [
+                'success' => false,
+                'message' => 'Produk ini sedang diikutkan dalam lelang dan tidak dapat diubah'
+            ];
+        }
+
         try {
             // Normalize data
             $normalizedData = [
@@ -268,6 +280,14 @@ class ProductService {
             return [
                 'success' => false,
                 'message' => 'Product not found or does not belong to your store'
+            ];
+        }
+
+        // Check if product has active auction
+        if ($this->hasActiveAuction($productId)) {
+            return [
+                'success' => false,
+                'message' => 'Produk ini sedang diikutkan dalam lelang dan tidak dapat dihapus'
             ];
         }
 
@@ -478,5 +498,39 @@ class ProductService {
             'store' => $store,
             'categories' => $categories
         ];
+    }
+
+    //cek barangnya dilelang atau ga
+    public function getActiveAuctionByProductId($productId) {
+        try {
+            // Status yang dianggap "ada lelang" ketika scheduled atau active
+            $sql = "SELECT * FROM auctions 
+                    WHERE product_id = :pid 
+                    AND status IN ('scheduled', 'active', 'ongoing') 
+                    LIMIT 1";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':pid' => $productId]);
+            
+            return $stmt->fetch();
+        } catch (Exception $e) {
+            // Log error but return false (no auction found)
+            error_log("Error querying auctions table: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if product has an active auction
+     */
+    private function hasActiveAuction(int $productId): bool {
+        try {
+            $auction = $this->getActiveAuctionByProductId($productId);
+            return $auction !== false;
+        } catch (Exception $e) {
+            // Log error but don't crash - auctions table might not exist or DB issue
+            error_log("Error checking active auction for product {$productId}: " . $e->getMessage());
+            return false;
+        }
     }
 }

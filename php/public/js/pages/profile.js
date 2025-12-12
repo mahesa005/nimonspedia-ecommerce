@@ -1,4 +1,104 @@
+import { ensurePushSubscription } from '../modules/push_manager.js';
+
 document.addEventListener('DOMContentLoaded', () => {
+
+    const btnEnableNotif = document.getElementById('btn-enable-browser-notif');
+    const statusText = document.getElementById('notif-status-text');
+
+    function updateStatusUI() {
+        if (!statusText || !btnEnableNotif) return;
+
+        if (!('Notification' in window)) {
+            statusText.textContent = "Tidak didukung browser ini.";
+            statusText.style.color = "#999";
+            btnEnableNotif.style.display = 'none';
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            statusText.textContent = "✅ Diizinkan (Aktif)";
+            statusText.style.color = "#28a745";
+            btnEnableNotif.style.display = 'none';
+        } else if (Notification.permission === 'denied') {
+            statusText.textContent = "❌ Diblokir (Cek pengaturan browser)";
+            statusText.style.color = "#dc3545";
+            btnEnableNotif.style.display = 'none';
+        } else {
+            statusText.textContent = "⚠️ Belum Diizinkan";
+            statusText.style.color = "#ffc107";
+            btnEnableNotif.style.display = 'inline-block';
+            btnEnableNotif.textContent = "Aktifkan";
+            btnEnableNotif.disabled = false;
+        }
+    }
+
+    updateStatusUI();
+
+    if (btnEnableNotif) {
+        btnEnableNotif.addEventListener('click', async () => {
+            btnEnableNotif.textContent = "Memproses...";
+            btnEnableNotif.disabled = true;
+
+            const success = await ensurePushSubscription();
+
+            if (success) {
+                alert("Notifikasi browser berhasil diaktifkan!");
+            } else if (Notification.permission === 'denied') {
+                alert("Gagal: Izin notifikasi diblokir. Silakan reset izin pada ikon gembok di address bar browser.");
+            } else {
+                alert("Gagal mengaktifkan notifikasi.");
+            }
+
+            updateStatusUI();
+        });
+    }
+
+    const notifForm = document.getElementById('form-notification-settings');
+    if (notifForm) {
+        notifForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btn-save-notif');
+            const msgDiv = document.getElementById('notif-msg');
+
+            // Disable button & loading state
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+            msgDiv.textContent = '';
+            msgDiv.className = 'form-message';
+
+            const formData = new FormData();            
+            formData.append('chat_enabled', document.getElementById('chat_enabled').checked);
+            formData.append('auction_enabled', document.getElementById('auction_enabled').checked);
+            formData.append('order_enabled', document.getElementById('order_enabled').checked);
+
+            try {
+                const response = await fetch('/profile/preferences', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToastMessage(result.message, 'success');
+                    msgDiv.textContent = result.message;
+                    msgDiv.classList.add('success');
+                } else {
+                    showToastMessage(result.message || 'Gagal menyimpan', 'error');
+                    msgDiv.textContent = result.message;
+                    msgDiv.classList.add('error');
+                }
+            } catch (error) {
+                console.error(error);
+                msgDiv.textContent = 'Terjadi kesalahan sistem';
+                msgDiv.classList.add('error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Simpan Pengaturan';
+            }
+        });
+    }
 
     const profileForm = document.getElementById('form-update-profile');
     if (profileForm) {
@@ -28,7 +128,7 @@ function handleProfileUpdate(event) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/profile/update', true);
 
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             setLoading(button, false);
 
@@ -50,7 +150,7 @@ function handleProfileUpdate(event) {
         }
     };
 
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         setLoading(button, false);
         showToastMessage('Terjadi kesalahan jaringan.', 'error');
     };
@@ -66,7 +166,7 @@ function handlePasswordChange(event) {
 
     const newPass = form.new_password.value;
     const confirmPass = form.confirm_password.value;
-    
+
     // Validasi client-side
     if (newPass !== confirmPass) {
         showMessage(msgEl, 'Password baru dan konfirmasi tidak cocok.', 'error');
@@ -87,7 +187,7 @@ function handlePasswordChange(event) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/profile/password', true);
 
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             setLoading(button, false);
 
@@ -110,7 +210,7 @@ function handlePasswordChange(event) {
         }
     };
 
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         setLoading(button, false);
         showToastMessage('Terjadi kesalahan jaringan.', 'error');
     };
@@ -132,6 +232,7 @@ function setLoading(button, isLoading) {
 function showMessage(element, message, type) {
     element.textContent = message;
     element.className = 'form-message ' + type;
+    element.style.display = 'block';
 }
 
 function showToastMessage(message, type = 'info') {

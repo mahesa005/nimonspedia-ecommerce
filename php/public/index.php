@@ -18,6 +18,7 @@ try {
 } catch (Exception $e) {
     if (strpos($path, '/api/') === 0) {
         header('Content-Type: application/json');
+        header("Access-Control-Allow-Origin: *");
         http_response_code(500);
         echo json_encode([
             'success' => false,

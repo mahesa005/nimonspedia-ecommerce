@@ -1,7 +1,55 @@
 
 <div class="profile-page">
     <h1>Profil Saya</h1>
+    <div class="profile-box">
+        <h2>Pengaturan Notifikasi</h2>
+        
+        <div class="notification-status-box" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong style="display:block; color: #333;">Status Izin Browser</strong>
+                <span id="notif-status-text" style="font-size: 14px; color: #666;">Memeriksa...</span>
+            </div>
+            <button type="button" id="btn-enable-browser-notif" class="btn btn-sm btn-primary" style="display: none;">
+                Aktifkan
+            </button>
+        </div>
+        
+        <form id="form-notification-settings">
+            <div class="form-group checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="chat_enabled" id="chat_enabled" 
+                        <?= $preferences['chat_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Chat
+                </label>
+            </div>
 
+            <div class="form-group checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="auction_enabled" id="auction_enabled" 
+                        <?= $preferences['auction_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Lelang
+                </label>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="order_enabled" id="order_enabled" 
+                        <?= $preferences['order_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Pesanan
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-secondary" id="btn-save-notif">
+                    Simpan Pengaturan
+                </button>
+            </div>
+            <div id="notif-msg" class="form-message"></div>
+        </form>
+    </div>
     <div class="profile-box">
         <h2>Edit Profil</h2>
         <form id="form-update-profile">
@@ -98,3 +146,4 @@
     </div>
 
 </div>
+<script type="module" src="/js/pages/profile.js"></script>

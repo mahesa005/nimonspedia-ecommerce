@@ -3,6 +3,24 @@ import express, { Request, Response } from 'express';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 import cors from 'cors';
+import auctionRoutes from './routes/auctionRoutes';
+import userRoutes from './routes/userRoutes';
+import auctionSocket from './sockets/auctionSocket';
+
+import { adminLoginController } from './controllers/adminAuthController';
+import { adminMeHandler } from './controllers/adminMeController';
+import { requireAdmin } from './middleware/requireAdmin';
+import { adminUserController } from './controllers/adminUserController';
+import { requireAuth, requireSocketAuth } from './middleware/requireSession';
+import { checkMyFlagController, getFlagController, internalCheckFlag, updateFlagController } from './controllers/featureFlagController';
+import chatRoutes from './routes/chatRoutes';
+import chatSocket from './sockets/chatSocket';
+import notificationRoutes from './routes/notificationRoutes';
+import { configDotenv } from 'dotenv';
+import path from 'path';
+import uploadRoutes from './routes/uploadRoutes';
+
+configDotenv()
 
 const app = express();
 const server = http.createServer(app);
@@ -15,10 +33,13 @@ app.use(express.json());
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    credentials: true
   },
   path: '/socket.io'
 });
+
+app.set('io', io)
 
 // Typed Route
 app.get('/', (req: Request, res: Response) => {
@@ -29,10 +50,37 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
+// Admin Authentication Routes
+// Accessible via Nginx proxy at /api/node/admin/...
+// or directly at localhost:3000/admin/...
+app.post('/admin/login', adminLoginController);
+app.get('/admin/me', requireAdmin, adminMeHandler);
+app.post('/admin/dashboard', requireAdmin, adminUserController);
+app.patch('/admin/feature-flags', requireAdmin, updateFlagController); // feature flag update route
+app.post('/admin/feature-flags/effective', requireAdmin, getFlagController); // feature flag get route
+
+// API Routes
+app.use('/auctions', auctionRoutes);
+app.use('', userRoutes);
+app.use('/chats', chatRoutes);
+app.use('/notifications', notificationRoutes)
+app.use('/uploads', uploadRoutes);
+app.use('/upload', uploadRoutes);
+app.post('/features/check', requireAuth, checkMyFlagController);
+app.post('/internal/features/check', internalCheckFlag);
+
+// Websocket Middleware
+io.use(requireSocketAuth);
+
 // WebSocket Logic
 io.on('connection', (socket: Socket) => {
   console.log(`Client connected: ${socket.id}`);
+  const user = socket.data.user; 
+  console.log(`User connected: ${user.name} (ID: ${user.user_id})`);
   
+  auctionSocket(io, socket);
+  chatSocket(io, socket);
+
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
   });

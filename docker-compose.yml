@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      NOTIFICATION_TRIGGER_URL: ${NOTIFICATION_TRIGGER_URL}
     volumes:
       - ./php:/var/www/html
     depends_on:
@@ -27,9 +29,14 @@ services:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       JWT_SECRET: ${JWT_SECRET}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     volumes:
       - ./node:/usr/src/app
       - /usr/src/app/node_modules
+      - ./php/public/uploads:/usr/php/public/uploads
     depends_on:
       postgres:
         condition: service_healthy

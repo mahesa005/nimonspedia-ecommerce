@@ -33,61 +33,90 @@ use App\Core\Auth;
                     <?php if ($product->isOutOfStock()):?>Stok Habis <?php else: ?>Tersedia <?php endif;?>(<?php echo htmlspecialchars($product->stock)?> unit)</span>
             </div>
 
-            <a href="/store/<?php echo htmlspecialchars($product->store_id); ?>" class="store-info-link">
-                <div class="store-info">
-                    <div class="store-header">
-                        <div class="store-avatar">
-                            <?php if (!empty($store->store_logo_path)): ?>
-                                <img 
-                                    src="<?php echo htmlspecialchars($store->getLogoPath()); ?>" 
-                                    alt="<?php echo htmlspecialchars($store->store_name); ?> Logo" 
-                                    class="store-logo-img"
-                                >
-                            <?php else: ?>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                                </svg>
-                            <?php endif; ?>
-                        </div>
-                        <div class="store-details">
-                            <h2 class="store-name" id="storeName"><?php echo htmlspecialchars($product->store_name)?></h2>
-                        </div>
+            <div class="store-info" style="border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #fff;">
+                <div class="store-header" style="display: flex; align-items: center; gap: 15px;">
+                    <a href="/store/<?php echo htmlspecialchars($product->store_id); ?>" class="store-avatar" style="text-decoration: none;">
+                        <?php if (!empty($store->store_logo_path)): ?>
+                            <img 
+                                src="<?php echo htmlspecialchars($store->getLogoPath()); ?>" 
+                                alt="<?php echo htmlspecialchars($store->store_name); ?> Logo" 
+                                class="store-logo-img"
+                            >
+                        <?php else: ?>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #666;">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        <?php endif; ?>
+                    </a>
+                    <div class="store-details" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <a href="/store/<?php echo htmlspecialchars($product->store_id); ?>" style="text-decoration: none; color: inherit;">
+                            <h2 class="store-name" id="storeName" style="margin: 0; font-size: 1.1rem; font-weight: 600;"><?php echo htmlspecialchars($product->store_name)?></h2>
+                        </a>
+                        
+                        <?php if (Auth::check() && $user->user_id !== $store->user_id): ?>
+                            <a href="/chat?store_id=<?= $store->store_id ?>&store_name=<?= urlencode($store->store_name) ?>" 
+                               class="btn-secondary"
+                               style="font-size: 0.85rem; padding: 6px 12px; border: 1px solid #ddd; background-color: #f8f9fa; border-radius: 20px; text-decoration: none; color: #333; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                               Chat Penjual
+                            </a>
+                        <?php endif; ?>
                     </div>
-                    <div class="store-description"><?php echo ($store->store_description) ?></div>
                 </div>
-            </a>
+                <div class="store-description" style="margin-top: 12px; color: #666; font-size: 0.95rem; line-height: 1.5;"><?php echo ($store->store_description) ?></div>
+            </div>
 
             <?php if (Auth::check()): ?>
-            <div class="add-to-cart-section" id="addToCartSection">
-                <div class="quantity-selector">
-                    <label class="quantity-label">Jumlah:</label>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn" id="decreaseBtn">-</button>
-                        <input type="number" class="quantity-input" id="quantityInput" value="1" min="1" readonly aria-label="Product quantity">
-                        <button class="quantity-btn" id="increaseBtn">+</button>
+                
+                <?php if (!empty($auction)): ?>
+                    <div class="auction-alert" style="padding: 20px; background-color: #fff8e1; border: 1px solid #ffecb3; border-radius: 8px; margin-top: 20px;">
+                        <h3 style="color: #ff6f00; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                            🔥 Produk Dalam Lelang!
+                        </h3>
+                        <p style="margin: 10px 0; color: #555;">Produk ini sedang dilelang mulai dari:</p>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #d32f2f; margin-bottom: 15px;">
+                            Rp<?php echo number_format($auction['current_price'] ?? $auction['starting_price'], 0, ',', '.'); ?>
+                        </div>
+                        
+                        <a href="/app/auction/<?= $auction['auction_id'] ?>" 
+                           class="add-to-cart-btn" 
+                           style="background-color: #d32f2f; text-decoration: none; text-align: center; display: flex; justify-content: center;">
+                            Ikut Lelang Sekarang ->
+                        </a>
                     </div>
-                </div>
-                <button class="add-to-cart-btn" id="addToCartBtn" <?php echo $product->isOutOfStock() ? 'disabled' : ''; ?>>
-                    <span class="btn-text">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="9" cy="21" r="1"></circle>
-                            <circle cx="20" cy="21" r="1"></circle>
-                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                        </svg>
-                        Tambah ke Keranjang
-                    </span>
-                </button>
-            </div>
+
+                <?php else: ?>
+                    <div class="add-to-cart-section" id="addToCartSection">
+                        <div class="quantity-selector">
+                            <label class="quantity-label">Jumlah:</label>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" id="decreaseBtn">-</button>
+                                <input type="number" class="quantity-input" id="quantityInput" value="1" min="1" readonly aria-label="Product quantity">
+                                <button class="quantity-btn" id="increaseBtn">+</button>
+                            </div>
+                        </div>
+                        <button class="add-to-cart-btn" id="addToCartBtn" <?php echo ($product->isOutOfStock() || !$canAddToCart) ? 'disabled' : ''; ?>>
+                            <span class="btn-text">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Tambah ke Keranjang
+                            </span>
+                        </button>
+                    </div>
+                <?php endif; ?>
+
             <?php else: ?>
-            <div class="guest-message" id="guestMessage">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <span>Silakan <a href="/login" class="login-link">login</a> untuk menambahkan produk ke keranjang</span>
-            </div>
+                <div class="guest-message" id="guestMessage">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>Silakan <a href="/login" class="login-link">login</a> untuk membeli produk ini</span>
+                </div>
             <?php endif; ?>
 
             <div class="product-description">

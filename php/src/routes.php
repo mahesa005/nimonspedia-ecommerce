@@ -16,6 +16,8 @@ use App\Core\Middleware\RoleMiddleware;
 use App\Core\Middleware\RedirectSellerMiddleware;
 use App\Controllers\OrderManagementController;
 use App\Controllers\ExportController;
+use App\Core\Middleware\FeatureFlagMiddleware;
+
 
 $router->add('GET', '/login',
     [AuthController::class, 'showLoginPage'],
@@ -50,17 +52,17 @@ $router->add('GET', '/cart',
 
 $router->add('POST', '/cart/add',
     [CartController::class, 'add'],
-    [AuthMiddleware::class]
+    [AuthMiddleware::class, new FeatureFlagMiddleware('checkout_enabled')]
 );
 
 $router->add('POST', '/cart/update',
     [CartController::class, 'update'],
-    [AuthMiddleware::class] 
+    [AuthMiddleware::class, new FeatureFlagMiddleware('checkout_enabled')] 
 );
 
 $router->add('POST', '/cart/delete',
     [CartController::class, 'delete'],
-    [AuthMiddleware::class]
+    [AuthMiddleware::class, new FeatureFlagMiddleware('checkout_enabled')]
 );
 
 $router->add('GET', '/', 
@@ -118,11 +120,11 @@ $router->add('GET', '/seller/dashboard',
     [SellerDashboardController::class, 'index'],
     [AuthMiddleware::class, RoleMiddleware::class]  
 );
-$router->add('GET', '/checkout', [CheckoutController::class, 'showCheckoutPage'], [AuthMiddleware::class]);
+$router->add('GET', '/checkout', [CheckoutController::class, 'showCheckoutPage'], [AuthMiddleware::class, new FeatureFlagMiddleware('checkout_enabled')]);
 
 $router->add('POST', '/checkout', 
     [CheckoutController::class, 'handleCheckout'], 
-    [AuthMiddleware::class]
+    [AuthMiddleware::class, new FeatureFlagMiddleware('checkout_enabled')]
 );
 
 // Order History Routes
@@ -166,6 +168,11 @@ $router->add('POST', '/profile/password',
     [AuthMiddleware::class]
 );
 
+$router->add('POST', '/profile/preferences', 
+    [ProfileController::class, 'updatePreferences'], 
+    [AuthMiddleware::class]
+);
+
 $router->add('POST', '/seller/store/update', 
     [StoreController::class, 'handleUpdateStore'],
     [AuthMiddleware::class, RoleMiddleware::class]
@@ -175,3 +182,8 @@ $router->add('GET', '/seller/export.csv',
     [ExportController::class, 'download'],
     [AuthMiddleware::class, RoleMiddleware::class]
 );
+
+$router->add('GET', '/api/auth/validate-session', [AuthController::class, 'validateSession']);
+
+$router->add('GET', '/api/stores', [StoreController::class, 'getAllStores']);
+

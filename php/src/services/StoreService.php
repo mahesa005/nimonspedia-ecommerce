@@ -31,6 +31,10 @@ class StoreService {
         return $this->storeRepo->getByUserId($user_id);
     }
 
+    public function getAllStores(string $store_name): array {
+        return $this->storeRepo->getAllStores($store_name);
+    }
+
     // Update store balance
     public function updateStoreBalance(int $store_id, float $amount): bool {
         return $this->storeRepo->updateBalance($store_id, $amount);

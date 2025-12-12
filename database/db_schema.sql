@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS "auctions" (
     quantity INT NOT NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('scheduled', 'active', 'ended', 'cancelled')),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('scheduled', 'active', 'ongoing', 'ended', 'cancelled')),
     winner_id INT,
     created_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (product_id) REFERENCES "product"(product_id),
@@ -184,13 +184,13 @@ CREATE TABLE IF NOT EXISTS "chat_messages" (
     created_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (store_id, buyer_id) REFERENCES "chat_room"(store_id, buyer_id),
     FOREIGN KEY (sender_id) REFERENCES "user"(user_id),
-    FOREIGN KEY (product_id) REFERENCES "Product"(product_id)
+    FOREIGN KEY (product_id) REFERENCES "product"(product_id)
 );
 
 CREATE TABLE IF NOT EXISTS "push_subscriptions" (
     subscription_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
-    endpoint TEXT NOT NULL,
+    endpoint TEXT UNIQUE NOT NULL,
     p256dh_key VARCHAR(255) NOT NULL,
     auth_key VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -199,10 +199,28 @@ CREATE TABLE IF NOT EXISTS "push_subscriptions" (
 
 CREATE TABLE IF NOT EXISTS "user_feature_access" (
     access_id SERIAL PRIMARY KEY,
-    user_id INT, -- Null -> Global Flag
+    user_id INT NULL, -- Null -> Global Flag
     feature_name VARCHAR(50) NOT NULL CHECK (feature_name IN ('checkout_enabled', 'chat_enabled', 'auction_enabled')),
     is_enabled BOOLEAN DEFAULT TRUE,
     reason TEXT,
     updated_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS "push_preferences" (
+    user_id INT PRIMARY KEY,
+    chat_enabled BOOLEAN DEFAULT TRUE,
+    auction_enabled BOOLEAN DEFAULT TRUE,
+    order_enabled BOOLEAN DEFAULT TRUE,
+    updated_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES "user"(user_id)
+);
+
+ALTER TABLE "auctions"
+ADD COLUMN cancel_reason TEXT,
+ADD COLUMN cancelled_at TIMESTAMP;
+
+ALTER TABLE "auctions"
+ADD CONSTRAINT cancel_reason_required CHECK (
+    status != 'cancelled' OR cancel_reason IS NOT NULL
 );

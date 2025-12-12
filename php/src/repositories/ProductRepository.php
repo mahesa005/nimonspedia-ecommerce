@@ -56,10 +56,14 @@ class ProductRepository {
                 p.main_image_path,
                 p.created_at,
                 p.updated_at,
-                STRING_AGG(c.name, ', ' ORDER BY c.name) as category_names
+                STRING_AGG(c.name, ', ' ORDER BY c.name) as category_names,
+                a.auction_id,
+                a.status as auction_status
             FROM product p
             LEFT JOIN category_item ci ON p.product_id = ci.product_id
             LEFT JOIN category c ON ci.category_id = c.category_id
+            LEFT JOIN auctions a ON p.product_id = a.product_id 
+                AND a.status IN ('scheduled', 'active', 'ongoing')
             WHERE p.store_id = :store_id
             AND p.deleted_at IS NULL
         ";
@@ -82,7 +86,7 @@ class ProductRepository {
         }
 
         $sortOrder = strtoupper($sortOrder) === 'DESC' ? 'DESC' : 'ASC';
-        $sql .= " GROUP BY p.product_id ";
+        $sql .= " GROUP BY p.product_id, a.auction_id, a.status ";
         $sql .= " ORDER BY p.$sortBy $sortOrder LIMIT :limit";
 
         $stmt = $this->db->prepare($sql);

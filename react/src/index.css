@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
-/* CSS RESET */
+body {
+    font-family: 'Nunito', sans-serif;
+}
+/* CSS RESET
 *,
 *::before,
 *::after {
@@ -59,4 +62,4 @@ table {
 
 main {
     padding-top: 64px;
-}
+} */
