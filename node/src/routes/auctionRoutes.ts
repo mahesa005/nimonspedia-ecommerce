@@ -14,4 +14,6 @@ router.post('/:id/stop', requireAuth, verifySellerAuction, stopAuction);
 
 router.post('/', requireAuth, createAuctionFromProduct);
 
+router.get('/api/auth/validate-session', requireAuth, );
+
 export default router;
