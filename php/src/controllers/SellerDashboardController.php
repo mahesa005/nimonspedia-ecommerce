@@ -51,9 +51,12 @@ class SellerDashboardController {
         try {
             $userId = Auth::id();
             
-            $chat = isset($_POST['chat_enabled']) && ($_POST['chat_enabled'] === '1' || $_POST['chat_enabled'] === 'true');
-            $auction = isset($_POST['auction_enabled']) && ($_POST['auction_enabled'] === '1' || $_POST['auction_enabled'] === 'true');
-            $order = isset($_POST['order_enabled']) && ($_POST['order_enabled'] === '1' || $_POST['order_enabled'] === 'true');
+            // Handle JSON request body
+            $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+            
+            $chat = isset($input['chat_enabled']) ? (bool)$input['chat_enabled'] : false;
+            $auction = isset($input['auction_enabled']) ? (bool)$input['auction_enabled'] : false;
+            $order = isset($input['order_enabled']) ? (bool)$input['order_enabled'] : false;
 
             $this->profileService->updatePreferences($userId, $chat, $auction, $order);
             

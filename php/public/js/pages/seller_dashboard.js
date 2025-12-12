@@ -5,6 +5,15 @@ document.addEventListener('DOMContentLoaded', function() {
     initEditStoreButton();
     initExportPopover();
     initNotificationSettings();
+    
+    // Initialize push notifications subscription
+    ensurePushSubscription().then(success => {
+        if (success) {
+            console.log('Push notifications enabled');
+        } else {
+            console.warn('Push notifications not available');
+        }
+    });
 
     function initMetricAnimations() {
         const metrics = document.querySelectorAll('.metric');
@@ -285,34 +294,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 msgDiv.style.display = 'none';
                 msgDiv.className = 'form-message';
 
-                const formData = new FormData();            
-                formData.append('chat_enabled', document.getElementById('chat_enabled').checked ? '1' : '0');
-                formData.append('auction_enabled', document.getElementById('auction_enabled').checked ? '1' : '0');
-                formData.append('order_enabled', document.getElementById('order_enabled').checked ? '1' : '0');
+                const payload = {
+                    chat_enabled: document.getElementById('chat_enabled').checked,
+                    auction_enabled: document.getElementById('auction_enabled').checked,
+                    order_enabled: document.getElementById('order_enabled').checked
+                };
 
                 try {
                     const response = await fetch('/seller/preferences/update', {
                         method: 'POST',
-                        body: formData
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
 
                     const result = await response.json();
+                    console.log('Preferences update response:', result);
 
                     if (result.success) {
                         msgDiv.textContent = result.message;
                         msgDiv.classList.add('success');
-                        if (typeof window.showToast === 'function') window.showToast(result.message, 'success');
+                        msgDiv.classList.remove('error');
+                        msgDiv.style.display = 'block';
+                        if (typeof window.showToast === 'function') {
+                            window.showToast(result.message, 'success');
+                        }
                     } else {
-                        throw new Error(result.message);
+                        throw new Error(result.message || 'Gagal menyimpan pengaturan');
                     }
                 } catch (error) {
-                    console.error(error);
+                    console.error('Preferences update error:', error);
                     msgDiv.textContent = error.message || 'Gagal menyimpan pengaturan.';
                     msgDiv.classList.add('error');
+                    msgDiv.classList.remove('success');
+                    msgDiv.style.display = 'block';
                 } finally {
                     btn.disabled = false;
                     btn.textContent = originalText;
-                    msgDiv.style.display = 'block';
                 }
             });
         }

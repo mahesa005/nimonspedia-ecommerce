@@ -1,5 +1,5 @@
 const VAPID_PUBLIC_KEY = 'BEtPTqASpgCYJw9FbfVkzW-1OpUe_9Ptge2baMOjRZPTJawcVN_984u787ik1S55l-Whe-NjAaGNa3AYTydEvgU';
-const SUBSCRIBE_API = 'api/node/notifications/subscribe';
+const SUBSCRIBE_API = '/api/node/notifications/subscribe';
 
 function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
