@@ -187,3 +187,7 @@ $router->add('GET', '/api/auth/validate-session', [AuthController::class, 'valid
 
 $router->add('GET', '/api/stores', [StoreController::class, 'getAllStores']);
 
+$router->add('POST', '/seller/preferences/update',
+    [SellerDashboardController::class, 'updatePreferences'],
+    [AuthMiddleware::class, RoleMiddleware::class]  
+);

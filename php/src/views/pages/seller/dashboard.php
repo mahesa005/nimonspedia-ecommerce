@@ -12,6 +12,12 @@ $lowStockProducts = $quickStats['low_stock_products'] ?? 0;
 function rph($n) {
     return 'Rp ' . number_format((float)$n, 0, ',', '.');
 }
+
+$preferences = $data['preferences'] ?? [
+    'chat_enabled' => true, 
+    'auction_enabled' => true, 
+    'order_enabled' => true
+];
 ?>
 
 <link rel="stylesheet" href="/css/pages/seller_dashboard.css">
@@ -214,6 +220,58 @@ function rph($n) {
           </div>
         </div>
       </div>
+
+      <div class="card section">
+        <div class="section-header">
+          <h2>Pengaturan Notifikasi</h2>
+        </div>
+        
+        <div class="notification-status-box">
+            <div>
+                <strong>Status Izin Browser</strong>
+                <span id="notif-status-text">Memeriksa...</span>
+            </div>
+            <button type="button" id="btn-enable-browser-notif" class="btn btn-sm btn-primary" style="display: none; padding: 6px 12px; font-size: 12px;">
+                Aktifkan
+            </button>
+        </div>
+
+        <form id="form-notification-settings">
+            <div class="checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="chat_enabled" id="chat_enabled" 
+                        <?= $preferences['chat_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Chat
+                </label>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="auction_enabled" id="auction_enabled" 
+                        <?= $preferences['auction_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Lelang
+                </label>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="order_enabled" id="order_enabled" 
+                        <?= $preferences['order_enabled'] ? 'checked' : '' ?>>
+                    <span class="checkmark"></span>
+                    Notifikasi Pesanan
+                </label>
+            </div>
+
+            <div class="form-actions" style="margin-top: 16px;">
+                <button type="submit" class="btn btn-primary" id="btn-save-notif" style="width:100%">
+                    Simpan Pengaturan
+                </button>
+            </div>
+            <div id="notif-msg" class="form-message"></div>
+        </form>
+      </div>
     </div>
 
     <div class="dashboard-right">
@@ -264,5 +322,5 @@ function rph($n) {
   </div>
 </div>
 
-<script src="/js/pages/seller_dashboard.js"></script>
+<script type="module" src="/js/pages/seller_dashboard.js"></script>
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
