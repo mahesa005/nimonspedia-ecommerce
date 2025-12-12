@@ -745,3 +745,109 @@
 .form-input{ flex:1 1 auto; padding:8px 10px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; font-size:14px; }
 .filters{ margin-top:4px; }
 .export-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+
+.notification-status-box {
+  background: var(--tp-gray-100);
+  border: 1px solid var(--tp-gray-200);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notification-status-box strong {
+  display: block;
+  color: var(--tp-gray-900);
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+#notif-status-text {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.checkbox-group {
+  margin-bottom: 12px;
+}
+
+.checkbox-container {
+  display: block;
+  position: relative;
+  padding-left: 32px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+  color: var(--tp-gray-900);
+  font-weight: 500;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: var(--tp-gray-200);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  border: 1px solid var(--tp-gray-300);
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  background-color: var(--tp-gray-300);
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: var(--tp-green);
+  border-color: var(--tp-green);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.form-message {
+  margin-top: 15px;
+  font-size: 13px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  display: none;
+}
+.form-message.success {
+  background-color: var(--tp-green-light);
+  color: var(--tp-green-dark);
+  display: block;
+}
+.form-message.error {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  display: block;
+}
