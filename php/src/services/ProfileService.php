@@ -50,7 +50,7 @@ class ProfileService {
     }
 
     public function getPreferences($userId) {
-        $stmt = $this->db->prepare("SELECT * FROM push_subscriptions WHERE user_id = :uid");
+        $stmt = $this->db->prepare("SELECT * FROM push_preferences WHERE user_id = :uid");
         $stmt->execute([':uid' => $userId]);
         $prefs = $stmt->fetch();
 
@@ -67,18 +67,18 @@ class ProfileService {
     public function updatePreferences($userId, $chat, $auction, $order) {
         $current = $this->getPreferences($userId);
         
-        $check = $this->db->prepare("SELECT 1 FROM push_subscriptions WHERE user_id = :uid");
+        $check = $this->db->prepare("SELECT 1 FROM push_preferences WHERE user_id = :uid");
         $check->execute([':uid' => $userId]);
         
         if ($check->fetch()) {
-            $sql = "UPDATE push_subscriptions SET 
+            $sql = "UPDATE push_preferences SET 
                     chat_enabled = :chat, 
                     auction_enabled = :auction, 
                     order_enabled = :order, 
                     updated_at = NOW() 
                     WHERE user_id = :uid";
         } else {
-            $sql = "INSERT INTO push_subscriptions (user_id, chat_enabled, auction_enabled, order_enabled) 
+            $sql = "INSERT INTO push_preferences (user_id, chat_enabled, auction_enabled, order_enabled) 
                     VALUES (:uid, :chat, :auction, :order)";
         }
 
