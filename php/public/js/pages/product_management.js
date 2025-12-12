@@ -1,3 +1,25 @@
+// ===== EXPANDABLE ROWS =====
+function initializeExpandableRows() {
+  const expandToggles = document.querySelectorAll('.expand-toggle');
+  
+  expandToggles.forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const productId = this.dataset.productId;
+      const detailRow = document.querySelector(`.row-detail[data-product-id="${productId}"]`);
+      
+      if (detailRow) {
+        detailRow.classList.toggle('visible');
+        this.classList.toggle('expanded');
+      }
+    });
+  });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initializeExpandableRows);
+
+// ===== SEARCH & FILTERS =====
 // Search with debounce
 let searchTimeout;
 const searchInput = document.getElementById('search-input');
@@ -123,7 +145,7 @@ let selectedProduct = null;
 
 // Helper: Get JWT token from localStorage (Node API auth)
 function getAuthToken() {
-  return localStorage.getItem('token') || '';
+  return localStorage.getItem('PHPSESSID') || ''; //
 }
 
 // Helper: Set field error message
@@ -286,20 +308,13 @@ auctionSubmitBtn.addEventListener('click', async function() {
   };
 
   try {
-    const token = getAuthToken();
-    if (!token) {
-      setGlobalError('Session expired. Please login again.');
-      auctionSubmitBtn.disabled = false;
-      auctionSubmitBtn.textContent = 'Mulai Lelang';
-      return;
-    }
-
+    // Authentication menggunakan PHP session cookies (PHPSESSID) yang otomatis dikirim browser
     const response = await fetch('/api/node/auctions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
+      credentials: 'include', // Kirim cookies termasuk PHPSESSID
       body: JSON.stringify(formData)
     });
 
@@ -307,6 +322,13 @@ auctionSubmitBtn.addEventListener('click', async function() {
     auctionSubmitBtn.textContent = 'Mulai Lelang';
 
     const data = await response.json();
+
+    // Cek status 401/403 untuk session expired
+    if (response.status === 401 || response.status === 403) {
+      setGlobalError('Session expired. Silakan login kembali.');
+      console.error('Auth Error:', response.status);
+      return;
+    }
 
     if (response.ok && data.success) {
       showToast('Lelang berhasil dibuat!', 'success');

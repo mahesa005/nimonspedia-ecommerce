@@ -100,7 +100,6 @@ export const AuctionService = {
     };
   },
 
-
   async createAuctionForProduct(params: {
     sellerId: number;
     productId: number;
