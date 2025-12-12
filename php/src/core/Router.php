@@ -5,7 +5,6 @@ class Router {
     private array $routes = [];
     
     public function add(string $method, string $uri, $action, array $middleware = []) {
-        // Convert {id} to regex pattern
         $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<$1>[^/]+)', $uri);
         $pattern = '#^' . $pattern . '$#';
         
@@ -27,9 +26,19 @@ class Router {
             }
             
             if (preg_match($route['pattern'], $uri, $matches)) {
-                foreach ($route['middleware'] as $middlewareClass) {
-                    $middleware = new $middlewareClass();
-                    if (!$middleware->handle()) {
+                
+                foreach ($route['middleware'] as $middlewareItem) {
+                    if (is_string($middlewareItem)) {
+                        $instance = new $middlewareItem();
+                    } 
+                    elseif (is_object($middlewareItem)) {
+                        $instance = $middlewareItem;
+                    } 
+                    else {
+                        throw new \Exception("Invalid middleware format");
+                    }
+
+                    if (!$instance->handle()) {
                         return;
                     }
                 }

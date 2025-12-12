@@ -12,7 +12,7 @@ import { adminMeHandler } from './controllers/adminMeController';
 import { requireAdmin } from './middleware/requireAdmin';
 import { adminUserController } from './controllers/adminUserController';
 import { requireAuth, requireSocketAuth } from './middleware/requireSession';
-import { checkMyFlagController, getFlagController, updateFlagController } from './controllers/featureFlagController';
+import { checkMyFlagController, getFlagController, internalCheckFlag, updateFlagController } from './controllers/featureFlagController';
 import chatRoutes from './routes/chatRoutes';
 import chatSocket from './sockets/chatSocket';
 import notificationRoutes from './routes/notificationRoutes';
@@ -67,6 +67,7 @@ app.use('/notifications', notificationRoutes)
 app.use('/uploads', uploadRoutes);
 app.use('/upload', uploadRoutes);
 app.post('/features/check', requireAuth, checkMyFlagController);
+app.post('/internal/features/check', internalCheckFlag);
 
 // Websocket Middleware
 io.use(requireSocketAuth);

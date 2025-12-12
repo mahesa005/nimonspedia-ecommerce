@@ -73,3 +73,33 @@ export async function checkMyFlagController(req: Request, res: Response) {
         res.status(500).json({ message: "Server error" });
     }
 }
+
+// CHECK FLAG FROM PHP
+export async function internalCheckFlag(req: Request, res: Response) {
+    try {
+        const apiKey = req.headers['x-internal-secret'];
+        if (apiKey !== process.env.INTERNAL_API_KEY) {
+            return res.status(403).json({ success: false, message: 'Forbidden' });
+        }
+
+        const { userId, featureName } = req.body as { 
+            userId: number | null, 
+            featureName: FeatureName 
+        };
+
+        if (!featureName) {
+            return res.status(400).json({ success: false, message: "Feature name required" });
+        }
+
+        const result = await getEffectiveFeatureFlag({
+            userId: userId,
+            featureName: featureName
+        });
+
+        res.json({ success: true, data: result });
+
+    } catch (err) {
+        console.error("Internal Flag Check Error:", err);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+}
