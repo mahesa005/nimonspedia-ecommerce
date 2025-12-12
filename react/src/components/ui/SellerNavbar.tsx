@@ -4,11 +4,10 @@ import '../../styles/navbar_seller.css';
 
 interface SellerNavbarProps {
   storeBalance: number;
-  onLogout: () => void;
   flags: { chat: boolean; auction: boolean; checkout: boolean };
 }
 
-export default function SellerNavbar({ storeBalance, onLogout, flags }: SellerNavbarProps) {
+export default function SellerNavbar({ storeBalance, flags }: SellerNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const formattedBalance = new Intl.NumberFormat('id-ID', {
@@ -46,7 +45,7 @@ export default function SellerNavbar({ storeBalance, onLogout, flags }: SellerNa
             <div className="navbar-store-balance">
               {formattedBalance}
             </div>
-            <button onClick={onLogout} className="navbar-logout">Logout</button>
+            <a href='/logout' className="navbar-logout">Logout</a>
           </div>
         </div>
       </nav>

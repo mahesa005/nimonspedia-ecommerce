@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/navbar_buyer.css';
 import Toast from './toast';
@@ -6,16 +6,17 @@ import Toast from './toast';
 interface BuyerNavbarProps {
   userBalance: number;
   cartItemCount: number;
-  onLogout: () => void;
   onBalanceUpdate: (newBalance: number) => void;
   flags: { chat: boolean; auction: boolean; checkout: boolean };
 }
 
-export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBalanceUpdate, flags }: BuyerNavbarProps) {
+export default function BuyerNavbar({ userBalance, cartItemCount, onBalanceUpdate, flags }: BuyerNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   const formattedBalance = new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -23,12 +24,20 @@ export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBa
     minimumFractionDigits: 0
   }).format(userBalance);
 
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
   const handleTopUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseInt(topUpAmount, 10);
 
     if (isNaN(amount) || amount < 1000) {
-      Toast({message: "Tolong masukkan jumlah yang valid (minimal Rp 1.000)", type: "error", onClose: () => {}});
+      setToastMessage("Tolong masukkan jumlah yang valid (minimal Rp 1.000)");
+      setToastType('error');
       return;
     }
 
@@ -40,9 +49,7 @@ export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBa
 
       const res = await fetch('/api/buyer/balance/topup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,
         credentials: 'include'
       });
@@ -50,18 +57,21 @@ export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBa
       const json = await res.json();
 
       if (json.success) {
-        Toast({message: json.message || 'Top up berhasil!', type: "success", onClose: () => {}});
-        
-        onBalanceUpdate(userBalance + amount); 
-        
+        setToastMessage(json.message || 'Top up berhasil!');
+        setToastType('success');
+
+        onBalanceUpdate(userBalance + amount);
+
         setIsBalanceModalOpen(false);
         setTopUpAmount('');
       } else {
-        Toast({message: json.message || 'Top up gagal.', type: "success", onClose: () => {}});
+        setToastMessage(json.message || 'Top up gagal.');
+        setToastType('error');
       }
     } catch (err) {
       console.error("Top up error:", err);
-      Toast({message: 'Terjadi kesalahan saat memproses top up.', type: "error", onClose: () => {}});
+      setToastMessage('Terjadi kesalahan saat memproses top up.');
+      setToastType('error');
     } finally {
       setIsLoading(false);
     }
@@ -84,46 +94,35 @@ export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBa
           </button>
 
           <div className={`navbar-menu ${isMobileMenuOpen ? 'active' : ''}`}>
-             
-             <div className="navbar-links">
-                {flags.auction && (
-                  <Link to="/auction" className="navbar-link">Lelang</Link>
-                )}
+            <div className="navbar-links">
+              {flags.auction && <Link to="/auction" className="navbar-link">Lelang</Link>}
+              {flags.chat && <Link to="/chat" className="navbar-link">Chat</Link>}
+            </div>
 
-                {flags.chat && (
-                  <Link to="/chat" className="navbar-link">Chat</Link>
-                )}
-             </div>
+            <div className="action-wrapper">
+              <a href="/cart" className="navbar-cart">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+                  <path fill="#42b549" d="M0 24C0 10.7 10.7 0 24 0H69.5c22 0 41.5 12.8 50.6 32h411c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3H170.7l5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5H488c13.3 0 24 10.7 24 24s-10.7 24-24 24H199.7c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5H24C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/>
+                </svg>
+                {cartItemCount > 0 && <div className="item-counter">{cartItemCount}</div>}
+              </a>
 
-             <div className="action-wrapper">
-                <a href="/cart" className="navbar-cart">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-                    <path fill="#42b549" d="M0 24C0 10.7 10.7 0 24 0H69.5c22 0 41.5 12.8 50.6 32h411c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3H170.7l5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5H488c13.3 0 24 10.7 24 24s-10.7 24-24 24H199.7c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5H24C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/>
-                  </svg>
-                  {cartItemCount > 0 && (
-                    <div className="item-counter">{cartItemCount}</div>
-                  )}
-                </a>
+              <button className="navbar-balance" onClick={() => setIsBalanceModalOpen(true)}>
+                {formattedBalance}
+              </button>
 
-                <button 
-                  className="navbar-balance" 
-                  onClick={() => setIsBalanceModalOpen(true)}
-                >
-                  {formattedBalance}
-                </button>
+              <div className="navbar-profile">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="profile-icon">
+                  <path fill="#42b549" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/> 
+                </svg>
 
-                <div className="navbar-profile">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="profile-icon">
-                    <path fill="#42b549" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/> 
-                  </svg>
-
-                  <ul className="profile-dropdown">
-                    <li><a href="/profile">Profil</a></li>
-                    <li><a href="/orders">Riwayat Pesanan</a></li>
-                    <li><button onClick={onLogout} className="text-left w-full">Logout</button></li>
-                  </ul>
-                </div>
-             </div>
+                <ul className="profile-dropdown">
+                  <li><a href="/profile">Profil</a></li>
+                  <li><a href="/orders">Riwayat Pesanan</a></li>
+                  <li><a href="/logout">Logout</a></li>
+                </ul>
+              </div>
+            </div>
           </div>
         </nav>
       </header>
@@ -167,6 +166,15 @@ export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBa
             </form>
           </div>
         </div>
+      )}
+
+      {/* Toast */}
+      {toastMessage && (
+        <Toast 
+          message={toastMessage} 
+          type={toastType} 
+          onClose={() => setToastMessage(null)} 
+        />
       )}
     </>
   );
