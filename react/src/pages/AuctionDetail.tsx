@@ -77,8 +77,12 @@ export default function AuctionDetail() {
   );
 
   if (navbarLoading || loading) return AuctionSkeleton;
+
+  if (!user) {
+        return <div className="p-8 text-center text-gray-500 font-medium text-lg pt-32">Please login to access the Auction Detail.</div>;
+  }  
   if (error) return <div className="p-10 text-center text-red-500 font-bold">{error}</div>;
-  if (!data || !user) return null;
+  if (!data) return null;
 
   return (
     <FeatureMiddleware flag="auction_enabled" skeleton={AuctionSkeleton}>

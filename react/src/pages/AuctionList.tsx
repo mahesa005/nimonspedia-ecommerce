@@ -57,6 +57,10 @@ export default function AuctionList() {
         </div>
     );
 
+    if (!user) {
+        return <div className="p-8 text-center text-gray-500 font-medium text-lg pt-32">Please login to access the Auction Market.</div>;
+    }
+
     return (
         <FeatureMiddleware flag="auction_enabled" skeleton={PageSkeleton}>
             <div className="min-h-screen bg-gray-50 flex flex-col">
