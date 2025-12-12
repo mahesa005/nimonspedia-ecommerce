@@ -1,202 +1,285 @@
-# Nimonspedia - Tugas Besar Milestone 1 IF3110
+# Nimonspedia - Tugas Besar Milestone 2 IF3110
 
 ---
 
 ## 1. Deskripsi Aplikasi Web
 
-Nimonspedia adalah aplikasi web e-commerce _full-stack_ yang dibangun untuk memenuhi Tugas Besar Milestone 1 mata kuliah IF3110. Aplikasi ini adalah sebuah _marketplace_ yang terinspirasi dari Tokopedia.
+Nimonspedia pada awalnya adalah aplikasi e-commerce *full-stack* sederhana (Milestone 1). Kini, Nimonspedia telah bertransformasi menjadi aplikasi web **Hybrid Modern** untuk memenuhi kebutuhan **Milestone 2 IF3110**.
 
-Aplikasi ini mengimplementasikan arsitektur **Layered MVC (Model-View-Controller)**. Sisi _server-side_ dibangun menggunakan **PHP murni** tanpa _framework_ eksternal (seperti Laravel), sedangkan _client-side_ dibangun menggunakan **JavaScript, HTML, dan CSS murni** tanpa _framework_ (seperti React) atau _library_ (seperti jQuery/Bootstrap).
+Aplikasi ini menggabungkan arsitektur monolitik PHP tradisional dengan layanan mikro modern berbasis Node.js dan antarmuka dinamis Single Page Application (SPA).
 
-Seluruh lingkungan pengembangan dan produksi dikelola menggunakan **Docker**, dengan **PostgreSQL** sebagai basis data relasional.
+### Arsitektur Hybrid
 
-Fitur utama aplikasi mencakup dua peran pengguna yang berbeda:
+* **Legacy Core (PHP):** Menangani logika bisnis dasar seperti manajemen produk, toko, dan profil pengguna menggunakan PHP murni.
+* **Modern Service (Node.js):** Menangani fitur real-time, concurrency tinggi, dan logika kompleks seperti Lelang (Auction), Chat, dan Notifikasi menggunakan Express.js dan TypeScript.
+* **Frontend Hybrid:**
+  * **MPA (Multi Page Application):** Menggunakan HTML/CSS/JS Native untuk halaman statis dan SEO-friendly.
+  * **SPA (Single Page Application):** Menggunakan **React** untuk modul interaktif seperti halaman Lelang, Chat Room, dan Admin Dashboard.
 
-- **Buyer:** Dapat mendaftar, login, menjelajahi produk, melihat detail produk, menambah item ke keranjang belanja, melakukan _top-up_ saldo, melakukan _checkout_, dan melihat riwayat pesanan.
-- **Seller:** Dapat mendaftar sebagai penjual (termasuk membuat toko), login, mengelola profil toko, mengelola produk, dan mengelola pesanan yang masuk.
-
----
-
-## 2. Daftar Kebutuhan (Requirements)
-
-Untuk menjalankan proyek ini di lingkungan lokal, Anda hanya memerlukan perangkat lunak berikut:
-
-- **Docker Engine**
-- **Docker Compose**
-- Browser Web modern (Google Chrome, Firefox, Safari, Edge)
-- File `.env` yang dibuat dengan menyalin `.env.example`.
+Seluruh lingkungan dijalankan di atas **Docker** dengan orkestrasi **Docker Compose**.
 
 ---
 
-## 3. Cara Instalasi
+## 2. Fitur Utama
+
+### Fitur Milestone 1 (Legacy) (Enhanced)
+
+* **Buyer & Seller Role:** Manajemen akun dan toko terpisah.
+* **Katalog & Pencarian:** Browsing produk dengan sorting dan filtering.
+* **Transaksi:** Shopping cart, checkout, dan order history.
+* **CRUD Produk:** Manajemen inventaris toko.
+
+### Fitur Milestone 2 (New)
+
+1. **Sistem Lelang (Auction) Real-time**
+    * Mekanisme bidding real-time menggunakan WebSocket.
+    * Countdown timer yang sinkron di semua klien.
+    * Penentuan pemenang otomatis.
+2. **Real-time Chat**
+    * Komunikasi langsung antara Buyer dan Seller.
+    * Indikator status pesan (sent/read).
+3. **Cross-Platform Notifications**
+    * Notifikasi real-time (In-App) via WebSocket.
+    * Web Push Notifications menggunakan Service Workers (bisa diterima saat browser tertutup).
+4. **Admin Panel & Feature Flags**
+    * Panel admin khusus berbasis React.
+    * **Feature Flags:** Kemampuan mematikan/menyalakan fitur krusial (seperti Checkout, Auction, Chat) secara dinamis tanpa restart server/re-deploy.
+
+---
+
+## 3. Daftar Kebutuhan (Requirements)
+
+* **Docker Engine** & **Docker Compose** (Wajib)
+* Browser modern dengan dukungan JavaScript dan Service Workers.
+
+---
+
+## 4. Cara Instalasi & Menjalankan
 
 Ikuti langkah-langkah ini untuk menyiapkan proyek:
 
-1.  Klon repositori ini ke mesin lokal Anda:
+1. Klon repositori ini ke mesin lokal Anda:
 
     ```bash
     git clone https://github.com/Labpro-22/milestone-1-tugas-besar-if-3110-web-based-development-k03-12.git
+
     cd milestone-1-tugas-besar-if-3110-web-based-development-k03-12
     ```
 
-2.  Salin file konfigurasi _environment_ dari _template_ yang disediakan:
+2. Salin file konfigurasi *environment* dari *template* yang disediakan:
+
     ```bash
     cp .env.example .env
     ```
 
 ---
 
-## 4. Cara Menjalankan Server
+3. **Jalankan dengan Docker**
 
 Setelah instalasi selesai, ikuti langkah-langkah ini untuk menjalankan aplikasi:
 
-1.  Bangun dan jalankan semua layanan (Nginx, PHP, PostgreSQL) dalam mode _detached_ (latar belakang):
+1. Membangun dan jalankan semua layanan (Nginx, PHP, PostgreSQL) dalam mode *detached* (latar belakang):
 
     ```bash
     docker compose up -d --build
     ```
 
-    - Pada saat _booting_ pertama, skrip `database/db_schema.sql` akan dieksekusi secara otomatis untuk membuat skema tabel dan melakukan _seeding_ data awal (kategori dan produk _dummy_).
-
-2.  Aplikasi web sekarang dapat diakses melalui browser di:
+2. Aplikasi web sekarang dapat diakses melalui browser di:
     `http://localhost:8080`
 
 **Perintah Docker Compose Lainnya:**
 
-- **Untuk Menghentikan Aplikasi:**
+* **Untuk Menghentikan Aplikasi:**
   (Menjalankan ini tidak akan menghapus data database Anda).
 
   ```bash
   docker compose down
   ```
 
-- **Untuk Menghentikan Aplikasi DAN Menghapus Volume Database:**
-  (Gunakan ini jika Anda ingin melakukan _reset_ total dan menjalankan ulang _seeding_ database).
+* **Untuk Menghentikan Aplikasi DAN Menghapus Volume Database:**
+  (Gunakan ini jika Anda ingin melakukan *reset* total dan menjalankan ulang *seeding* database).
+
   ```bash
   docker compose down -v
   ```
 
 ---
 
-## 5. Tangkapan Layar Aplikasi
+4. **Akses Aplikasi**
+    * **Web App:** `http://localhost:8080`
+    * **Admin Login:** Gunakan kredensial `luthor@lexcorp.com` / `admin123` (atau sesuai seeding).
+
+## 5. Konfigurasi Khusus (Milestone 2)
+
+### Feature Flags (Admin)
+
+Admin dapat mengakses endpoint/halaman khusus untuk mengaktifkan atau menonaktifkan fitur:
+
+* `auction_enabled`: Mengaktifkan menu lelang.
+* `chat_enabled`: Mengaktifkan fitur chat.
+* `checkout_enabled`: Mengizinkan transaksi checkout.
+
+### Service Workers
+
+Untuk fitur Push Notification, pastikan browser Anda mengizinkan notifikasi dari `localhost:8080`.
+
+---
+
+## 6. Tangkapan Layar Aplikasi
 
 Berikut adalah tangkapan layar untuk halaman-halaman utama yang diimplementasikan:
 
 ### Halaman Buyer
 
-- **Halaman Login**
+* **Halaman Login**
   ![Halaman Login](image/pages/login_page.png "Halaman Login")
 
-- **Halaman Register**
+* **Halaman Register**
   ![Halaman Register](image/pages/register_page.png "Halaman Register")
 
-- **Halaman Product Discovery (Home)**
+* **Halaman Product Discovery (Home)**
   ![Halaman Product Discovery](image/pages/Product_discovery.png "Halaman Product Discover")
 
-- **Halaman Detail Produk**
+* **Halaman Detail Produk**
   ![Halaman Detail Produk](image/pages/detail_produk.png "Halaman Detail Produk")
 
-- **Halaman Detail Store**
+* **Halaman Detail Store**
   ![Halaman Detail Store](image/pages/store_detail.png "Halaman Detail Store")
 
-- **Halaman Shopping Cart**
+* **Halaman Shopping Cart**
   ![Halaman Shopping Cart](image/pages/cart.png "Halaman Shopping Cart")
 
-- **Halaman Checkout**
+* **Halaman Checkout**
   ![Halaman Checkout](image/pages/checkout.png "Halaman Checkout")
 
-- **Halaman Order History**
+* **Halaman Order History**
   ![Halaman Order History](image/pages/order_history.png "Halaman Order History")
   ![Halaman Order History](image/pages/order_history_detail.png)
-- **Halaman Profile**
+* **Halaman Profile**
   ![Halaman Profile](image/pages/profile.png "Halaman Profile")
 
-- **Halaman TopUp**
+* **Halaman TopUp**
   ![Halaman TopUp](image/pages/topup.png "Halaman TopUp")
+
+* **Halaman Auction**
+  ![Halaman Auction](image/pages/auction_list.jpg "Halaman Auction")
+
+* **Halaman Chat**
+  ![Halaman Chat](image/pages/chat.jpg "Halaman Chat")
 
 ### Halaman Seller
 
-- **Halaman Dashboard (Seller)**
+* **Halaman Dashboard (Seller)**
   ![Halaman Dashboard (Seller)](image/pages/dashboard_seller.png "Halaman Dashboard Seller")
 
-- **Halaman Product Management (Seller)**
+* **Halaman Product Management (Seller)**
   ![Halaman Product Management (Seller)](image/pages/product_management.png "Halaman Product Management (Seller)")
 
-- **Halaman Order Management (Seller)**
+* **Halaman Order Management (Seller)**
   ![Halaman Order Management (Seller)](image/pages/order_management.png "Halaman Order Management (Seller)")
   ![Halaman Order Management (Seller)](image/pages/seller_orders.png)
 
-- **Halaman Add Product (Seller)**
+* **Halaman Add Product (Seller)**
   ![Halaman Add Product (Seller)](image/pages/products_add.png "Halaman Add Product (Seller)")
 
-- **Halaman Edit Product (Seller)**
+* **Halaman Edit Product (Seller)**
   ![Halaman Edit Product (Seller](image/pages/seller_products_edit.png "Halaman Edit Product (Seller")
 
 ---
 
-## 6. Pembagian Tugas
+## 7. Pembagian Tugas
 
 **Anggota Tim:**
 
-- **13523134 - Sebastian Enrico Nathanael**
-- **13523140 - Mahesa Fadhillah Andre**
-- **13523152 - Muhammad Kinan Arkansyaddad**
+* **13523134 - Sebastian Enrico Nathanael**
+* **13523140 - Mahesa Fadhillah Andre**
+* **13523152 - Muhammad Kinan Arkansyaddad**
 
-### Server-side (PHP)
+### Milestone 1
 
-- **Core & Arsitektur:** 13523152
-- **Login:** 13523152
-- **Register:** 13523152
-- **Home/Product Disovery:** 13523152
-- **Detail Product:** 13523152
-- **Detail Store:** 13523152
-- **Shopping Cart (Buyer):** 13523134
-- **Checkout (Buyer):** 13523152
-- **Order History (Buyer):** 13523134
-- **Profile (Buyer):** 13523134
-- **Dashboard (Seller):** 13523140
-- **Product Management (Seller):** 13523140
-- **Add Product (Seller):** 13523140
-- **Edit Product (Seller):** 13523140
-- **Order Management (Seller):** 13523140
-- **Data Export (Seller):** 13523140
+#### Server-side (PHP)
 
-### Client-side (HTML/CSS/JS)
+* **Core & Arsitektur:** 13523152
+* **Login & Register:** 13523152
+* **Home/Product Discovery:** 13523152
+* **Detail Product & Store:** 13523152
+* **Shopping Cart (Buyer):** 13523134
+* **Checkout (Buyer):** 13523152
+* **Order History (Buyer):** 13523134
+* **Profile (Buyer):** 13523134
+* **Dashboard & Product Mgmt (Seller):** 13523140
+* **Order Management (Seller):** 13523140
+* **Data Export (Seller):** 13523140
 
-- **Core & Arsitektur:** 13523152
-- **Login:** 13523152
-- **Register:** 13523152
-- **Home/Product Disovery:** 13523152
-- **Detail Product:** 13523152
-- **Detail Store:** 13523152
-- **Shopping Cart (Buyer):** 13523134
-- **Checkout (Buyer):** 13523152
-- **Order History (Buyer):** 13523134
-- **Profile (Buyer):** 13523134
-- **Dashboard (Seller):** 13523140
-- **Product Management (Seller):** 13523140
-- **Add Product (Seller):** 13523140
-- **Edit Product (Seller):** 13523140
-- **Order Management (Seller):** 13523140
-- **Data Export (Seller):** 13523140
+#### Client-side (HTML/CSS/JS)
+
+* **Core & Arsitektur:** 13523152
+* **Login & Register:** 13523152
+* **Home/Product Discovery:** 13523152
+* **Detail Product & Store:** 13523152
+* **Shopping Cart (Buyer):** 13523134
+* **Checkout (Buyer):** 13523152
+* **Order History (Buyer):** 13523134
+* **Profile (Buyer):** 13523134
+* **Dashboard & Product Mgmt (Seller):** 13523140
+* **Order Management (Seller):** 13523140
+* **Data Export (Seller):** 13523140
+
+### Milestone 2
+
+#### Server-side (Node.js & Express)
+
+* **Authentication Service (JWT):** 13523152
+* **Auction Service (Socket.io):** 13523134
+* **Chat Service (Socket.io):** 13523152
+* **Notification Service:** 13523152
+* **Admin Middleware:** 13523140
+
+#### Client-side (React SPA)
+
+* **Auction List:** 13523134
+* **Auction Detail:** 13523152
+* **Chat Room:** 13523152
+* **Admin Dashboard:** 13523140
+* **Global Notifications (Context/UI):** 13523152
+
+#### Update 
+
+* **Update Detail Product:** 13523134
+* **Update Product Management:** 13523140
+* **Update Profile:** 13523134
 
 ---
 
-## 7. Bonus
+## 8. Bonus
+
+* **All Responsive Web Design**
+* **UI/UX Seperti Tokopedia**
+* **Google Lighthouse** (Performance > 80, Accessibility > 90)
+
+## 9. Lighthouse Scores
+
 ### Google Lighthouse
-- ![alt text](docs/lighthouse/l1.png)
-- ![alt text](docs/lighthouse/l2.png)
-- ![alt text](docs/lighthouse/l3.png)
-- ![alt text](docs/lighthouse/l4.png)
-- ![alt text](docs/lighthouse/l5.png)
-- ![alt text](docs/lighthouse/l6.png)
-- ![alt text](docs/lighthouse/l7.png)
-- ![alt text](docs/lighthouse/l8.png)
-- ![alt text](docs/lighthouse/l9.png)
-- ![alt text](docs/lighthouse/l10.png)
-- ![alt text](docs/lighthouse/l11.png)
-- ![alt text](docs/lighthouse/l12.png)
-**Nilai accesibility rendah disebabkan oleh 3rd party rich text editor** 
-- ![alt text](docs/lighthouse/l13.png)
-**Nilai accesibility rendah disebabkan oleh 3rd party rich text editor** 
-- ![alt text](docs/lighthouse/l14.png)
+
+* ![alt text](docs/lighthouse/l1.png)
+* ![alt text](docs/lighthouse/l2.png)
+* ![alt text](docs/lighthouse/l3.png)
+* ![alt text](docs/lighthouse/l4.png)
+* ![alt text](docs/lighthouse/l5.png)
+* ![alt text](docs/lighthouse/l6.png)
+* ![alt text](docs/lighthouse/l7.png)
+* ![alt text](docs/lighthouse/l8.png)
+* ![alt text](docs/lighthouse/l9.png)
+* ![alt text](docs/lighthouse/l10.png)
+* ![alt text](docs/lighthouse/l11.png)
+* ![alt text](docs/lighthouse/l12.png)
+
+**Nilai accesibility rendah disebabkan oleh 3rd party rich text editor**
+
+* ![alt text](docs/lighthouse/l13.png)
+
+**Nilai accesibility rendah disebabkan oleh 3rd party rich text editor**
+
+* ![alt text](docs/lighthouse/l14.png)
+
+---
