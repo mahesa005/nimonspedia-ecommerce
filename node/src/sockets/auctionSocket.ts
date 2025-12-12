@@ -5,6 +5,21 @@ import { PlaceBidPayload, NewBidEvent, AuctionEndedEvent, AuctionStartedEvent } 
 const auctionTimers: Record<number, NodeJS.Timeout> = {};
 const warningTimers: Record<number, NodeJS.Timeout> = {};
 
+const broadcastAuctionStart = async (io: Server, auction: any) => {
+    if (!auction) return;
+    
+    const fullData = await AuctionService.getAuctionPageData(auction.auction_id);
+    if (fullData) {
+        io.to('market').emit('market_auction_started', {
+            ...fullData.auction,
+            bidder_count: fullData.auction.bidder_count ?? 0
+        });
+    }
+
+    const event: AuctionStartedEvent = { status: 'active', message: "Auction is now OPEN!" };
+    io.to(`auction_${auction.auction_id}`).emit('auction_started', event);
+};
+
 export default (io: Server, socket: Socket) => {
 
   console.log(`[SOCKET] New client connected: ${socket.id}`);
@@ -19,25 +34,19 @@ export default (io: Server, socket: Socket) => {
 
   // START AUCTION
   socket.on('start_auction', async ({ auctionId }: { auctionId: number }) => {
-    console.log(`[START] Received start_auction for auctionId=${auctionId}`);
+    console.log(`[START] Request start_auction for auctionId=${auctionId}`);
 
     try {
-      const auction = await AuctionService.startAuction(auctionId);
-      console.log(`[START] AuctionService.startAuction result:`, auction);
+      const result = await AuctionService.startAuction(auctionId);
 
-      if (auction) {
-        const fullData = await AuctionService.getAuctionPageData(auctionId);
-        
-        if (fullData) {
-            io.to('market').emit('market_auction_started', {
-                ...fullData.auction,
-                bidder_count: fullData.auction.bidder_count ?? 0
-            });
-        }
+      if (result.message === 'ADDED_TO_QUEUE') {
+        socket.emit('error', 'Auction queued. Another auction is currently active.');
+        return;
+      }
 
-        // Notify specific room (Detail Page)
-        const event: AuctionStartedEvent = { status: 'active', message: "Auction is now OPEN!" };
-        io.to(`auction_${auctionId}`).emit('auction_started', event);
+      if (result.auction) {
+        console.log(`[START] Auction started manually: ${auctionId}`);
+        await broadcastAuctionStart(io, result.auction);
       }
     } catch (e: any) { 
         console.error(e.message);
@@ -73,14 +82,22 @@ export default (io: Server, socket: Socket) => {
       auctionTimers[auctionId] = setTimeout(async () => {
         if (warningTimers[auctionId]) clearTimeout(warningTimers[auctionId]);
         console.log(`[TIMER] Timer triggered, finalizing auction ${auctionId}`);
-        const finalized = await AuctionService.finalizeAuction(auctionId);
-        console.log(`[TIMER] Finalized result:`, finalized);
-
-        if (finalized) {
+        
+        const { closed, next } = await AuctionService.finalizeAuction(auctionId);
+        
+        if (closed) {
           io.to(`auction_${auctionId}`).emit('auction_ended', {
-            auctionId, winnerId: finalized.winner_id, finalPrice: Number(finalized.current_price)
+            auctionId, 
+            winnerId: closed.winner_id, 
+            finalPrice: Number(closed.current_price)
           });
         }
+        
+        if (next) {
+            console.log(`[TIMER] Next auction auto-started: ${next.auction_id}`);
+            await broadcastAuctionStart(io, next);
+        }
+
         delete auctionTimers[auctionId];
         delete warningTimers[auctionId];
       }, 15000);

@@ -339,6 +339,42 @@ export const AuctionRepository = {
       ];
     const res = await pool.query<AuctionData>(query, values);
     return res.rows[0] ?? null;
-  }
+  },
 
+  async hasActiveAuction(store_id: number): Promise<boolean> {
+    const query = `
+      SELECT 1 
+      FROM "auctions" a
+      JOIN "product" p ON a.product_id = p.product_id
+      WHERE p.store_id = $1 
+      AND a.status IN ('active', 'ongoing')
+      LIMIT 1
+    `;
+    
+    const res = await pool.query(query, [store_id]);
+    return res.rowCount !== null && res.rowCount > 0;
+  },
+
+  async findNextReadyAuction(): Promise<AuctionData | null> {
+    const query = `
+      SELECT * FROM "auctions" 
+      WHERE status = 'scheduled' 
+      ORDER BY start_time ASC 
+      LIMIT 1
+    `;
+    const res = await pool.query<AuctionData>(query);
+    return res.rows[0] || null;
+  },
+
+  async findById(auctionId: number): Promise<any> {
+    const query = `
+      SELECT a.*, p.store_id 
+      FROM "auctions" a
+      JOIN "product" p ON a.product_id = p.product_id
+      WHERE a.auction_id = $1
+    `;
+    
+    const res = await pool.query(query, [auctionId]);
+    return res.rows.length > 0 ? res.rows[0] : null;
+  },
 };
