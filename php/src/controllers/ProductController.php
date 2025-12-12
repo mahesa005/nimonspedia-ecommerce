@@ -167,4 +167,44 @@ class ProductController {
             // $this->view->renderPage('errors/500.php', ['pageTitle' => 'Server Error']);
         }
     }
+
+    public function apiGetProductsOnly(Request $request): void {
+        $page = max(1, (int)($request->getDataBody('page', 1)));
+        $limit = (int)($request->getDataBody('limit', 12));
+        $search = $request->getDataBody('search', '');
+        $sort = $request->getDataBody('sort', 'newest');
+        
+        $category_ids = $request->getDataBody('categories', []);
+        if (!is_array($category_ids)) {
+            $category_ids = $category_ids ? [$category_ids] : []; 
+        }
+        $category_ids = array_filter(array_map('intval', $category_ids));
+        
+        $min_price_raw = $request->getDataBody('min_price');
+        $max_price_raw = $request->getDataBody('max_price');
+
+        $min_price = ($min_price_raw !== '' && is_numeric($min_price_raw) && $min_price_raw >= 0) ? (int)$min_price_raw : null;
+        $max_price = ($max_price_raw !== '' && is_numeric($max_price_raw) && $max_price_raw >= 0) ? (int)$max_price_raw : null;
+
+        $store_id_raw = $request->getDataBody('store_id');
+        $store_id = ($store_id_raw !== '' && is_numeric($store_id_raw)) ? (int)$store_id_raw : null;
+
+        $result = $this->product_service->getPaginatedProducts(
+            $page, $limit, $search, $category_ids, $min_price, $max_price, $sort, $store_id
+        );
+
+        $response = [
+            'products' => $result['data'],
+            'pagination' => [
+                'current_page' => $result['current_page'],
+                'total_pages' => $result['total_pages'],
+                'total_items' => $result['total_items'],
+                'limit' => $limit
+            ]
+        ];
+
+        header('Content-Type: application/json');
+        echo json_encode($response, JSON_NUMERIC_CHECK);
+        exit;
+    }
 }
