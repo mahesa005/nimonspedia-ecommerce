@@ -5,6 +5,11 @@ interface NavbarData {
   user: User | null;
   store: any | null;
   cartCount: number;
+  flags: {
+      chat: boolean;
+      auction: boolean;
+      checkout: boolean;
+  };
   loading: boolean;
   refreshData: () => Promise<void>;
   handleLogout: () => void;
@@ -16,6 +21,7 @@ export const useNavbarData = (): NavbarData => {
   const [store, setStore] = useState<any | null>(null);
   const [cartCount, setCartCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [flags, setFlags] = useState({ chat: true, auction: true, checkout: true });
 
   const fetchData = useCallback(async () => {
     try {
@@ -31,6 +37,7 @@ export const useNavbarData = (): NavbarData => {
         if (navJson.success) {
           setCartCount(navJson.data.cartCount);
           setStore(navJson.data.store);
+          setFlags(navJson.data.flags);
         }
       }
     } catch (err) {
@@ -54,5 +61,5 @@ export const useNavbarData = (): NavbarData => {
     }
   };
 
-  return { user, store, cartCount, loading, refreshData: fetchData, handleLogout, updateLocalBalance };
+  return { user, store, cartCount, flags, loading, refreshData: fetchData, handleLogout, updateLocalBalance };
 };

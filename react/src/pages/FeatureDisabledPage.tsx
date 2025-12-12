@@ -8,7 +8,7 @@ import { useNavbarData } from '../hooks/useNavbarData';
 export default function FeatureDisabledPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, store, cartCount, handleLogout } = useNavbarData();
+  const { user, store, cartCount, flags, handleLogout } = useNavbarData();
   
   const featureParam = searchParams.get('feature');
   
@@ -62,13 +62,14 @@ export default function FeatureDisabledPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-[#333]">
       {user && (
         isSeller ? (
-          <SellerNavbar storeBalance={store?.balance || 0} onLogout={handleLogout} />
+          <SellerNavbar storeBalance={store?.balance || 0} onLogout={handleLogout} flags={flags} />
         ) : (
           <BuyerNavbar 
             userBalance={user.balance} 
             cartItemCount={cartCount} 
             onLogout={handleLogout} 
             onBalanceUpdate={() => {}}
+            flags={flags}
           />
         )
       )}

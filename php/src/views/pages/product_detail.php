@@ -95,7 +95,7 @@ use App\Core\Auth;
                                 <button class="quantity-btn" id="increaseBtn">+</button>
                             </div>
                         </div>
-                        <button class="add-to-cart-btn" id="addToCartBtn" <?php echo $product->isOutOfStock() ? 'disabled' : ''; ?>>
+                        <button class="add-to-cart-btn" id="addToCartBtn" <?php echo ($product->isOutOfStock() || !$canAddToCart) ? 'disabled' : ''; ?>>
                             <span class="btn-text">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="9" cy="21" r="1"></circle>

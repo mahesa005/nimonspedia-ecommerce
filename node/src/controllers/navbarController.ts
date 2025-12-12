@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { NavbarService } from '../services/navbarService';
+import { getEffectiveFeatureFlag } from '../services/featureFlagService';
 
 export const getNavbarData = async (req: Request, res: Response) => {
   try {
@@ -11,9 +12,22 @@ export const getNavbarData = async (req: Request, res: Response) => {
 
     const data = await NavbarService.getNavbarData(user.user_id, user.role);
 
+    const [chatFlag, auctionFlag, checkoutFlag] = await Promise.all([
+        getEffectiveFeatureFlag({ userId: user.user_id, featureName: 'chat_enabled' }),
+        getEffectiveFeatureFlag({ userId: user.user_id, featureName: 'auction_enabled' }),
+        getEffectiveFeatureFlag({ userId: user.user_id, featureName: 'checkout_enabled' })
+    ]);
+
     res.json({ 
       success: true, 
-      data 
+      data: {
+        ...data,
+          flags: {
+              chat: chatFlag.enabled,
+              auction: auctionFlag.enabled,
+              checkout: checkoutFlag.enabled
+          }
+      } 
     });
 
   } catch (error) {

@@ -26,7 +26,7 @@ const socket: Socket = io('http://localhost:8080', {
 
 export default function AuctionDetail() {
   const { id } = useParams<{ id: string }>();
-  const { user, store, cartCount, loading: navbarLoading, handleLogout, updateLocalBalance } = useNavbarData();
+  const { user, store, cartCount, flags, loading: navbarLoading, handleLogout, updateLocalBalance } = useNavbarData();
   const [data, setData] = useState<AuctionDetailResponse['data'] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -263,6 +263,7 @@ export default function AuctionDetail() {
         <SellerNavbar 
           storeBalance={store?.balance || 0} 
           onLogout={handleLogout}
+          flags={flags}
         />
       ) : (
         <BuyerNavbar 
@@ -270,6 +271,7 @@ export default function AuctionDetail() {
           cartItemCount={cartCount} 
           onLogout={handleLogout}
           onBalanceUpdate={updateLocalBalance} 
+          flags={flags}
         />
       )}
 

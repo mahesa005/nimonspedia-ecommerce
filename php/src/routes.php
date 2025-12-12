@@ -52,17 +52,17 @@ $router->add('GET', '/cart',
 
 $router->add('POST', '/cart/add',
     [CartController::class, 'add'],
-    [AuthMiddleware::class]
+    [AuthMiddleware::class, new FeatureFlagMiddleware('checkout_enabled')]
 );
 
 $router->add('POST', '/cart/update',
     [CartController::class, 'update'],
-    [AuthMiddleware::class] 
+    [AuthMiddleware::class, new FeatureFlagMiddleware('checkout_enabled')] 
 );
 
 $router->add('POST', '/cart/delete',
     [CartController::class, 'delete'],
-    [AuthMiddleware::class]
+    [AuthMiddleware::class, new FeatureFlagMiddleware('checkout_enabled')]
 );
 
 $router->add('GET', '/', 

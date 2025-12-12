@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Store;
+use App\Services\FeatureService;
 
 $current_store = $store ?? null;
 $store_balance_formatted = '0';
@@ -8,6 +9,8 @@ if ($current_store) {
     $store_balance_formatted = number_format($current_store["balance"], 0, ',', '.');
 }
 ?>
+
+$chatStatus = FeatureService::getStatus('chat_enabled');
 
 <header>
     <link rel="stylesheet" href="/css/components/navbar_seller.css">
@@ -25,9 +28,9 @@ if ($current_store) {
                 <a href="/seller/dashboard" class="navbar-link">Dashboard</a>
                 <a href="/seller/products" class="navbar-link">Produk</a>
                 <a href="/seller/orders" class="navbar-link">Pesanan</a>
-                
-                <a href="/auction" class="navbar-link">Lelang</a>
-                <a href="/chat" class="navbar-link">Chat</a>
+                <?php if ($chatStatus['enabled']): ?>
+                    <a href="/chat" class="navbar-link">Chat</a>
+                <?php endif; ?>
             </div>
 
             <div class="navbar-actions">

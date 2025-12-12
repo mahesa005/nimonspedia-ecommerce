@@ -8,9 +8,10 @@ interface BuyerNavbarProps {
   cartItemCount: number;
   onLogout: () => void;
   onBalanceUpdate: (newBalance: number) => void;
+  flags: { chat: boolean; auction: boolean; checkout: boolean };
 }
 
-export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBalanceUpdate }: BuyerNavbarProps) {
+export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBalanceUpdate, flags }: BuyerNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
@@ -85,8 +86,13 @@ export default function BuyerNavbar({ userBalance, cartItemCount, onLogout, onBa
           <div className={`navbar-menu ${isMobileMenuOpen ? 'active' : ''}`}>
              
              <div className="navbar-links">
-                <Link to="/chat" className="navbar-link">Chat</Link>
-                <Link to="/auction" className="navbar-link">Lelang</Link>
+                {flags.auction && (
+                  <Link to="/auction" className="navbar-link">Lelang</Link>
+                )}
+
+                {flags.chat && (
+                  <Link to="/chat" className="navbar-link">Chat</Link>
+                )}
              </div>
 
              <div className="action-wrapper">
