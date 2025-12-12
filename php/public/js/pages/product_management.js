@@ -1,3 +1,25 @@
+// ===== EXPANDABLE ROWS =====
+function initializeExpandableRows() {
+  const expandToggles = document.querySelectorAll('.expand-toggle');
+  
+  expandToggles.forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const productId = this.dataset.productId;
+      const detailRow = document.querySelector(`.row-detail[data-product-id="${productId}"]`);
+      
+      if (detailRow) {
+        detailRow.classList.toggle('visible');
+        this.classList.toggle('expanded');
+      }
+    });
+  });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initializeExpandableRows);
+
+// ===== SEARCH & FILTERS =====
 // Search with debounce
 let searchTimeout;
 const searchInput = document.getElementById('search-input');

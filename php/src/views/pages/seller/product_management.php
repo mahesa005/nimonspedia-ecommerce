@@ -102,13 +102,10 @@
               >
                 <td>
                   <div class="status-cell">
-                    <span class="badge-dot <?= $active ? 'on' : 'off' ?>"></span>
-                    <span class="status-text"><?= $active ? 'Aktif' : 'Habis' ?></span>
-
-                    <!-- Badge lelang sesuai spek -->
-                    <span class="badge-auction <?= $auctionBadgeClass ?>">
-                      <?= $auctionBadgeText ?>
-                    </span>
+                    <div class="status-indicator">
+                      <span class="badge-dot <?= $active ? 'on' : 'off' ?>"></span>
+                      <span class="status-text"><?= $active ? 'Aktif' : 'Habis' ?></span>
+                    </div>
                   </div>
                 </td>
 
@@ -131,7 +128,14 @@
                 </td>
 
                 <td class="actions">
-                  <!-- Tombol EDIT & DELETE: harus disabled kalau produk sedang dilelang -->
+                  <!-- Expand trigger (first action) -->
+                  <button class="expand-toggle" data-product-id="<?= (int)$p['product_id'] ?>" title="Tampilkan detail" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" width="18" height="18" class="expand-icon">
+                      <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+
+                  <!-- Edit button -->
                   <a class="icon-btn <?= $inAuction ? 'is-disabled' : '' ?>"
                     href="<?= $inAuction ? 'javascript:void(0)' : '/seller/products/' . (int)$p['product_id'] . '/edit' ?>"
                     title="<?= $inAuction ? 'Tidak dapat mengubah produk yang sedang dilelang' : 'Edit' ?>">
@@ -140,6 +144,7 @@
                     </svg>
                   </a>
 
+                  <!-- Delete button -->
                   <button class="icon-btn danger btn-delete <?= $inAuction ? 'is-disabled' : '' ?>"
                           data-product-id="<?= (int)$p['product_id'] ?>"
                           data-product-name="<?= htmlspecialchars($p['product_name']) ?>"
@@ -149,30 +154,47 @@
                       <path d="M6 7h12M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2m1 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7h10z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
                     </svg>
                   </button>
+                </td>
+              </tr>
 
-                  <!-- Tombol LELANG -->
-                  <?php if ($inAuction && $auctionId): ?>
-                    <!-- Produk sedang/lekan aktif → tampilkan "Lihat Lelang" -->
-                    <a 
-                      href="/auction/<?= (int)$auctionId ?>"
-                      class="btn btn-ghost btn-sm"
-                      title="Lihat detail lelang"
-                    >
-                      Lihat Lelang
-                    </a>
-                  <?php else: ?>
-                    <!-- Produk belum dalam lelang → tampilkan "Jadikan Lelang" -->
-                    <button 
-                      type="button"
-                      class="btn btn-primary btn-sm btn-start-auction"
-                      data-product-id="<?= (int)$p['product_id'] ?>"
-                      data-product-name="<?= htmlspecialchars($p['product_name']) ?>"
-                      data-stock="<?= (int)$p['stock'] ?>"
-                      title="Jadikan produk ini sebagai barang lelang"
-                    >
-                      Jadikan Lelang
-                    </button>
-                  <?php endif; ?>
+              <!-- Expanded detail row -->
+              <tr class="row-detail hidden" data-product-id="<?= (int)$p['product_id'] ?>">
+                <td colspan="6">
+                  <div class="detail-content">
+                    <div class="detail-group">
+                      <div class="detail-section">
+                        <div class="detail-label">Status Lelang</div>
+                        <div class="detail-value">
+                          <span class="badge-auction <?= $auctionBadgeClass ?>">
+                            <?= $auctionBadgeText ?>
+                          </span>
+                        </div>
+                      </div>
+                      <?php if ($inAuction && $auctionId): ?>
+                        <div class="detail-section">
+                          <div class="detail-label">ID Lelang</div>
+                          <div class="detail-value"><?= (int)$auctionId ?></div>
+                        </div>
+                        <div class="detail-section">
+                          <div class="detail-label">Status</div>
+                          <div class="detail-value"><?= htmlspecialchars($auctionStatus) ?></div>
+                        </div>
+                      <?php endif; ?>
+                    </div>
+                    <?php if ($inAuction && $auctionId): ?>
+                      <div class="detail-actions">
+                        <a href="/auction/<?= (int)$auctionId ?>" class="btn btn-ghost btn-sm" title="Lihat detail lelang">
+                          Lihat Lelang →
+                        </a>
+                      </div>
+                    <?php else: ?>
+                      <div class="detail-actions">
+                        <button type="button" class="btn btn-primary btn-sm btn-start-auction" data-product-id="<?= (int)$p['product_id'] ?>" data-product-name="<?= htmlspecialchars($p['product_name']) ?>" data-stock="<?= (int)$p['stock'] ?>" title="Jadikan produk ini sebagai barang lelang">
+                          Jadikan Lelang
+                        </button>
+                      </div>
+                    <?php endif; ?>
+                  </div>
                 </td>
               </tr>
             <?php endforeach; ?>
