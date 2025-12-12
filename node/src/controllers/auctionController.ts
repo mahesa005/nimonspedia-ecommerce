@@ -101,6 +101,9 @@ export const getAuctions = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+}
+
 export const createAuctionFromProduct = async (
   req: Request,
   res: Response<AuctionResponse>
