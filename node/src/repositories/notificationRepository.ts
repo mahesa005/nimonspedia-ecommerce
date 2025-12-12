@@ -22,7 +22,7 @@ export const NotificationRepository = {
   },
   
   async getUserPreferences(userId: number) {
-    const query = `SELECT * FROM push_preferences WHERE user_id = $1`;
+    const query = `SELECT * FROM push_subscriptions WHERE user_id = $1`;
     const res = await pool.query(query, [userId]);
     return res.rows[0]; 
   }
