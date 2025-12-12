@@ -1,9 +1,13 @@
 <?php
 
 use App\Models\User;
+use App\Services\FeatureService;
 
 $current_user = $user ?? null; 
 $item_count = $cart_item_count ?? 0;
+
+$chatStatus = FeatureService::getStatus('chat_enabled');
+$auctionStatus = FeatureService::getStatus('auction_enabled');
 
 $user_balance_formatted = '0';
 if ($current_user) {
@@ -22,8 +26,13 @@ if ($current_user) {
 
         <div class="navbar-menu" id="navbarMenu">
             <div class="navbar-links">
-                <a href="/chat" class="navbar-link">Chat</a>
-                <a href="/auction" class="navbar-link">Lelang</a>
+                <?php if ($auctionStatus['enabled']): ?>
+                    <a href="/auction" class="navbar-link">Lelang</a>
+                <?php endif; ?>
+
+                <?php if ($chatStatus['enabled']): ?>
+                    <a href="/chat" class="navbar-link">Chat</a>
+                <?php endif; ?>
             </div>
 
             <div class="action-wrapper"> 

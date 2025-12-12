@@ -7,6 +7,7 @@ import BuyerNavbar from '../components/ui/BuyerNavbar';
 import SellerNavbar from '../components/ui/SellerNavbar';
 import { useNavbarData } from '../hooks/useNavbarData';
 import type { ChatRoom, ChatMessage } from '../types/chat';
+import FeatureMiddleware from '../components/common/FeatureMiddleware';
 
 const ChatPageSkeleton = () => (
   <div className="pt-16 h-screen bg-gray-50">
@@ -59,7 +60,7 @@ const socket: Socket = io('http://localhost:8080', {
 });
 
 export default function ChatPage() {
-  const { user, store, cartCount, loading, handleLogout, updateLocalBalance } = useNavbarData();
+  const { user, store, cartCount, flags, loading, handleLogout, updateLocalBalance } = useNavbarData();
 
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
@@ -81,7 +82,7 @@ export default function ChatPage() {
       socket.connect();
     }
     return () => { 
-      if (socket.connected) socket.disconnect(); 
+      // if (socket.connected) socket.disconnect(); 
     };
   }, [user]);
 
@@ -266,12 +267,14 @@ export default function ChatPage() {
   const isSeller = (user.role as string).trim() === 'SELLER';
 
   return (
+    <FeatureMiddleware flag="chat_enabled" skeleton={<ChatPageSkeleton/>}>
     <div className="flex flex-col h-screen bg-gray-50">
       {/* NAVBAR */}
       {isSeller ? (
         <SellerNavbar 
           storeBalance={store ? store.balance : 0} 
           onLogout={handleLogout} 
+          flags={flags}
         />
       ) : (
         <BuyerNavbar 
@@ -279,6 +282,7 @@ export default function ChatPage() {
           cartItemCount={cartCount} 
           onLogout={handleLogout} 
           onBalanceUpdate={updateLocalBalance}
+          flags={flags}
         />
       )}
 
@@ -318,5 +322,6 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+    </FeatureMiddleware>
   );
 }

@@ -9,6 +9,7 @@ use App\Services\ProductService;
 use App\Services\CategoryService;
 use App\Services\UserService;
 use App\Services\CartService;
+use App\Services\FeatureService;
 
 class ProductController {
     private ProductService $product_service;
@@ -139,6 +140,9 @@ class ProductController {
                 $navbar_file = 'components/navbar_buyer.php';
                 $styles[] = '/css/components/navbar_buyer.css';
                 $scripts[] = '/js/modules/topup_modal.js';
+                $checkoutStatus = FeatureService::getStatus('checkout_enabled');
+                $canAddToCart = $checkoutStatus['enabled'];
+                $this->view->setData('canAddToCart', $canAddToCart);
             } else {
                  $styles[] = '/css/components/navbar_guest.css';
             }

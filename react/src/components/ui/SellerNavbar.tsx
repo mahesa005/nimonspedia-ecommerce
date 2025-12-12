@@ -5,9 +5,10 @@ import '../../styles/navbar_seller.css';
 interface SellerNavbarProps {
   storeBalance: number;
   onLogout: () => void;
+  flags: { chat: boolean; auction: boolean; checkout: boolean };
 }
 
-export default function SellerNavbar({ storeBalance, onLogout }: SellerNavbarProps) {
+export default function SellerNavbar({ storeBalance, onLogout, flags }: SellerNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const formattedBalance = new Intl.NumberFormat('id-ID', {
@@ -36,8 +37,9 @@ export default function SellerNavbar({ storeBalance, onLogout }: SellerNavbarPro
             <a href="/seller/dashboard" className="navbar-link">Dashboard</a>
             <a href="/seller/products" className="navbar-link">Produk</a>
             <a href="/seller/orders" className="navbar-link">Pesanan</a>
-            <Link to="/seller/auctions" className="navbar-link">Lelang</Link>
-            <Link to="/chat" className="navbar-link">Chat</Link>
+            {flags.chat && (
+              <Link to="/chat" className="navbar-link">Chat</Link>
+            )}
           </div>
 
           <div className="navbar-actions">

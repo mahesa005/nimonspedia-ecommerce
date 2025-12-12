@@ -6,6 +6,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AuctionDetail from './pages/AuctionDetail';
 import ChatPage from './pages/ChatPage';
 import AuctionList from './pages/AuctionList';
+import FeatureDisabledPage from './pages/FeatureDisabledPage';
 
 // Placeholder Components
 // const AuctionList = () => <h1 className="text-3xl font-bold text-green-600">Auction List Page</h1>;
@@ -32,6 +33,7 @@ function App() {
         <Route path="/auction/:id" element={<AuctionDetail />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/feature-disabled" element={<FeatureDisabledPage />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
