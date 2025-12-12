@@ -236,15 +236,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (Notification.permission === 'granted') {
-                statusText.textContent = "✅ Diizinkan (Aktif)";
+                statusText.textContent = "Diizinkan (Aktif)";
                 statusText.style.color = "var(--tp-green-dark)";
                 btnEnableNotif.style.display = 'none';
             } else if (Notification.permission === 'denied') {
-                statusText.textContent = "❌ Diblokir (Cek browser)";
+                statusText.textContent = "Diblokir (Cek browser)";
                 statusText.style.color = "var(--danger)";
                 btnEnableNotif.style.display = 'none';
             } else {
-                statusText.textContent = "⚠️ Belum Diizinkan";
+                statusText.textContent = "Belum Diizinkan";
                 statusText.style.color = "#f57c00"; // Orange
                 btnEnableNotif.style.display = 'inline-flex';
                 btnEnableNotif.disabled = false;
@@ -286,9 +286,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 msgDiv.className = 'form-message';
 
                 const formData = new FormData();            
-                formData.append('chat_enabled', document.getElementById('chat_enabled').checked);
-                formData.append('auction_enabled', document.getElementById('auction_enabled').checked);
-                formData.append('order_enabled', document.getElementById('order_enabled').checked);
+                formData.append('chat_enabled', document.getElementById('chat_enabled').checked ? '1' : '0');
+                formData.append('auction_enabled', document.getElementById('auction_enabled').checked ? '1' : '0');
+                formData.append('order_enabled', document.getElementById('order_enabled').checked ? '1' : '0');
 
                 try {
                     const response = await fetch('/seller/preferences/update', {

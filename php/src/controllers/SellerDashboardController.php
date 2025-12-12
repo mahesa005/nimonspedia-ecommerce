@@ -51,9 +51,9 @@ class SellerDashboardController {
         try {
             $userId = Auth::id();
             
-            $chat = isset($_POST['chat_enabled']) && $_POST['chat_enabled'] === 'true';
-            $auction = isset($_POST['auction_enabled']) && $_POST['auction_enabled'] === 'true';
-            $order = isset($_POST['order_enabled']) && $_POST['order_enabled'] === 'true';
+            $chat = isset($_POST['chat_enabled']) && ($_POST['chat_enabled'] === '1' || $_POST['chat_enabled'] === 'true');
+            $auction = isset($_POST['auction_enabled']) && ($_POST['auction_enabled'] === '1' || $_POST['auction_enabled'] === 'true');
+            $order = isset($_POST['order_enabled']) && ($_POST['order_enabled'] === '1' || $_POST['order_enabled'] === 'true');
 
             $this->profileService->updatePreferences($userId, $chat, $auction, $order);
             

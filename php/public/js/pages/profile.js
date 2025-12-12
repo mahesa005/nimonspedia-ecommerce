@@ -16,15 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (Notification.permission === 'granted') {
-            statusText.textContent = "✅ Diizinkan (Aktif)";
+            statusText.textContent = "Diizinkan (Aktif)";
             statusText.style.color = "#28a745";
             btnEnableNotif.style.display = 'none';
         } else if (Notification.permission === 'denied') {
-            statusText.textContent = "❌ Diblokir (Cek pengaturan browser)";
+            statusText.textContent = "Diblokir (Cek pengaturan browser)";
             statusText.style.color = "#dc3545";
             btnEnableNotif.style.display = 'none';
         } else {
-            statusText.textContent = "⚠️ Belum Diizinkan";
+            statusText.textContent = "Belum Diizinkan";
             statusText.style.color = "#ffc107";
             btnEnableNotif.style.display = 'inline-block';
             btnEnableNotif.textContent = "Aktifkan";
